@@ -21,6 +21,8 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://chainloop.dev/install.sh | sh -s -- -b /usr/local/bin
+          which chainloop
+          chainloop --version || echo "chainloop not found"
       
       - name: Make scan.sh executable
         run: chmod +x scan.sh
