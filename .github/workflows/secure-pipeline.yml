@@ -1,0 +1,23 @@
+name: Secure Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq curl
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://chainloop.dev/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run Security Scan
+        run: ./scan.sh "ghcr.io/my-org/my-app:latest"

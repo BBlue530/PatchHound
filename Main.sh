@@ -26,6 +26,12 @@ if [ "$THRESHOLD" == "HIGH" ] && [ "$HIGH_COUNT" -gt 0 ]; then
   exit 1
 fi
 
+if [ "$CRIT_COUNT" -gt 0 ]; then
+  curl -X POST -H 'Content-type: application/json' \
+    --data '{"text":"🚨 Critical CVEs detected in image '$IMAGE'. Build failed."}' \
+    $SLACK_WEBHOOK_URL
+fi
+
 echo "[+] Signing artifact with Chainloop"
 chainloop attestation sign --attestation sbom.json --artifact "$IMAGE"
 
