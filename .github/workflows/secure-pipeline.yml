@@ -36,7 +36,7 @@ jobs:
         run: ./scan.sh "ghcr.io/bblue530/my-app:latest" "CRITICAL"
 
       - name: Upload Vulnerability Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: vulnerability-report
           path: vulns.json

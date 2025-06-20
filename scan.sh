@@ -39,8 +39,8 @@ if [ "$CRIT_COUNT" -gt 0 ]; then
     "$DISCORD_WEBHOOK_URL"
 fi
 
-echo "[+] Top 10 Critical Vulnerabilities:"
-jq '.matches[] | select(.vulnerability.severity == "Critical") | {id: .vulnerability.id, pkg: .artifact.name, version: .artifact.version, fix: .vulnerability.fixedInVersion}' vulns.json | head -n 50
+echo "[+] Top 10 Unique Critical Vulnerabilities:"
+jq '[.matches[] | select(.vulnerability.severity == "Critical")] | unique_by(.vulnerability.id) | .[0:10][] | {id: .vulnerability.id, desc: .vulnerability.description}' vulns.json
 
 # Threshold enforcement
 if [ "$THRESHOLD" == "CRITICAL" ] && [ "$CRIT_COUNT" -gt 0 ]; then
