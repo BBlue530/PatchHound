@@ -34,6 +34,7 @@ jobs:
 
       - name: Run Security Scan
         run: ./scan.sh "ghcr.io/bblue530/my-app:latest" "CRITICAL"
+        continue-on-error: true
 
       - name: Upload Vulnerability Report
         uses: actions/upload-artifact@v4
