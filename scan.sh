@@ -44,8 +44,6 @@ if [[ "$http_status" -eq 404 ]]; then
   exit 1
 fi
 
-echo "[+] Upload to scan service complete"
-
 if [ $curl_exit_code -ne 0 ]; then
   echo "curl failed with exit code $curl_exit_code"
   rm -f sbom.json
