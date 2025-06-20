@@ -2,7 +2,7 @@ name: Secure Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   security-check:
