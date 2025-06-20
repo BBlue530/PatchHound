@@ -29,26 +29,20 @@ fi
 
 echo "[+] Uploading SBOM to scan service..."
 
-RESPONSE=$(curl --connect-timeout 60 --max-time 300 -s -w "%{http_code}" \
+response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.json" \
   -F "license=$LICENSE_SECRET" \
   "$SBOM_SCAN_API_URL")
-CURL_EXIT_CODE=$?
 
-if [ $CURL_EXIT_CODE -ne 0 ]; then
-  echo "curl failed with exit code $CURL_EXIT_CODE"
-  echo "Response was: $RESPONSE"
+curl_exit_code=$?
+
+if [ $curl_exit_code -ne 0 ]; then
+  echo "curl failed with exit code $curl_exit_code"
   rm -f sbom.json
-  exit $CURL_EXIT_CODE
+  exit $curl_exit_code
 fi
 
-HTTP_CODE="${RESPONSE: -3}"
-BODY="${RESPONSE:0:-3}"
-
-response_and_status=$(curl -s -w "\n%{http_code}" -F license="$LICENSE" -F sbom=@sbom.json http://your-service/scan-sbom)
-
 http_status=$(echo "$response_and_status" | tail -n1)
-
 response_body=$(echo "$response_and_status" | head -n -1)
 
 echo "HTTP status: $http_status"
@@ -56,11 +50,13 @@ echo "Response body: $response_body"
 
 if [[ "$http_status" -ne 200 ]]; then
   echo "Error: Server returned status $http_status"
+  rm -f sbom.json
   exit 5
 fi
 
 if ! echo "$response_body" | jq -e '.severity_counts' > /dev/null; then
   echo "Error: Response JSON missing severity_counts key or invalid JSON"
+  rm -f sbom.json
   exit 5
 fi
 
@@ -75,8 +71,6 @@ if ! echo "$RESPONSE" | jq -e '.severity_counts' > /dev/null; then
   echo "ERROR: Response JSON missing severity_counts key or invalid JSON"
   exit 5
 fi
-
-
 
 # Extract severity counts with defaults
 CRIT_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Critical // 0')
