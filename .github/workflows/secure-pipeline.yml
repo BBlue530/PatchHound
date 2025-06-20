@@ -9,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
 
     steps:
       - name: Checkout code
@@ -19,25 +21,8 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y jq curl
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-          curl -sSfL https://chainloop.dev/install.sh | sh -s -- -b /usr/local/bin
-      - name: Install Chainloop CLI
-        run: curl -sfL https://dl.chainloop.dev/cli/install.sh | bash -s
 
-      - name: Log in to GitHub Container Registry
-        env:
-          CR_PAT: ${{ secrets.GHCR_PAT }}
-        run: echo $CR_PAT | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      
-      - name: Make scan.sh executable
-        run: chmod +x scan.sh
-
-      - name: Run Security Scan
-        run: ./scan.sh "ghcr.io/bblue530/my-app:latest" "CRITICAL"
-        continue-on-error: true
-
-      - name: Upload Vulnerability Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-report
-          path: vulns.json
+      - name: Run SBOM Scan script
+        run: |
+          chmod +x ./scan.sh
+          ./scan.sh "ghcr.io/bblue530/my-app:latest"
