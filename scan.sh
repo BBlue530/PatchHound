@@ -1,4 +1,10 @@
+#!/bin/bash
+
 set -e
+
+command -v syft >/dev/null 2>&1 || { echo >&2 "Syft not installed. Exiting."; exit 1; }
+command -v grype >/dev/null 2>&1 || { echo >&2 "Grype not installed. Exiting."; exit 1; }
+command -v chainloop >/dev/null 2>&1 || { echo >&2 "Chainloop not installed. Exiting."; exit 1; }
 
 IMAGE="$1"
 THRESHOLD="${2:-CRITICAL}"
@@ -16,15 +22,21 @@ CRIT_COUNT=$(jq '[.matches[] | select(.vulnerability.severity == "Critical")] | 
 echo "High: $HIGH_COUNT"
 echo "Critical: $CRIT_COUNT"
 
-# Slack alert on criticals
+# Discord alert on criticals
 if [ "$CRIT_COUNT" -gt 0 ]; then
-  echo "[!] Sending Slack alert for criticals..."
+  echo "[!] Sending Discord alert for critical CVEs..."
   MESSAGE=$(jq -n --arg img "$IMAGE" --arg count "$CRIT_COUNT" \
-    '{"text": "🚨 *Critical CVEs detected!*\nImage: \($img)\nCount: \($count)"}')
+    '{
+      "embeds": [{
+        "title": "🚨 Critical CVEs Detected",
+        "description": "**Image:** \($img)\n**Critical Count:** \($count)",
+        "color": 16711680
+      }]
+    }')
 
-  curl -X POST -H 'Content-type: application/json' \
-    --data "$MESSAGE" \
-    "$SLACK_WEBHOOK_URL"
+  curl -X POST -H "Content-Type: application/json" \
+    -d "$MESSAGE" \
+    "$DISCORD_WEBHOOK_URL"
 fi
 
 # Threshold enforcement

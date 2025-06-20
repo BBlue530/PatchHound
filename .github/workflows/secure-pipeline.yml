@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
     steps:
       - name: Checkout code
@@ -21,6 +21,9 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://chainloop.dev/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Make scan.sh executable
+        run: chmod +x scan.sh
 
       - name: Run Security Scan
         run: ./scan.sh "ghcr.io/my-org/my-app:latest" "CRITICAL"
