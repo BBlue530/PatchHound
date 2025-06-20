@@ -7,7 +7,7 @@ import requests
 
 app = Flask(__name__)
 
-@app.route('/v1/scan-sbom', methods=['POST'])
+@app.route('/scan-sbom', methods=['POST'])
 def scan_sbom():
     
     license_key = request.form.get("license")
@@ -17,33 +17,15 @@ def scan_sbom():
     if valid_license == False:
         return jsonify({"error": "Invalid license"}), 404
 
-def validate_license(license_key):
-    url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
-    headers = {"Content-Type": "application/json"}
-
-    data = {
-        "LicenseKey": license_key
-    }
-
-    try:
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-
-        if response.status_code == 200:
-            print("License = valid")
-            return True
-        else:
-            print(f"License validation failed: {response.json().get('message', 'Unknown error')}")
-            return False
-
-    except Exception as e:
-        print(f"Error: {e}")
-
     if 'sbom' not in request.files:
         return jsonify({"error": "No SBOM file uploaded"}), 400
     
     sbom_file = request.files['sbom']
-    if sbom_file.content_type != 'application/json':
-        return jsonify({"error": "SBOM file must be JSON"}), 400
+    try:
+        json.load(sbom_file)
+        sbom_file.seek(0)  # Reset file pointer if needed
+    except json.JSONDecodeError:
+        return jsonify({"error": "SBOM file must be valid JSON"}), 400
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
         sbom_file.save(tmp)
@@ -83,6 +65,27 @@ def validate_license(license_key):
         "severity_counts": severity_counts,
         "vulnerabilities": vulns_json
     })
+
+def validate_license(license_key):
+    url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
+    headers = {"Content-Type": "application/json"}
+
+    data = {
+        "LicenseKey": license_key
+    }
+
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+
+        if response.status_code == 200:
+            print("License = valid")
+            return True
+        else:
+            print(f"License validation failed: {response.json().get('message', 'Unknown error')}")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

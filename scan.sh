@@ -61,6 +61,16 @@ echo "Debug: past http code"
 
 echo "[+] Vulnerability report received."
 
+echo "Response JSON:"
+echo "$RESPONSE"
+
+if ! echo "$RESPONSE" | jq -e '.severity_counts' > /dev/null; then
+  echo "ERROR: Response JSON missing severity_counts key or invalid JSON"
+  exit 5
+fi
+
+
+
 # Extract severity counts with defaults
 CRIT_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Critical // 0')
 HIGH_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.High // 0')
