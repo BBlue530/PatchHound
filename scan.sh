@@ -29,13 +29,21 @@ fi
 
 echo "SBOM file size: $(stat -c%s sbom.json) bytes"
 head -20 sbom.json
-which curl
 
 echo "[+] Uploading SBOM to scan service..."
+
 RESPONSE=$(curl --connect-timeout 5 --max-time 30 -s -w "%{http_code}" \
   -F "sbom=@sbom.json" \
   -F "license=$LICENSE_SECRET" \
   "$SBOM_SCAN_API_URL")
+CURL_EXIT_CODE=$?
+
+if [ $CURL_EXIT_CODE -ne 0 ]; then
+  echo "curl failed with exit code $CURL_EXIT_CODE"
+  echo "Response was: $RESPONSE"
+  rm -f sbom.json
+  exit $CURL_EXIT_CODE
+fi
 
 HTTP_CODE="${RESPONSE: -3}"
 BODY="${RESPONSE:0:-3}"
@@ -46,7 +54,7 @@ echo "Response body: $BODY"
 if [[ "$HTTP_CODE" -ne 200 ]]; then
   echo "Error scanning SBOM: HTTP $HTTP_CODE"
   rm -f sbom.json
-  exit 1
+  exit 3
 fi
 
 echo "[+] Vulnerability report received."
