@@ -28,9 +28,7 @@ RESPONSE=$(curl --connect-timeout 5 --max-time 30 -s -w "%{http_code}" \
   -F "license=$LICENSE_SECRET" \
   "$SBOM_SCAN_API_URL")
 
-# Extract HTTP status code from the end of the response
 HTTP_CODE="${RESPONSE: -3}"
-# Extract body without the last 3 chars (the status code)
 BODY="${RESPONSE:0:-3}"
 
 echo "Curl HTTP status code: $HTTP_CODE"
