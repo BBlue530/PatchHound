@@ -39,6 +39,9 @@ if [ "$CRIT_COUNT" -gt 0 ]; then
     "$DISCORD_WEBHOOK_URL"
 fi
 
+echo "[+] Top 10 Critical Vulnerabilities:"
+jq '.matches[] | select(.vulnerability.severity == "Critical") | {id: .vulnerability.id, pkg: .artifact.name, version: .artifact.version, fix: .vulnerability.fixedInVersion}' vulns.json | head -n 50
+
 # Threshold enforcement
 if [ "$THRESHOLD" == "CRITICAL" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Critical vulnerabilities found. Failing build."
