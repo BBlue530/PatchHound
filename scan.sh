@@ -64,20 +64,23 @@ RESPONSE="$response_body"
 
 echo "[+] Vulnerability report received."
 
-echo "Response JSON:"
-echo "$RESPONSE"
-
 if ! echo "$RESPONSE" | jq -e '.severity_counts' > /dev/null; then
   echo "ERROR: Response JSON missing severity_counts key or invalid JSON"
   exit 5
 fi
 
 # Extract severity counts with defaults
-CRIT_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Critical // 0')
-HIGH_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.High // 0')
-MED_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Medium // 0')
-LOW_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Low // 0')
-UNKNOWN_COUNT=$(echo "$RESPONSE" | jq '.severity_counts.Unknown // 0')
+CRIT_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Critical // 0')
+HIGH_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.High // 0')
+MED_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Medium // 0')
+LOW_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Low // 0')
+UNKNOWN_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Unknown // 0')
+
+CRIT_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Critical // 0')
+HIGH_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.High // 0')
+MED_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Medium // 0')
+LOW_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Low // 0')
+UNKNOWN_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Unknown // 0')
 
 echo "Critical: $CRIT_COUNT"
 echo "High: $HIGH_COUNT"
@@ -85,9 +88,9 @@ echo "Medium: $MED_COUNT"
 echo "Low: $LOW_COUNT"
 echo "Unknown: $UNKNOWN_COUNT"
 
-# Discord alert if critical vulnerabilities found
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
+
   MESSAGE=$(jq -n \
     --arg img "$IMAGE" \
     --argjson crit "$CRIT_COUNT" \
@@ -108,9 +111,19 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
       }]
     }')
 
+  echo "Discord message payload:"
+  echo "$MESSAGE"
+  echo "Posting to Discord webhook: $DISCORD_WEBHOOK_URL"
+
   curl -X POST -H "Content-Type: application/json" \
     -d "$MESSAGE" \
     "$DISCORD_WEBHOOK_URL"
+
+  CURL_EXIT=$?
+  if [ $CURL_EXIT -ne 0 ]; then
+    echo "Curl to Discord failed with exit code $CURL_EXIT"
+    exit $CURL_EXIT
+  fi
 fi
 
 rm -f sbom.json
