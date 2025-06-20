@@ -26,4 +26,4 @@ jobs:
         run: chmod +x scan.sh
 
       - name: Run Security Scan
-        run: ./scan.sh "ghcr.io/BBlue530/my-app:latest" "CRITICAL"
+        run: ./scan.sh "ghcr.io/bblue530/my-app:latest" "CRITICAL"
