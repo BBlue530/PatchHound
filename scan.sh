@@ -29,6 +29,7 @@ fi
 
 echo "SBOM file size: $(stat -c%s sbom.json) bytes"
 head -20 sbom.json
+which curl
 
 echo "[+] Uploading SBOM to scan service..."
 RESPONSE=$(curl --connect-timeout 5 --max-time 30 -s -w "%{http_code}" \
