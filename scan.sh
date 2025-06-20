@@ -76,12 +76,6 @@ MED_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Medium // 0')
 LOW_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Low // 0')
 UNKNOWN_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Unknown // 0')
 
-CRIT_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Critical // 0')
-HIGH_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.High // 0')
-MED_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Medium // 0')
-LOW_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Low // 0')
-UNKNOWN_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Unknown // 0')
-
 echo "Critical: $CRIT_COUNT"
 echo "High: $HIGH_COUNT"
 echo "Medium: $MED_COUNT"
@@ -92,24 +86,20 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
 
   MESSAGE=$(jq -n \
-    --arg img "$IMAGE" \
-    --argjson crit "$CRIT_COUNT" \
-    --argjson high "$HIGH_COUNT" \
-    --argjson med "$MED_COUNT" \
-    --argjson low "$LOW_COUNT" \
-    --argjson unknown "$UNKNOWN_COUNT" \
+  --arg img "$IMAGE" \
+  --arg crit "$CRIT_COUNT" \
+  --arg high "$HIGH_COUNT" \
+  --arg med "$MED_COUNT" \
+  --arg low "$LOW_COUNT" \
+  --arg unknown "$UNKNOWN_COUNT" \
     '{
       "embeds": [{
         "title": "🚨 Vulnerability Severity Report",
-        "description": "**Image:** \($img)\n\n" +
-                       "**Critical:** \($crit)\n" +
-                       "**High:** \($high)\n" +
-                       "**Medium:** \($med)\n" +
-                       "**Low:** \($low)\n" +
-                       "**Unknown:** \($unknown)",
+        "description": "**Image:** \($img)\n\n**Critical:** \($crit)\n**High:** \($high)\n**Medium:** \($med)\n**Low:** \($low)\n**Unknown:** \($unknown)",
         "color": 16711680
       }]
-    }')
+    }'
+  )
 
   echo "Discord message payload:"
   echo "$MESSAGE"
