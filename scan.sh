@@ -27,7 +27,7 @@ if [ ! -f sbom.json ]; then
   exit 3
 fi
 
-echo "[+] Uploading SBOM to scan service..."
+echo "[~] Uploading SBOM to scan service..."
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.json" \
@@ -35,6 +35,16 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?
+
+http_status=$(echo "$response_and_status" | tail -n1)
+response_body=$(echo "$response_and_status" | head -n -1)
+
+if [[ "$http_status" -eq 404 ]]; then
+  echo "Error: Invalid license 404"
+  exit 1
+fi
+
+echo "[+] Upload to scan service complete"
 
 if [ $curl_exit_code -ne 0 ]; then
   echo "curl failed with exit code $curl_exit_code"
@@ -45,8 +55,7 @@ fi
 http_status=$(echo "$response_and_status" | tail -n1)
 response_body=$(echo "$response_and_status" | head -n -1)
 
-echo "HTTP status: $http_status"
-echo "Response body: $response_body"
+echo "[+] Upload to scan service finished"
 
 if [[ "$http_status" -ne 200 ]]; then
   echo "Error: Server returned status $http_status"
@@ -101,10 +110,6 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
     }'
   )
 
-  echo "Discord message payload:"
-  echo "$MESSAGE"
-  echo "Posting to Discord webhook: $DISCORD_WEBHOOK_URL"
-
   curl -X POST -H "Content-Type: application/json" \
     -d "$MESSAGE" \
     "$DISCORD_WEBHOOK_URL"
@@ -118,4 +123,4 @@ fi
 
 rm -f sbom.json
 
-echo "[✓] Done!"
+echo "[+] Scan Finished"
