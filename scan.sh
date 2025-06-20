@@ -22,6 +22,14 @@ fi
 echo "[+] Generating SBOM for $IMAGE"
 syft "$IMAGE" -o json > sbom.json
 
+if [ ! -f sbom.json ]; then
+  echo "Error: sbom.json not found"
+  exit 3
+fi
+
+echo "SBOM file size: $(stat -c%s sbom.json) bytes"
+head -20 sbom.json
+
 echo "[+] Uploading SBOM to scan service..."
 RESPONSE=$(curl --connect-timeout 5 --max-time 30 -s -w "%{http_code}" \
   -F "sbom=@sbom.json" \
