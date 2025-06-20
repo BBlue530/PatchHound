@@ -35,8 +35,6 @@ RESPONSE=$(curl --connect-timeout 60 --max-time 300 -s -w "%{http_code}" \
   "$SBOM_SCAN_API_URL")
 CURL_EXIT_CODE=$?
 
-echo "Debug: Past curl"
-
 if [ $CURL_EXIT_CODE -ne 0 ]; then
   echo "curl failed with exit code $CURL_EXIT_CODE"
   echo "Response was: $RESPONSE"
@@ -44,20 +42,29 @@ if [ $CURL_EXIT_CODE -ne 0 ]; then
   exit $CURL_EXIT_CODE
 fi
 
-echo "Debug: Past exit code"
-
 HTTP_CODE="${RESPONSE: -3}"
 BODY="${RESPONSE:0:-3}"
 
-echo "Curl HTTP status code: $HTTP_CODE"
-echo "Response body: $BODY"
+response_and_status=$(curl -s -w "\n%{http_code}" -F license="$LICENSE" -F sbom=@sbom.json http://your-service/scan-sbom)
 
-if [[ "$HTTP_CODE" -ne 200 ]]; then
-  echo "Error scanning SBOM: HTTP $HTTP_CODE"
-  rm -f sbom.json
-  exit 3
+http_status=$(echo "$response_and_status" | tail -n1)
+
+response_body=$(echo "$response_and_status" | head -n -1)
+
+echo "HTTP status: $http_status"
+echo "Response body: $response_body"
+
+if [[ "$http_status" -ne 200 ]]; then
+  echo "Error: Server returned status $http_status"
+  exit 5
 fi
-echo "Debug: past http code"
+
+if ! echo "$response_body" | jq -e '.severity_counts' > /dev/null; then
+  echo "Error: Response JSON missing severity_counts key or invalid JSON"
+  exit 5
+fi
+
+RESPONSE="$response_body"
 
 echo "[+] Vulnerability report received."
 
