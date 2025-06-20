@@ -8,6 +8,9 @@ jobs:
   security-check:
     runs-on: ubuntu-latest
 
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,4 +23,4 @@ jobs:
           curl -sSfL https://chainloop.dev/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Run Security Scan
-        run: ./scan.sh "ghcr.io/my-org/my-app:latest"
+        run: ./scan.sh "ghcr.io/my-org/my-app:latest" "CRITICAL"

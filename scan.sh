@@ -16,6 +16,18 @@ CRIT_COUNT=$(jq '[.matches[] | select(.vulnerability.severity == "Critical")] | 
 echo "High: $HIGH_COUNT"
 echo "Critical: $CRIT_COUNT"
 
+# Slack alert on criticals
+if [ "$CRIT_COUNT" -gt 0 ]; then
+  echo "[!] Sending Slack alert for criticals..."
+  MESSAGE=$(jq -n --arg img "$IMAGE" --arg count "$CRIT_COUNT" \
+    '{"text": "🚨 *Critical CVEs detected!*\nImage: \($img)\nCount: \($count)"}')
+
+  curl -X POST -H 'Content-type: application/json' \
+    --data "$MESSAGE" \
+    "$SLACK_WEBHOOK_URL"
+fi
+
+# Threshold enforcement
 if [ "$THRESHOLD" == "CRITICAL" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Critical vulnerabilities found. Failing build."
   exit 1
@@ -26,13 +38,7 @@ if [ "$THRESHOLD" == "HIGH" ] && [ "$HIGH_COUNT" -gt 0 ]; then
   exit 1
 fi
 
-if [ "$CRIT_COUNT" -gt 0 ]; then
-  curl -X POST -H 'Content-type: application/json' \
-    --data '{"text":"🚨 Critical CVEs detected in image '$IMAGE'. Build failed."}' \
-    $SLACK_WEBHOOK_URL
-fi
-
 echo "[+] Signing artifact with Chainloop"
 chainloop attestation sign --attestation sbom.json --artifact "$IMAGE"
 
-echo "[+] Done!"
+echo "[✓] Done!"
