@@ -27,9 +27,6 @@ if [ ! -f sbom.json ]; then
   exit 3
 fi
 
-echo "SBOM file size: $(stat -c%s sbom.json) bytes"
-head -20 sbom.json
-
 echo "[+] Uploading SBOM to scan service..."
 
 RESPONSE=$(curl --connect-timeout 60 --max-time 300 -s -w "%{http_code}" \

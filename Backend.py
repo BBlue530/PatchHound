@@ -7,7 +7,7 @@ import requests
 
 app = Flask(__name__)
 
-@app.route('/scan-sbom', methods=['POST'])
+@app.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
     
     license_key = request.form.get("license")
