@@ -4,6 +4,8 @@ import subprocess
 import os
 import json
 import requests
+import shutil
+from pathlib import Path
 
 app = Flask(__name__)
 
@@ -87,5 +89,24 @@ def validate_license(license_key):
     except Exception as e:
         print(f"Error: {e}")
 
+def clear_grype_cache():
+    cache_path = Path.home() / ".cache" / "grype"
+    if cache_path.exists():
+        print("[~] Clearing Grype cache directory...")
+        try:
+            shutil.rmtree(cache_path, ignore_errors=True)
+            print("[✓] Grype cache cleared.")
+        except Exception as e:
+            print(f"[!] Failed to clear cache: {e}")
+    else:
+        print("[!] Grype cache directory does not exist.")
+
 if __name__ == "__main__":
+    clear_grype_cache()
+    print("[~] Warming up grype DB (may take a few seconds)...")
+    try:
+        subprocess.run(["grype", "db", "update"], check=True)
+        print("[+] Grype database updated")
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Grype DB update failed: {e.stderr}")
     app.run(host="0.0.0.0", port=8080)
