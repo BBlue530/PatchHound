@@ -92,6 +92,9 @@ echo "Medium: $MED_COUNT"
 echo "Low: $LOW_COUNT"
 echo "Unknown: $UNKNOWN_COUNT"
 
+echo "[+] Full vulnerability report:"
+jq '.' vulnerabilities.json
+
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
 

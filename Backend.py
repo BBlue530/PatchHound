@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 @app.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
@@ -65,7 +66,8 @@ def scan_sbom():
     
     return jsonify({
         "severity_counts": severity_counts,
-        "vulnerabilities": vulns_json
+        "vulnerabilities": vulns_json,
+        "simplified": simplify_cves(vulns_json)
     })
 
 def validate_license(license_key):
@@ -88,6 +90,29 @@ def validate_license(license_key):
 
     except Exception as e:
         print(f"Error: {e}")
+
+def simplify_cves(vulns_json):
+    simplified = {}
+    for match in vulns_json.get("matches", []):
+        vuln = match.get("vulnerability", {})
+        cve = vuln.get("id", "Unknown CVE")
+        if cve in simplified:
+            continue
+
+        full_cause = vuln.get("description", "No description available").strip().replace('\n', ' ')
+        cause = (full_cause[:197] + '...') if len(full_cause) > 200 else full_cause
+        
+        fix_versions = vuln.get("fix", {}).get("versions", [])
+        solution = f"Upgrade to >= {fix_versions[0]}" if fix_versions else "No fix available"
+        
+        cve_link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={cve}"
+
+        simplified[cve] = {
+            "cause": cause,
+            "solution": solution,
+            "link": cve_link
+        }
+    return simplified
 
 def clear_grype_cache():
     cache_path = Path.home() / ".cache" / "grype"
