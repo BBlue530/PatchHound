@@ -69,6 +69,7 @@ if ! echo "$response_body" | jq -e '.severity_counts' > /dev/null; then
 fi
 
 RESPONSE="$response_body"
+echo "$RESPONSE" > vulnerabilities.json
 
 echo "[+] Vulnerability report received."
 
