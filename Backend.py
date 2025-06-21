@@ -16,9 +16,9 @@ def scan_sbom():
     license_key = request.form.get("license")
     if not license_key:
         return jsonify({"error": "License key missing"}), 400
-    valid_license = validate_license(license_key)
+    response, valid_license = validate_license(license_key)
     if valid_license == False:
-        return jsonify({"error": "Invalid license"}), 404
+        return jsonify({"error": f"{response}"}), 404
 
     if 'sbom' not in request.files:
         return jsonify({"error": "No SBOM file uploaded"}), 400
@@ -82,14 +82,17 @@ def validate_license(license_key):
         response = requests.post(url, headers=headers, data=json.dumps(data))
 
         if response.status_code == 200:
+            message = response.json().get('message', 'Unknown success message')
             print("License = valid")
-            return True
+            return f"License validation: {message}", True
         else:
-            print(f"License validation failed: {response.json().get('message', 'Unknown error')}")
-            return False
+            message = response.json().get('message', 'Unknown error')
+            print(f"License validation failed: {message}")
+            return f"License validation: {message}", False
 
     except Exception as e:
         print(f"Error: {e}")
+        return f"License validation error: {str(e)}", False
 
 def simplify_cves(vulns_json):
     simplified = {}
