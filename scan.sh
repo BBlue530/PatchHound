@@ -173,4 +173,9 @@ fi
 
 rm -f "$SBOM_OUTPUT"
 
+if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
+  echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
+  exit 1
+fi
+
 echo "[+] Scan Finished"
