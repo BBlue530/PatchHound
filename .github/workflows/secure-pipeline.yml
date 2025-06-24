@@ -17,8 +17,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u bblue530 --password-stdin
+      - name: Check for GHCR_PAT
+        run: |
+          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
+            echo "[!] GHCR_PAT not set. Skipping auth. May fail for private images."
+          else
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u bblue530 --password-stdin
+          fi
 
       - name: Install Dependencies
         run: |
@@ -28,7 +33,7 @@ jobs:
       - name: Run SBOM Scan script
         run: |
           chmod +x ./scan.sh
-          ./scan.sh "ghcr.io/bblue530/my-app:latest"
+          ./scan.sh scan.config
       
       - name: Upload CVE Report
         uses: actions/upload-artifact@v4
