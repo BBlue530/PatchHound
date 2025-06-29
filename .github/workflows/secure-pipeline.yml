@@ -43,6 +43,10 @@ jobs:
             sbom.json
             vulns.json
 
+      - name: Cleanup scan files
+        run: |
+          rm -f sbom.json vulns.json summary.md
+
       - name: Fail if critical vulns found
         run: |
           CRIT_COUNT=$(cat crit_count.txt)
