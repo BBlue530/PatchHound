@@ -203,7 +203,7 @@ if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
 fi
 
-syft convert -i sbom.json -o cyclonedx-json > sbom.cyclonedx.json
+syft convert sbom.json -o cyclonedx-json > sbom.cyclonedx.json
 
 rm -f sbom.json vulns.json
 
