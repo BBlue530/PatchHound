@@ -60,7 +60,6 @@ fi
 
 if [ $curl_exit_code -ne 0 ]; then
   echo "[!] Error: curl failed with exit code $curl_exit_code"
-  rm -f "sbom.json"
   exit $curl_exit_code
 fi
 
@@ -69,7 +68,6 @@ response_body=$(echo "$response_and_status" | head -n -1)
 
 if [[ "$http_status" -ne 200 ]]; then
   echo "[!] Error: Server returned status $http_status"
-  rm -f "sbom.json"
   exit 5
 fi
 
@@ -189,7 +187,6 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
   fi
 fi
 
-rm -f "sbom.json"
 
 CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.json")
 echo "$CRIT_COUNT" > crit_count.txt
