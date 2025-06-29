@@ -100,7 +100,7 @@ echo "--------------------------------------------------------------------------
 
 jq -r '
   (.matches // [])[]
-  | select(.vulnerability.severity == "Critical" or .vulnerability.severity == "High" or .vulnerability.severity == "Medium")
+  | select(.vulnerability.severity == "Critical")
   | .vulnerability.id as $ID
   | (.vulnerability.description // "No description available") as $DESC
   | (.vulnerability.fix.versions[0] // "No fix available") as $FIX
