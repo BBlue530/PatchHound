@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import tempfile
 import subprocess
 import os
@@ -35,40 +35,19 @@ def scan_sbom():
         tmp_path = tmp.name
 
     try:
-        # Run grype scan on SBOM
-        result = subprocess.run(
+        vulns_json = subprocess.run(
             ["grype", f"sbom:{tmp_path}", "-o", "json"],
             capture_output=True,
             text=True,
             check=True
         )
-        vulns_json = json.loads(result.stdout)
-
-        # Count severities
-        severity_counts = {
-            "Critical": 0,
-            "High": 0,
-            "Medium": 0,
-            "Low": 0,
-            "Unknown": 0
-        }
-
-        for match in vulns_json.get("matches", []):
-            sev = match.get("vulnerability", {}).get("severity", "Unknown")
-            if sev not in severity_counts:
-                severity_counts[sev] = 0
-            severity_counts[sev] += 1
 
     except subprocess.CalledProcessError as e:
         return jsonify({"error": "Grype scan failed", "details": e.stderr}), 500
     finally:
-        os.unlink(tmp_path)  # Clean up temp file
-    
-    return jsonify({
-        "severity_counts": severity_counts,
-        "vulnerabilities": vulns_json,
-        "simplified": simplify_cves(vulns_json)
-    })
+        os.unlink(tmp_path)
+
+    return Response(vulns_json.stdout, content_type='application/json')
 
 def validate_license(license_key):
     url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
@@ -93,29 +72,6 @@ def validate_license(license_key):
     except Exception as e:
         print(f"Error: {e}")
         return f"License validation error: {str(e)}", False
-
-def simplify_cves(vulns_json):
-    simplified = {}
-    for match in vulns_json.get("matches", []):
-        vuln = match.get("vulnerability", {})
-        cve = vuln.get("id", "Unknown CVE")
-        if cve in simplified:
-            continue
-
-        full_cause = vuln.get("description", "No description available").strip().replace('\n', ' ')
-        cause = (full_cause[:197] + '...') if len(full_cause) > 200 else full_cause
-        
-        fix_versions = vuln.get("fix", {}).get("versions", [])
-        solution = f"Upgrade to >= {fix_versions[0]}" if fix_versions else "No fix available"
-        
-        cve_link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={cve}"
-
-        simplified[cve] = {
-            "cause": cause,
-            "solution": solution,
-            "link": cve_link
-        }
-    return simplified
 
 def clear_grype_cache():
     cache_path = Path.home() / ".cache" / "grype"

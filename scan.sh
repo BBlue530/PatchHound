@@ -2,6 +2,8 @@
 
 set -e
 
+CRIT_COUNT=${CRIT_COUNT:-0}
+
 CONFIG_FILE="${1:-scan.config}"
 if [ -f "$CONFIG_FILE" ]; then
   source "$CONFIG_FILE"
@@ -25,14 +27,18 @@ if [[ -z "$LICENSE_SECRET" ]]; then
   exit 2
 fi
 
+{
+echo "==============================================="
+echo "          PatchHound - by BBlue530"
+echo "==============================================="
+
 echo "[~] Generating SBOM for: $TARGET"
 syft "$TARGET" -o json > "$SBOM_OUTPUT"
-echo "[+] SBOM created: $SBOM_OUTPUT"
-
 if [ ! -f "$SBOM_OUTPUT" ]; then
   echo "[!] Error: sbom.json not found"
   exit 3
 fi
+echo "[+] SBOM created: $SBOM_OUTPUT"
 
 echo "[~] Uploading SBOM to scan service..."
 
@@ -61,36 +67,27 @@ fi
 http_status=$(echo "$response_and_status" | tail -n1)
 response_body=$(echo "$response_and_status" | head -n -1)
 
-echo "[+] Upload to scan service finished"
-
 if [[ "$http_status" -ne 200 ]]; then
   echo "[!] Error: Server returned status $http_status"
   rm -f "$SBOM_OUTPUT"
   exit 5
 fi
 
-if ! echo "$response_body" | jq -e '.severity_counts' > /dev/null; then
-  echo "[!] Error: Response JSON missing severity_counts key or invalid JSON"
-  rm -f "$SBOM_OUTPUT"
-  exit 5
-fi
+echo "[+] Upload to scan service finished"
 
 RESPONSE="$response_body"
+# "vuln_report": vulns_json
+# is what gets returned
 echo "$RESPONSE" > "$VULN_OUTPUT"
 
 echo "[+] Vulnerability report received."
 
-if ! echo "$RESPONSE" | jq -e '.severity_counts' > /dev/null; then
-  echo "[!] ERROR: Response JSON missing severity_counts key or invalid JSON"
-  exit 5
-fi
-
 # Extract severity counts with defaults
-CRIT_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Critical // 0')
-HIGH_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.High // 0')
-MED_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Medium // 0')
-LOW_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Low // 0')
-UNKNOWN_COUNT=$(echo "$RESPONSE" | jq -r '.severity_counts.Unknown // 0')
+CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "$VULN_OUTPUT")
+HIGH_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "High")] | length' "$VULN_OUTPUT")
+MED_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Medium")] | length' "$VULN_OUTPUT")
+LOW_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Low")] | length' "$VULN_OUTPUT")
+UNKNOWN_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Unknown")] | length' "$VULN_OUTPUT")
 
 echo "[i] Vulnerability assessment:"
 echo "Critical: $CRIT_COUNT"
@@ -100,7 +97,28 @@ echo "Low: $LOW_COUNT"
 echo "Unknown: $UNKNOWN_COUNT"
 
 echo "[+] Full vulnerability report:"
-jq '.' "$VULN_OUTPUT"
+echo "[~] Generating Summary"
+echo "---------------------------------------------------------------------------"
+
+jq -r '
+  (.matches // [])[]
+  | .vulnerability.id as $ID
+  | (.vulnerability.description // "No description available") as $DESC
+  | (.vulnerability.fix.versions[0] // "No fix available") as $FIX
+  | ("https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + $ID) as $LINK
+  | .vulnerability.severity as $SEV
+  | .artifact.name as $PKG_NAME
+  | .artifact.version as $PKG_VER
+  | "ID: \($ID)
+Severity: \($SEV)
+Package: \($PKG_NAME)@\($PKG_VER)
+Cause: \($DESC)
+Fix: \($FIX)
+Link: \($LINK)
+---------------------------------------------------------------------------"
+' "$VULN_OUTPUT"
+echo ""
+} | tee "$SUMMARY_OUTPUT"
 
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
@@ -173,9 +191,10 @@ fi
 
 rm -f "$SBOM_OUTPUT"
 
+CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "$VULN_OUTPUT")
+echo "$CRIT_COUNT" > crit_count.txt
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
-  exit 1
 fi
 
 echo "[+] Scan Finished"
