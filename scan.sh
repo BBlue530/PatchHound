@@ -103,7 +103,18 @@ jq -r '
   | .vulnerability.id as $ID
   | (.vulnerability.description // "No description available") as $DESC
   | (.vulnerability.fix.versions[0] // "No fix available") as $FIX
-  | ("https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + $ID) as $LINK
+  | (
+      .vulnerability.link // .vulnerability.url
+      // (
+        if ($ID | test("^GHSA")) then
+          "https://github.com/advisories/" + $ID
+        elif ($ID | test("^CVE")) then
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + $ID
+        else
+          "No link available"
+        end
+      )
+    ) as $LINK
   | .vulnerability.severity as $SEV
   | .artifact.name as $PKG_NAME
   | .artifact.version as $PKG_VER
