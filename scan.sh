@@ -118,6 +118,9 @@ Link: \($LINK)
 echo ""
 } | tee "summary.md"
 
+echo "DEBUG: CRIT_COUNT=$CRIT_COUNT"
+echo "DEBUG: DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL"
+
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
 
