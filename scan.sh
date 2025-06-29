@@ -122,6 +122,7 @@ echo ""
 CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.json")
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..." >&2
+  sleep 0.2
 
   MESSAGE=$(jq -n \
   --arg img "$IMAGE" \
@@ -152,6 +153,7 @@ fi
 
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
   echo "[!] Sending Slack alert with severity breakdown..." >&2
+  sleep 0.2
 
   MESSAGE=$(jq -n \
     --arg img "$IMAGE" \
