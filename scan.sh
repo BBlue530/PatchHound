@@ -33,17 +33,17 @@ echo "          PatchHound - by BBlue530"
 echo "==============================================="
 
 echo "[~] Generating SBOM for: $TARGET"
-syft "$TARGET" -o json > "$SBOM_OUTPUT"
-if [ ! -f "$SBOM_OUTPUT" ]; then
+syft "$TARGET" -o json > "sbom.json"
+if [ ! -f "sbom.json" ]; then
   echo "[!] Error: sbom.json not found"
   exit 3
 fi
-echo "[+] SBOM created: $SBOM_OUTPUT"
+echo "[+] SBOM created: sbom.json"
 
 echo "[~] Uploading SBOM to scan service..."
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
-  -F "sbom=@$SBOM_OUTPUT" \
+  -F "sbom=@sbom.json" \
   -F "license=$LICENSE_SECRET" \
   "$SBOM_SCAN_API_URL")
 
@@ -60,7 +60,7 @@ fi
 
 if [ $curl_exit_code -ne 0 ]; then
   echo "[!] Error: curl failed with exit code $curl_exit_code"
-  rm -f "$SBOM_OUTPUT"
+  rm -f "sbom.json"
   exit $curl_exit_code
 fi
 
@@ -69,7 +69,7 @@ response_body=$(echo "$response_and_status" | head -n -1)
 
 if [[ "$http_status" -ne 200 ]]; then
   echo "[!] Error: Server returned status $http_status"
-  rm -f "$SBOM_OUTPUT"
+  rm -f "sbom.json"
   exit 5
 fi
 
@@ -78,16 +78,16 @@ echo "[+] Upload to scan service finished"
 RESPONSE="$response_body"
 # "vuln_report": vulns_json
 # is what gets returned
-echo "$RESPONSE" > "$VULN_OUTPUT"
+echo "$RESPONSE" > "vulns.json"
 
 echo "[+] Vulnerability report received."
 
 # Extract severity counts with defaults
-CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "$VULN_OUTPUT")
-HIGH_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "High")] | length' "$VULN_OUTPUT")
-MED_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Medium")] | length' "$VULN_OUTPUT")
-LOW_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Low")] | length' "$VULN_OUTPUT")
-UNKNOWN_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Unknown")] | length' "$VULN_OUTPUT")
+CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.json")
+HIGH_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "High")] | length' "vulns.json")
+MED_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Medium")] | length' "vulns.json")
+LOW_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Low")] | length' "vulns.json")
+UNKNOWN_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Unknown")] | length' "vulns.json")
 
 echo "[i] Vulnerability assessment:"
 echo "Critical: $CRIT_COUNT"
@@ -116,9 +116,9 @@ Cause: \($DESC)
 Fix: \($FIX)
 Link: \($LINK)
 ---------------------------------------------------------------------------"
-' "$VULN_OUTPUT"
+' "vulns.json"
 echo ""
-} | tee "$SUMMARY_OUTPUT"
+} | tee "summary.md"
 
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..."
@@ -189,9 +189,9 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
   fi
 fi
 
-rm -f "$SBOM_OUTPUT"
+rm -f "sbom.json"
 
-CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "$VULN_OUTPUT")
+CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.json")
 echo "$CRIT_COUNT" > crit_count.txt
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."

@@ -39,9 +39,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            ${{ env.SUMMARY_OUTPUT }}
-            ${{ env.SBOM_OUTPUT }}
-            ${{ env.VULN_OUTPUT }}
+            summary.md
+            sbom.json
+            vulns.json
 
       - name: Fail if critical vulns found
         run: |
