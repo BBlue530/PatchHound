@@ -118,12 +118,9 @@ Link: \($LINK)
 echo ""
 } | tee "summary.md"
 
-echo "DEBUG: CRIT_COUNT=$CRIT_COUNT"
-echo "DEBUG: DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL"
-
 CRIT_COUNT=$(jq '[.matches // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.json")
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
-  echo "[!] Sending Discord alert with severity breakdown..."
+  echo "[!] Sending Discord alert with severity breakdown..." >&2
 
   MESSAGE=$(jq -n \
   --arg img "$IMAGE" \
@@ -153,7 +150,7 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
 fi
 
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
-  echo "[!] Sending Slack alert with severity breakdown..."
+  echo "[!] Sending Slack alert with severity breakdown..." >&2
 
   MESSAGE=$(jq -n \
     --arg img "$IMAGE" \
