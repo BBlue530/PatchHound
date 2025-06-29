@@ -74,9 +74,8 @@ fi
 echo "[+] Upload to scan service finished"
 
 RESPONSE="$response_body"
-# "vuln_report": vulns_json
-# is what gets returned
-echo "$RESPONSE" > "vulns.json"
+echo "$RESPONSE" | jq '.vulns_json' > vulns.json
+echo "$RESPONSE" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
 
 echo "[+] Vulnerability report received."
 
@@ -203,5 +202,9 @@ echo "$CRIT_COUNT" > crit_count.txt
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
 fi
+
+syft convert -i sbom.json -o cyclonedx-json > sbom.cyclonedx.json
+
+rm -f sbom.json vulns.json
 
 echo "[+] Scan Finished"

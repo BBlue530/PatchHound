@@ -40,12 +40,12 @@ jobs:
         with:
           path: |
             summary.md
-            sbom.json
-            vulns.json
+            sbom.cyclonedx.json
+            vulns.cyclonedx.json
 
       - name: Cleanup scan files
         run: |
-          rm -f sbom.json vulns.json summary.md
+          rm -f sbom.cyclonedx.json vulns.cyclonedx.json summary.md
 
       - name: Fail if critical vulns found
         run: |

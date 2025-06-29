@@ -41,13 +41,24 @@ def scan_sbom():
             text=True,
             check=True
         )
+        vulns_cyclonedx_json = subprocess.run(
+        ["grype", f"sbom:{tmp_path}", "-o", "cyclonedx-json"],
+        capture_output=True,
+        text=True,
+        check=True
+        )
 
     except subprocess.CalledProcessError as e:
         return jsonify({"error": "Grype scan failed", "details": e.stderr}), 500
     finally:
         os.unlink(tmp_path)
 
-    return Response(vulns_json.stdout, content_type='application/json')
+    combined_result_parsed = {
+    "vulns_json": json.loads(vulns_json.stdout),
+    "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout)
+    }
+
+    return jsonify(combined_result_parsed)
 
 def validate_license(license_key):
     url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
