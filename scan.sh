@@ -79,11 +79,11 @@ echo "$RESPONSE" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
 echo "[+] Vulnerability report received."
 
 # Extract severity counts with defaults
-CRIT_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.cyclonedx.json")
-HIGH_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "High")] | length' "vulns.cyclonedx.json")
-MED_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Medium")] | length' "vulns.cyclonedx.json")
-LOW_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Low")] | length' "vulns.cyclonedx.json")
-UNKNOWN_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Unknown")] | length' "vulns.cyclonedx.json")
+CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
+HIGH_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "high")] | length' vulns.cyclonedx.json)
+MED_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "medium")] | length' vulns.cyclonedx.json)
+LOW_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "low")] | length' vulns.cyclonedx.json)
+UNKNOWN_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "unknown")] | length' vulns.cyclonedx.json)
 
 echo "[i] Vulnerability assessment:"
 echo "Critical: $CRIT_COUNT"
@@ -131,11 +131,11 @@ echo ""
 
 sleep 0.2
 
-CRIT_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.cyclonedx.json")
-HIGH_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "High")] | length' "vulns.cyclonedx.json")
-MED_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Medium")] | length' "vulns.cyclonedx.json")
-LOW_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Low")] | length' "vulns.cyclonedx.json")
-UNKNOWN_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Unknown")] | length' "vulns.cyclonedx.json")
+CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
+HIGH_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "high")] | length' vulns.cyclonedx.json)
+MED_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "medium")] | length' vulns.cyclonedx.json)
+LOW_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "low")] | length' vulns.cyclonedx.json)
+UNKNOWN_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "unknown")] | length' vulns.cyclonedx.json)
 if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
   echo "[!] Sending Discord alert with severity breakdown..." >&2
   sleep 0.2
@@ -208,7 +208,7 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
 fi
 
 
-CRIT_COUNT=$(jq '[.vulnerabilities // [] | .[] | select(.vulnerability.severity == "Critical")] | length' "vulns.cyclonedx.json")
+CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
 echo "$CRIT_COUNT" > crit_count.txt
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
