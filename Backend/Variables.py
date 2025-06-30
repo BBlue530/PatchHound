@@ -1,0 +1,1 @@
+lambda_api_gateway_url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
