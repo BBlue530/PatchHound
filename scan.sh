@@ -74,7 +74,6 @@ fi
 echo "[+] Upload to scan service finished"
 
 RESPONSE="$response_body"
-echo "$RESPONSE" | jq '.vulns_json' > vulns.json
 echo "$RESPONSE" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
 
 echo "[+] Vulnerability report received."
@@ -98,13 +97,14 @@ echo "[~] Generating Summary"
 echo "---------------------------------------------------------------------------"
 
 jq -r '
-  (.matches // [])[]
-  | select(.vulnerability.severity == "Critical")
-  | .vulnerability.id as $ID
-  | (.vulnerability.description // "No description available") as $DESC
-  | (.vulnerability.fix.versions[0] // "No fix available") as $FIX
+  (.vulnerabilities // [])[] 
+  | select(
+      (.ratings[]?.severity | ascii_downcase) == "critical"
+    ) 
+  | .id as $ID
+  | (.description // "No description available") as $DESC
   | (
-      .vulnerability.link // .vulnerability.url
+      .references[0]?.url
       // (
         if ($ID | test("^GHSA")) then
           "https://github.com/advisories/" + $ID
@@ -115,17 +115,17 @@ jq -r '
         end
       )
     ) as $LINK
-  | .vulnerability.severity as $SEV
-  | .artifact.name as $PKG_NAME
-  | .artifact.version as $PKG_VER
+  | (
+      (.affects[0]?.ref | capture("pkg:(?<type>[^/]+)/(?<name>[^@]+)@(?<version>.+)") 
+      // {type: "unknown", name: "unknown", version: "unknown"})
+    ) as $PKG
   | "ID: \($ID)
-Severity: \($SEV)
-Package: \($PKG_NAME)@\($PKG_VER)
+Severity: Critical
+Package: \($PKG.name)@\($PKG.version)
 Cause: \($DESC)
-Fix: \($FIX)
 Link: \($LINK)
 ---------------------------------------------------------------------------"
-' "vulns.json"
+' vulns.cyclonedx.json
 echo ""
 } | tee "summary.md"
 
@@ -213,9 +213,5 @@ echo "$CRIT_COUNT" > crit_count.txt
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
 fi
-
-syft convert sbom.json -o cyclonedx-json > sbom.cyclonedx.json
-
-rm -f sbom.json vulns.json
 
 echo "[+] Scan Finished"

@@ -35,12 +35,6 @@ def scan_sbom():
         tmp_path = tmp.name
 
     try:
-        vulns_json = subprocess.run(
-            ["grype", f"sbom:{tmp_path}", "-o", "json"],
-            capture_output=True,
-            text=True,
-            check=True
-        )
         vulns_cyclonedx_json = subprocess.run(
         ["grype", f"sbom:{tmp_path}", "-o", "cyclonedx-json"],
         capture_output=True,
@@ -53,12 +47,11 @@ def scan_sbom():
     finally:
         os.unlink(tmp_path)
 
-    combined_result_parsed = {
-    "vulns_json": json.loads(vulns_json.stdout),
+    result_parsed = {
     "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout)
     }
 
-    return jsonify(combined_result_parsed)
+    return jsonify(result_parsed)
 
 def validate_license(license_key):
     url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
