@@ -33,6 +33,7 @@ def scan_sbom():
         return jsonify({"error": "SBOM file must be valid JSON format CycloneDX 1.6"}), 400
     
     try:
+        sbom_file.seek(0)
         json.load(sbom_file)
         sbom_file.seek(0)  # Reset file pointer if needed
     except json.JSONDecodeError:
