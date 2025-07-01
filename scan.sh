@@ -33,17 +33,17 @@ echo "          PatchHound - by BBlue530"
 echo "==============================================="
 
 echo "[~] Generating SBOM for: $TARGET"
-syft "$TARGET" -o json > "sbom.json"
-if [ ! -f "sbom.json" ]; then
+syft "$TARGET" -o cyclonedx-json > sbom.cyclonedx.json
+if [ ! -f "sbom.cyclonedx.json" ]; then
   echo "[!] Error: sbom.json not found"
   exit 3
 fi
-echo "[+] SBOM created: sbom.json"
+echo "[+] SBOM created: sbom.cyclonedx.json"
 
 echo "[~] Uploading SBOM to scan service..."
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
-  -F "sbom=@sbom.json" \
+  -F "sbom=@sbom.cyclonedx.json" \
   -F "license=$LICENSE_SECRET" \
   "$SBOM_SCAN_API_URL")
 
