@@ -3,6 +3,8 @@ import tempfile
 import subprocess
 import os
 import json
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 from Grype_Handling import clear_and_update_grype_cache
 from License_Handling import validate_license
 
@@ -55,4 +57,7 @@ def scan_sbom():
 
 if __name__ == "__main__":
     clear_and_update_grype_cache()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(clear_and_update_grype_cache, 'cron', day_of_week='sun', hour=3, minute=0)
+    scheduler.start()
     app.run(host="0.0.0.0", port=8080)
