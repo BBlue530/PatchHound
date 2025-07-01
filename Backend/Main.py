@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
 from Grype_Handling import clear_and_update_grype_cache
 from License_Handling import validate_license
+from Check_Format import check_json_format
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -26,6 +27,11 @@ def scan_sbom():
         return jsonify({"error": "No SBOM file uploaded"}), 400
     
     sbom_file = request.files['sbom']
+
+    is_cyclonedx = check_json_format(sbom_file)
+    if is_cyclonedx == False:
+        return jsonify({"error": "SBOM file must be valid JSON format CycloneDX 1.6"}), 400
+    
     try:
         json.load(sbom_file)
         sbom_file.seek(0)  # Reset file pointer if needed
