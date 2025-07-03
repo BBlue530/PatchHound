@@ -5,6 +5,7 @@ import os
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
+from File_Handling import save_scan_files
 from Vulnerability_DB import update_grype_kev_db
 from License_Handling import validate_license
 from Check_Format import check_json_format
@@ -20,14 +21,16 @@ def scan_sbom():
     license_key = request.form.get("license")
     if not license_key:
         return jsonify({"error": "License key missing"}), 400
+    
     response, valid_license = validate_license(license_key)
     if valid_license == False:
         return jsonify({"error": f"{response}"}), 404
-
+    
+    sbom_file = request.files['sbom']
     if 'sbom' not in request.files:
         return jsonify({"error": "No SBOM file uploaded"}), 400
     
-    sbom_file = request.files['sbom']
+    current_repo = request.form.get("current_repo")
 
     is_cyclonedx = check_json_format(sbom_file)
     if is_cyclonedx == False:
@@ -63,6 +66,8 @@ def scan_sbom():
     "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout),
     "prio_vulns": json.loads(prio_vuln_data)
     }
+
+    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data)
 
     return jsonify(result_parsed)
 

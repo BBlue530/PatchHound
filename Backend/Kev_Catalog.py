@@ -23,7 +23,5 @@ def compare_kev_catalog(vulns_cyclonedx_json):
         "release_date": kev_release_date,
         "prioritized_vulnerabilities": matched_vulns
     }
-    with open("prio_vulnerabilities.json", "w") as f:
-        json.dump(prio_vuln_data, f, indent=4)
     
     return prio_vuln_data
