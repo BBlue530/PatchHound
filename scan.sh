@@ -75,6 +75,7 @@ echo "[+] Upload to scan service finished"
 
 RESPONSE="$response_body"
 echo "$RESPONSE" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
+echo "$RESPONSE" | jq '.prio_vulns' > prio_vulns.json
 
 echo "[+] Vulnerability report received."
 

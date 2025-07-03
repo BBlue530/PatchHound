@@ -42,10 +42,11 @@ jobs:
             summary.md
             sbom.cyclonedx.json
             vulns.cyclonedx.json
+            prio_vulns.json
 
       - name: Cleanup scan files
         run: |
-          rm -f sbom.cyclonedx.json vulns.cyclonedx.json summary.md
+          rm -f sbom.cyclonedx.json vulns.cyclonedx.json summary.md prio_vulns.json
 
       - name: Fail if critical vulns found
         run: |

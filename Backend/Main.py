@@ -5,9 +5,10 @@ import os
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
-from Grype_Handling import clear_and_update_grype_cache
+from Vulnerability_DB import update_grype_kev_db
 from License_Handling import validate_license
 from Check_Format import check_json_format
+from Kev_Catalog import compare_kev_catalog
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -55,16 +56,19 @@ def scan_sbom():
         return jsonify({"error": "Grype scan failed", "details": e.stderr}), 500
     finally:
         os.unlink(tmp_path)
+    
+    prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json)
 
     result_parsed = {
-    "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout)
+    "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout),
+    "prio_vulns": json.loads(prio_vuln_data)
     }
 
     return jsonify(result_parsed)
 
 if __name__ == "__main__":
-    clear_and_update_grype_cache()
+    update_grype_kev_db()
     scheduler = BackgroundScheduler()
-    scheduler.add_job(clear_and_update_grype_cache, 'cron', day_of_week='sun', hour=3, minute=0)
+    scheduler.add_job(update_grype_kev_db, 'cron', hour=3, minute=0)
     scheduler.start()
     app.run(host="0.0.0.0", port=8080)
