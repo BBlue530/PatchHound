@@ -60,14 +60,15 @@ def scan_sbom():
     finally:
         os.unlink(tmp_path)
     
-    prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json)
+    vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
+    prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json_data)
 
     result_parsed = {
-    "vulns_cyclonedx_json": json.loads(vulns_cyclonedx_json.stdout),
-    "prio_vulns": json.loads(prio_vuln_data)
+    "vulns_cyclonedx_json": vulns_cyclonedx_json_data,
+    "prio_vulns": prio_vuln_data
     }
 
-    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data)
+    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data)
 
     return jsonify(result_parsed)
 

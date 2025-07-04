@@ -6,10 +6,6 @@ from Variables import all_repo_scans_folder
 from Kev_Catalog import compare_kev_catalog
 
 def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data):
-
-    if not os.path.isdir(all_repo_scans_folder):
-        print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
-        os.makedirs(all_repo_scans_folder, exist_ok=True)
         
     safe_repo_name = current_repo.replace("/", "_")
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
@@ -36,6 +32,10 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
 
 def scan_latest_sboms():
 
+    if not os.path.isdir(all_repo_scans_folder):
+        print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
+        os.makedirs(all_repo_scans_folder, exist_ok=True)
+        
     for repo_name in os.listdir(all_repo_scans_folder):
         repo_path = os.path.join(all_repo_scans_folder, repo_name)
         if not os.path.isdir(repo_path):
@@ -67,13 +67,14 @@ def scan_latest_sboms():
             )
 
             # Save the scan output
-            with open(vulns_output_path, "w") as f:
-                f.write(vulns_cyclonedx_json.stdout)
+            with open(vulns_output_path, "r") as f:
+                vulns_json_data = json.load(f)
 
-            prio_vuln_data = compare_kev_catalog(vulns_output_path)
+            prio_vuln_data = compare_kev_catalog(vulns_json_data)
             prio_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
             with open(prio_path, "w") as f:
                 json.dump(prio_vuln_data, f, indent=4)
+            print(f"[+] Scan finished for repo: {repo_name}")
 
         except subprocess.CalledProcessError as e:
             print(f"[!] Scan failed for {repo_name}: {e.stderr}")

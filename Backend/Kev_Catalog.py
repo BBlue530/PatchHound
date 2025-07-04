@@ -1,15 +1,12 @@
 import json
 from Variables import kev_catalog
 
-def compare_kev_catalog(vulns_cyclonedx_json):
+def compare_kev_catalog(cyclonedx_data):
     with open(kev_catalog, "r") as f:
         kev_data = json.load(f)
 
     kev_version = kev_data["catalogVersion"]
     kev_release_date = kev_data["dateReleased"]
-
-    with open(vulns_cyclonedx_json, "r") as f:
-        cyclonedx_data = json.load(f)
 
     cyclone_ids = set(vuln["id"] for vuln in cyclonedx_data.get("vulnerabilities", []))
 
