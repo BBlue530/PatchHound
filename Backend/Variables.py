@@ -1,3 +1,4 @@
 lambda_api_gateway_url = "https://u1e8fkkqcl.execute-api.eu-north-1.amazonaws.com/v1/CheckKey"
 kev_url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 kev_catalog = "kev_catalog.json"
+all_repo_scans_folder = "all_scans"
