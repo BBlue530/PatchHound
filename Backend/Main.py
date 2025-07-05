@@ -10,6 +10,7 @@ from Vulnerability_DB import update_grype_kev_db
 from License_Handling import validate_license
 from Check_Format import check_json_format
 from Kev_Catalog import compare_kev_catalog
+from System import install_tools
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -79,6 +80,7 @@ def scan_sbom():
     return jsonify(result_parsed)
 
 if __name__ == "__main__":
+    install_tools()
     update_grype_kev_db()
     scheduler = BackgroundScheduler()
     scheduler.add_job(update_grype_kev_db, 'cron', hour=3, minute=0)
