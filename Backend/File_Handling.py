@@ -66,14 +66,17 @@ def scan_latest_sboms():
                 check=True
             )
 
-            # Save the scan output
-            with open(vulns_output_path, "r") as f:
-                vulns_json_data = json.load(f)
+            vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
 
-            prio_vuln_data = compare_kev_catalog(vulns_json_data)
+            # Save the scan output
+            with open(vulns_output_path, "w") as f:
+                f.write(vulns_cyclonedx_json.stdout)
+
+            prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json_data)
             prio_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
             with open(prio_path, "w") as f:
                 json.dump(prio_vuln_data, f, indent=4)
+
             print(f"[+] Scan finished for repo: {repo_name}")
 
         except subprocess.CalledProcessError as e:
