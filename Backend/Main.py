@@ -68,7 +68,7 @@ def scan_sbom():
     "prio_vulns": prio_vuln_data
     }
 
-    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data)
+    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data, license_key)
 
     return jsonify(result_parsed)
 
