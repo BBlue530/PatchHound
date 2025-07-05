@@ -83,7 +83,7 @@ def scan_latest_sboms():
                 )
                 print(f"[+] Verified SBOM signature for repo: {repo_name}")
             except subprocess.CalledProcessError:
-                print(f"[!] Signature verification failed for repo: {repo_name}. Skipping.")
+                print(f"[!] Signature failed for repo: {repo_name}!")
                 continue
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
