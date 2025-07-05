@@ -21,6 +21,16 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     else:
         with open(sbom_path, "w") as f:
             json.dump(sbom_file, f, indent=4)
+    
+    sbom_sig_path = f"{sbom_path}.sig"
+    try:
+        subprocess.run(
+            ["cosign", "sign-blob", "--key", "cosign.key", "--output-signature", sbom_sig_path, sbom_path],
+            check=True
+        )
+        print(f"[+] SBOM signed: {sbom_sig_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Failed to sign SBOM: {e.stderr}")
 
     grype_path = os.path.join(scan_dir, f"{safe_repo_name}_vulns_cyclonedx.json")
     with open(grype_path, "w") as f:
@@ -56,9 +66,24 @@ def scan_latest_sboms():
 
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
+            sbom_sig_path = f"{sbom_path}.sig"
 
             if not os.path.exists(sbom_path):
                 print(f"[!] SBOM not found for repo: {repo_name}")
+                continue
+
+            if not os.path.exists(sbom_sig_path):
+                print(f"[!] Signature missing for SBOM in repo: {repo_name}")
+                continue
+
+            try:
+                subprocess.run(
+                    ["cosign", "verify-blob", "--key", "cosign.pub", "--signature", sbom_sig_path, sbom_path],
+                    check=True
+                )
+                print(f"[+] Verified SBOM signature for repo: {repo_name}")
+            except subprocess.CalledProcessError:
+                print(f"[!] Signature verification failed for repo: {repo_name}. Skipping.")
                 continue
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
