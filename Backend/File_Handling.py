@@ -4,8 +4,9 @@ from datetime import datetime
 import subprocess
 from Variables import all_repo_scans_folder
 from Kev_Catalog import compare_kev_catalog
+from Alerts import alert_system
 
-def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key):
+def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system, alert_system_webhook):
         
     safe_repo_name = current_repo.replace("/", "_")
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
@@ -39,6 +40,16 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     prio_path = os.path.join(scan_dir, f"{safe_repo_name}_prio_vuln_data.json")
     with open(prio_path, "w") as f:
         json.dump(prio_vuln_data, f, indent=4)
+
+    if alert_system and alert_system_webhook:
+        alert_system_json = {
+        "alert_system": alert_system,
+        "alert_system_webhook": alert_system_webhook
+        }
+        alert_path = os.path.join(scan_dir, f"{safe_repo_name}_alert.json")
+        with open(alert_path, "w") as f:
+            json.dump(alert_system_json, f, indent=4)
+            print(f"[+] Alert system set for: {safe_repo_name}")
 
 def scan_latest_sboms():
 
@@ -84,7 +95,9 @@ def scan_latest_sboms():
                 print(f"[+] Verified SBOM signature for repo: {repo_name}")
             except subprocess.CalledProcessError:
                 print(f"[!] Signature failed for repo: {repo_name}!")
-                continue
+                message = f"Signature failed for repo: {repo_name}!"
+                alert = "Signature Fail"
+                alert_system(message, alert, repo_name, repo_path)
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
             try:

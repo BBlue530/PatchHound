@@ -14,7 +14,16 @@ fi
 
 # Ensure secrets are set
 if [[ -z "$DISCORD_WEBHOOK_URL" && -z "$SLACK_WEBHOOK_URL" ]]; then
-  echo "[!] SLACK_WEBHOOK_URL and DISCORD_WEBHOOK_URL is not set, no alerts will be sent."
+  echo "[!] SLACK_WEBHOOK_URL and DISCORD_WEBHOOK_URL are not set, no alerts will be sent."
+else
+  # This will prio discord for the alert inside the backend
+  if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
+    ALERT_SYSTEM="discord"
+    ALERT_SYSTEM_WEBHOOK="$DISCORD_WEBHOOK_URL"
+  elif [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+    ALERT_SYSTEM="slack"
+    ALERT_SYSTEM_WEBHOOK="$SLACK_WEBHOOK_URL"
+  fi
 fi
 
 if [[ -z "$SBOM_SCAN_API_URL" ]]; then
@@ -46,6 +55,8 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "sbom=@sbom.cyclonedx.json" \
   -F "license=$LICENSE_SECRET" \
   -F "current_repo=$GITHUB_REPOSITORY" \
+  -F "alert_system=$ALERT_SYSTEM" \
+  -F "alert_system_webhook=$ALERT_SYSTEM_WEBHOOK" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?

@@ -31,6 +31,12 @@ def scan_sbom():
         return jsonify({"error": "No SBOM file uploaded"}), 400
     
     current_repo = request.form.get("current_repo")
+    if 'current_repo' not in request.files:
+        return jsonify({"error": "No Current repo detected"}), 400
+    
+    # Get both the alert system its going to use and the webhook
+    alert_system = request.form.get("alert_system")
+    alert_system_webhook = request.form.get("alert_system_webhook")
 
     is_cyclonedx = check_json_format(sbom_file)
     if is_cyclonedx == False:
@@ -68,7 +74,7 @@ def scan_sbom():
     "prio_vulns": prio_vuln_data
     }
 
-    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data, license_key)
+    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook)
 
     return jsonify(result_parsed)
 
