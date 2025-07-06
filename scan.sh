@@ -51,8 +51,6 @@ echo "[+] SBOM created: sbom.cyclonedx.json"
 
 echo "[~] Uploading SBOM to scan service..."
 
-echo "COMMIT_SHA: $COMMIT_SHA"
-
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "license=$LICENSE_SECRET" \

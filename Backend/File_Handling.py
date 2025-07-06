@@ -2,19 +2,56 @@ import os
 import json
 from datetime import datetime
 import subprocess
-from Variables import all_repo_scans_folder
+from Variables import all_repo_scans_folder, cosign_password
 from Kev_Catalog import compare_kev_catalog
 from Alerts import alert_system
 from Log import log_event
 
+local_bin = os.path.expanduser("~/.local/bin")
+
 def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author):
-        
+    
+    env = os.environ.copy()
+    env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
+    env["COSIGN_PASSWORD"] = cosign_password
+
     repo_name = current_repo.replace("/", "_")
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     scan_dir = os.path.join(all_repo_scans_folder, license_key, repo_name, timestamp)
-    repo_dir = os.path.join(all_repo_scans_folder, license_key, repo_name)
     
     os.makedirs(scan_dir, exist_ok=True)
+
+    if alert_system and alert_system_webhook:
+        alert_system_json = {
+        "alert_system": alert_system,
+        "alert_system_webhook": alert_system_webhook
+        }
+        alert_path = os.path.join(scan_dir, f"{repo_name}_alert.json")
+        with open(alert_path, "w") as f:
+            json.dump(alert_system_json, f, indent=4)
+            print(f"[+] Alert system set for: {repo_name}")
+
+    cosign_key_path = os.path.join(scan_dir, f"{repo_name}.key")
+    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
+
+    if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
+        print(f"[~] Generating Cosign key for repo: {repo_name}")
+        try:
+            subprocess.run(
+                ["cosign", "generate-key-pair"],
+                cwd=scan_dir,
+                check=True,
+                env=env
+            )
+            os.rename(os.path.join(scan_dir, "cosign.key"), cosign_key_path)
+            os.rename(os.path.join(scan_dir, "cosign.pub"), cosign_pub_path)
+            print(f"[+] Cosign key generated for repo: {repo_name}")
+
+        except subprocess.CalledProcessError as e:
+            print(f"[!] Failed to generate Cosign key: {e.stderr}")
+            event = f"[!] Failed to generate Cosign key: {e.stderr}, Cause : Workflow"
+            log_event(scan_dir, repo_name, timestamp, event, commit_sha, commit_author)
+            return
 
     sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     if hasattr(sbom_file, 'read'):
@@ -28,12 +65,21 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     sbom_sig_path = f"{sbom_path}.sig"
     try:
         subprocess.run(
-            ["cosign", "sign-blob", "--key", "cosign.key", "--output-signature", sbom_sig_path, sbom_path],
-            check=True
+            [
+                "cosign", "sign-blob",
+                "-y",
+                "--key", cosign_key_path,
+                "--output-signature", sbom_sig_path,
+                sbom_path
+            ],
+            check=True,
+            env=env
         )
         print(f"[+] SBOM signed: {sbom_sig_path}")
     except subprocess.CalledProcessError as e:
         print(f"[!] Failed to sign SBOM: {e.stderr}")
+        event = f"[+] Scan of '{repo_name}_sbom_cyclonedx.json' Completed, Cause : Workflow"
+        log_event(scan_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
     with open(grype_path, "w") as f:
@@ -42,21 +88,14 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     prio_path = os.path.join(scan_dir, f"{repo_name}_prio_vuln_data.json")
     with open(prio_path, "w") as f:
         json.dump(prio_vuln_data, f, indent=4)
-
-    if alert_system and alert_system_webhook:
-        alert_system_json = {
-        "alert_system": alert_system,
-        "alert_system_webhook": alert_system_webhook
-        }
-        alert_path = os.path.join(scan_dir, f"{repo_name}_alert.json")
-        with open(alert_path, "w") as f:
-            json.dump(alert_system_json, f, indent=4)
-            print(f"[+] Alert system set for: {repo_name}")
     
     event = f"[+] Scan of '{repo_name}_sbom_cyclonedx.json' Completed, Cause : Workflow"
-    log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
+    log_event(scan_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
 def scan_latest_sboms():
+
+    env = os.environ.copy()
+    env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
 
     if not os.path.isdir(all_repo_scans_folder):
         print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
@@ -87,6 +126,9 @@ def scan_latest_sboms():
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             sbom_sig_path = f"{sbom_path}.sig"
             repo_dir = latest_scan_dir
+            alert_config_path = os.path.join(latest_scan_dir, f"{repo_name}_alert.json")
+            alert_system_name = None
+            alert_system_webhook = None
 
             if not os.path.exists(sbom_path):
                 print(f"[!] SBOM not found for repo: {repo_name}")
@@ -103,11 +145,18 @@ def scan_latest_sboms():
                 event = f"[!] Signature missing for SBOM in repo: {repo_name}, Cause : Daily Scan"
                 log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
                 continue
-
+            
+            cosign_pub_path = os.path.join(repo_dir, f"{repo_name}.pub")
             try:
                 subprocess.run(
-                    ["cosign", "verify-blob", "--key", "cosign.pub", "--signature", sbom_sig_path, sbom_path],
-                    check=True
+                    [
+                        "cosign", "verify-blob",
+                        "--key", cosign_pub_path,
+                        "--signature", sbom_sig_path,
+                        sbom_path
+                    ],
+                    check=True,
+                    env=env
                 )
                 print(f"[+] Verified SBOM signature for repo: {repo_name}")
             except subprocess.CalledProcessError:

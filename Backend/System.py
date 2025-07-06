@@ -46,16 +46,28 @@ def install_cosign():
 
     print("[+] Cosign is installed")
 
+def version_check(tool, version, env=None):
+    result = subprocess.run([tool, version], capture_output=True, text=True, env=env)
+    print(result.stdout)
+
 def install_tools():
     make_local_bin()
+
+    env = os.environ.copy()
+    env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
+
     if not tool_exists("grype"):
         install_grype()
+        version_check("grype", "--version")
     else:
+        version_check("grype", "--version")
         print("[+] Grype is installed")
 
     if not tool_exists("cosign"):
         install_cosign()
+        version_check("cosign", "version", env)
     else:
+        version_check("cosign", "version", env)
         print("[+] Cosign is installed")
 
 def tool_exists(tool_name):
