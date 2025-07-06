@@ -57,6 +57,8 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "current_repo=$GITHUB_REPOSITORY" \
   -F "alert_system=$ALERT_SYSTEM" \
   -F "alert_system_webhook=$ALERT_SYSTEM_WEBHOOK" \
+  -F "commit_sha=$COMMIT_SHA" \
+  -F "commit_author=$AUTHOR_NAME <$AUTHOR_EMAIL>" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?

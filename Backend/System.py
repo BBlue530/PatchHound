@@ -27,8 +27,6 @@ def install_grype():
 def install_cosign():
     print("[~] Installing Cosign...")
 
-    cosign_url = f"https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-{arch}"
-    cosign_path = os.path.join(local_bin, "cosign")
     arch_map = {
         "x86_64": "amd64",
         "aarch64": "arm64",
@@ -39,6 +37,9 @@ def install_cosign():
     if not arch:
         print(f"[!] Unsupported arch for Cosign: {uname_arch}")
         sys.exit(1)
+
+    cosign_url = f"https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-{arch}"
+    cosign_path = os.path.join(local_bin, "cosign")
 
     urllib.request.urlretrieve(cosign_url, cosign_path)
     os.chmod(cosign_path, 0o755)

@@ -5,16 +5,18 @@ import subprocess
 from Variables import all_repo_scans_folder
 from Kev_Catalog import compare_kev_catalog
 from Alerts import alert_system
+from Log import log_event
 
-def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system, alert_system_webhook):
+def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author):
         
-    safe_repo_name = current_repo.replace("/", "_")
+    repo_name = current_repo.replace("/", "_")
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    scan_dir = os.path.join(all_repo_scans_folder, license_key, safe_repo_name, timestamp)
+    scan_dir = os.path.join(all_repo_scans_folder, license_key, repo_name, timestamp)
+    repo_dir = os.path.join(all_repo_scans_folder, license_key, repo_name)
     
     os.makedirs(scan_dir, exist_ok=True)
 
-    sbom_path = os.path.join(scan_dir, f"{safe_repo_name}_sbom_cyclonedx.json")
+    sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     if hasattr(sbom_file, 'read'):
         sbom_file.seek(0)
         with open(sbom_path, "w") as f:
@@ -33,11 +35,11 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     except subprocess.CalledProcessError as e:
         print(f"[!] Failed to sign SBOM: {e.stderr}")
 
-    grype_path = os.path.join(scan_dir, f"{safe_repo_name}_vulns_cyclonedx.json")
+    grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
     with open(grype_path, "w") as f:
         json.dump(vulns_cyclonedx_json, f, indent=4)
 
-    prio_path = os.path.join(scan_dir, f"{safe_repo_name}_prio_vuln_data.json")
+    prio_path = os.path.join(scan_dir, f"{repo_name}_prio_vuln_data.json")
     with open(prio_path, "w") as f:
         json.dump(prio_vuln_data, f, indent=4)
 
@@ -46,16 +48,22 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
         "alert_system": alert_system,
         "alert_system_webhook": alert_system_webhook
         }
-        alert_path = os.path.join(scan_dir, f"{safe_repo_name}_alert.json")
+        alert_path = os.path.join(scan_dir, f"{repo_name}_alert.json")
         with open(alert_path, "w") as f:
             json.dump(alert_system_json, f, indent=4)
-            print(f"[+] Alert system set for: {safe_repo_name}")
+            print(f"[+] Alert system set for: {repo_name}")
+    
+    event = f"[+] Scan of '{repo_name}_sbom_cyclonedx.json' Completed, Cause : Workflow"
+    log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
 def scan_latest_sboms():
 
     if not os.path.isdir(all_repo_scans_folder):
         print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
         os.makedirs(all_repo_scans_folder, exist_ok=True)
+
+    commit_sha = "Null"
+    commit_author = "Daily Scan"
         
     for license_key in os.listdir(all_repo_scans_folder):
         license_path = os.path.join(all_repo_scans_folder, license_key)
@@ -78,13 +86,22 @@ def scan_latest_sboms():
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             sbom_sig_path = f"{sbom_path}.sig"
+            repo_dir = latest_scan_dir
 
             if not os.path.exists(sbom_path):
                 print(f"[!] SBOM not found for repo: {repo_name}")
+
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"[!] SBOM not found for repo: {repo_name}, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
                 continue
 
             if not os.path.exists(sbom_sig_path):
                 print(f"[!] Signature missing for SBOM in repo: {repo_name}")
+
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"[!] Signature missing for SBOM in repo: {repo_name}, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
                 continue
 
             try:
@@ -98,6 +115,10 @@ def scan_latest_sboms():
                 message = f"Signature failed for repo: {repo_name}!"
                 alert = "Signature Fail"
                 alert_system(message, alert, repo_name, repo_path)
+
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"Signature failed for repo: {repo_name}!, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
             try:
@@ -125,3 +146,6 @@ def scan_latest_sboms():
 
             except subprocess.CalledProcessError as e:
                 print(f"[!] Scan failed for {repo_name}: {e.stderr}")
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"[!] Scan failed for {repo_name}: {e.stderr}, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
