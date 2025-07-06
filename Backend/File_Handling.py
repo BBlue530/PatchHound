@@ -127,8 +127,6 @@ def scan_latest_sboms():
             sbom_sig_path = f"{sbom_path}.sig"
             repo_dir = latest_scan_dir
             alert_config_path = os.path.join(latest_scan_dir, f"{repo_name}_alert.json")
-            alert_system_name = None
-            alert_system_webhook = None
 
             if not os.path.exists(sbom_path):
                 print(f"[!] SBOM not found for repo: {repo_name}")
@@ -140,6 +138,9 @@ def scan_latest_sboms():
 
             if not os.path.exists(sbom_sig_path):
                 print(f"[!] Signature missing for SBOM in repo: {repo_name}")
+                message = f"[!] Signature missing for SBOM in repo: {repo_name}"
+                alert = "Daily Scan : Signature Fail"
+                alert_system(message, alert, alert_config_path)
 
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 event = f"[!] Signature missing for SBOM in repo: {repo_name}, Cause : Daily Scan"
@@ -162,8 +163,8 @@ def scan_latest_sboms():
             except subprocess.CalledProcessError:
                 print(f"[!] Signature failed for repo: {repo_name}!")
                 message = f"Signature failed for repo: {repo_name}!"
-                alert = "Signature Fail"
-                alert_system(message, alert, repo_name, repo_path)
+                alert = "Daily Scan : Signature Fail"
+                alert_system(message, alert, alert_config_path)
 
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 event = f"Signature failed for repo: {repo_name}!, Cause : Daily Scan"

@@ -2,16 +2,12 @@ import os
 import json
 import requests
 
-def alert_system(message, alert, repo_name, repo_path):
+def alert_system(message, alert, alert_config_path):
+    alert_system_name = None
+    alert_system_webhook = None
 
-    alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
-
-    if not os.path.isfile(alert_path):
-        print("[!] Alert config not found!")
-        return
-
-    if os.path.isfile(alert_path):
-        with open(alert_path, "r") as f:
+    if os.path.isfile(alert_config_path):
+        with open(alert_config_path, "r") as f:
             alert_system_json = json.load(f)
 
         alert_system = alert_system_json.get("alert_system")
