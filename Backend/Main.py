@@ -32,16 +32,16 @@ def scan_sbom():
         return jsonify({"error": "No SBOM file uploaded"}), 400
     
     current_repo = request.form.get("current_repo")
-    if 'current_repo' not in request.files:
-        return jsonify({"error": "No Current repo detected"}), 400
-    
+    if not current_repo:
+        return jsonify({"error": "No current repo detected"}), 400
+
     commit_sha = request.form.get("commit_sha")
-    if 'commit_sha' not in request.files:
+    if not commit_sha:
         return jsonify({"error": "No commit sha detected"}), 400
-    
+
     commit_author = request.form.get("commit_author")
-    if 'commit_author' not in request.files:
-        return jsonify({"error": "No commit_author detected"}), 400
+    if not commit_author:
+        return jsonify({"error": "No commit author detected"}), 400
     
     # Get both the alert system its going to use and the webhook
     alert_system = request.form.get("alert_system")
