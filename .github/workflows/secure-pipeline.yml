@@ -30,6 +30,11 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq curl
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
+      - name: Set environment variables
+        run: |
+          echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "AUTHOR_NAME=${{ github.actor }}" >> $GITHUB_ENV
+          
       - name: Run SBOM Scan script
         run: |
           chmod +x ./scan.sh
