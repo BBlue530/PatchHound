@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-def alert_system(message, alert, alert_config_path):
+def alert_event_system(message, alert, alert_config_path):
     alert_system_name = None
     alert_system_webhook = None
 
