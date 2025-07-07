@@ -69,6 +69,7 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
             json.dump(sbom_file, f, indent=4)
     
     sbom_sig_path = f"{sbom_path}.sig"
+    sbom_attestation_path = f"{sbom_path}.att"
     try:
 
         # Sign the SBOM using the private key
@@ -91,6 +92,29 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
         alert_event_system(message, alert, repo_dir)
 
         event = f"[!] Failed to sign SBOM for repo: {repo_name} {e.stderr}!, Cause : Workflow"
+        log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
+    
+    try:
+        subprocess.run(
+            [
+                "cosign", "attest-blob",
+                "-y",
+                "--key", cosign_key_path,
+                "--predicate", sbom_path,
+                "--type", "cyclonedx",
+                "--output-signature", sbom_attestation_path
+            ],
+            check=True,
+            env=env
+        )
+        print(f"[+] SBOM attested: {sbom_attestation_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Failed to attest SBOM: {e.stderr}")
+        message = f"[!] Failed to attest SBOM for repo: {repo_name} {e.stderr}!"
+        alert = "Workflow : Signature Fail"
+        alert_event_system(message, alert, repo_dir)
+
+        event = f"[!] Failed to attest SBOM for repo: {repo_name} {e.stderr}!, Cause : Workflow"
         log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
@@ -142,6 +166,7 @@ def scan_latest_sboms():
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             sbom_sig_path = f"{sbom_path}.sig"
+            sbom_attestation_path = f"{sbom_path}.att"
             repo_dir = latest_scan_dir
             alert_config_path = os.path.join(repo_path, f"{repo_name}_alert.json")
 
@@ -163,8 +188,20 @@ def scan_latest_sboms():
                 event = f"[!] Signature missing for SBOM in repo: {repo_name}, Cause : Daily Scan"
                 log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
                 continue
+
+            if not os.path.exists(sbom_attestation_path):
+                print(f"[!] Attestation missing for SBOM in repo: {repo_name}")
+                message = f"[!] Attestation missing for SBOM in repo: {repo_name}"
+                alert = "Daily Scan : Attestation Missing"
+                alert_event_system(message, alert, alert_config_path)
+
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"[!] Attestation missing for SBOM in repo: {repo_name}, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
+                continue
             
             cosign_pub_path = os.path.join(repo_dir, f"{repo_name}.pub")
+            
             try:
 
                 # Verify the signature using the .sig file along with .pub key and the SBOM itself
@@ -187,6 +224,29 @@ def scan_latest_sboms():
 
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 event = f"[!] Signature failed for repo: {repo_name}!, Cause : Daily Scan"
+                log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
+            
+            try:
+                subprocess.run(
+                    [
+                        "cosign", "verify-blob-attestation",
+                        "--key", cosign_pub_path,
+                        "--signature", sbom_attestation_path,
+                        "--type", "cyclonedx",
+                        sbom_path
+                    ],
+                    check=True,
+                    env=env
+                )
+                print(f"[+] Verified SBOM attestation for repo: {repo_name}")
+            except subprocess.CalledProcessError:
+                print(f"[!] Attestation verification failed for repo: {repo_name}!")
+                message = f"Attestation verification failed for repo: {repo_name}!"
+                alert = "Daily Scan : Attestation Fail"
+                alert_event_system(message, alert, alert_config_path)
+
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                event = f"[!] Attestation verification failed for repo: {repo_name}!, Cause : Daily Scan"
                 log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author)
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
