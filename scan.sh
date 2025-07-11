@@ -94,6 +94,8 @@ echo "$RESPONSE" | jq '.prio_vulns' > prio_vulns.json
 echo "[+] Vulnerability report received."
 
 # Extract severity counts with defaults
+# REVIEW==
+# Need moved to the backend
 CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
 HIGH_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "high")] | length' vulns.cyclonedx.json)
 MED_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "medium")] | length' vulns.cyclonedx.json)
@@ -222,6 +224,7 @@ if [[ "$CRIT_COUNT" -gt 0 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
   fi
 fi
 
+# ==REVIEW
 
 CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
 echo "$CRIT_COUNT" > crit_count.txt

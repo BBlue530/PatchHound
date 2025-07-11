@@ -3,14 +3,14 @@ import shutil
 from pathlib import Path
 import os
 import requests
-from File_Handling import scan_latest_sboms
+from File_Validation import sbom_validation
 from Variables import kev_catalog, kev_url
 
-def update_grype_kev_db():
+def scheduled_event():
     print("[~] Warming up (may take a few seconds)...")
     update_grype_db()
     update_kev_db()
-    scan_latest_sboms()
+    sbom_validation()
 
 def update_grype_db():
     cache_path = Path.home() / ".cache" / "grype"

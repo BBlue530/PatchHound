@@ -5,8 +5,8 @@ import os
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
-from File_Handling import save_scan_files
-from Vulnerability_DB import update_grype_kev_db
+from File_Save import save_scan_files
+from Backend.Schedule_Handling import scheduled_event
 from License_Handling import validate_license
 from Check_Format import check_json_format
 from Kev_Catalog import compare_kev_catalog
@@ -26,24 +26,24 @@ def scan_sbom():
     response, valid_license = validate_license(license_key)
     if valid_license == False:
         return jsonify({"error": f"{response}"}), 404
-    
-    sbom_file = request.files['sbom']
+        
+    missing_fields = []
     if 'sbom' not in request.files:
-        return jsonify({"error": "No SBOM file uploaded"}), 400
-    
+        missing_fields.append("SBOM file")
+    if not request.form.get("current_repo"):
+        missing_fields.append("current repo")
+    if not request.form.get("commit_sha"):
+        missing_fields.append("commit sha")
+    if not request.form.get("commit_author"):
+        missing_fields.append("commit author")
+
+    if missing_fields:
+        return jsonify({"error": f"Missing: {', '.join(missing_fields)}"}), 400
+
+    sbom_file = request.files['sbom']
     current_repo = request.form.get("current_repo")
-    if not current_repo:
-        return jsonify({"error": "No current repo detected"}), 400
-
     commit_sha = request.form.get("commit_sha")
-    if not commit_sha:
-        return jsonify({"error": "No commit sha detected"}), 400
-
     commit_author = request.form.get("commit_author")
-    if not commit_author:
-        return jsonify({"error": "No commit author detected"}), 400
-    
-    # Get both the alert system its going to use and the webhook
     alert_system = request.form.get("alert_system")
     alert_system_webhook = request.form.get("alert_system_webhook")
 
@@ -54,7 +54,7 @@ def scan_sbom():
     try:
         sbom_file.seek(0)
         json.load(sbom_file)
-        sbom_file.seek(0)  # Reset file pointer if needed
+        sbom_file.seek(0)
     except json.JSONDecodeError:
         return jsonify({"error": "SBOM file must be valid JSON"}), 400
     
@@ -89,8 +89,8 @@ def scan_sbom():
 
 if __name__ == "__main__":
     install_tools()
-    update_grype_kev_db()
+    scheduled_event()
     scheduler = BackgroundScheduler()
-    scheduler.add_job(update_grype_kev_db, 'cron', hour=3, minute=0)
+    scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
     scheduler.start()
     app.run(host="0.0.0.0", port=8080)
