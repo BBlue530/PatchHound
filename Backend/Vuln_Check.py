@@ -1,0 +1,79 @@
+import json
+import os
+import requests
+
+def check_vuln_file(grype_path, alert_path, repo_name):
+
+    if os.path.isfile(alert_path):
+        with open(alert_path, "r") as f:
+            alert_system_json = json.load(f)
+
+        alert_system = alert_system_json.get("alert_system")
+        alert_system_webhook = alert_system_json.get("alert_system_webhook")
+
+    with open(grype_path) as f:
+        vuln_data = json.load(f)
+    
+    severity_levels = ["critical", "high", "medium", "low", "unknown"]
+    severity_counts = {level: 0 for level in severity_levels}
+
+    # Severities count
+    for vuln in vuln_data.get("vulnerabilities", []):
+        ratings = vuln.get("ratings", [])
+        for rating in ratings:
+            severity = rating.get("severity", "").lower()
+            if severity in severity_counts:
+                severity_counts[severity] += 1
+    
+    crit_count = severity_counts.get("critical", 0)
+    high_count = severity_counts.get("high", 0)
+
+    if crit_count > 0 and alert_system == "discord":
+        print("[!] Sending Discord alert with severity breakdown...")
+
+        message = {
+            "embeds": [{
+                "title": "🚨 Vulnerability Severity Report",
+                "description": (
+                    f"**Repo:** {repo_name}\n\n"
+                    f"**Critical:** {severity_counts['critical']}\n"
+                    f"**High:** {severity_counts['high']}\n"
+                    f"**Medium:** {severity_counts['medium']}\n"
+                    f"**Low:** {severity_counts['low']}\n"
+                    f"**Unknown:** {severity_counts['unknown']}"
+                ),
+                "color": 16711680
+            }]
+        }
+        response = requests.post(
+            alert_system_webhook,
+            data=json.dumps(message),
+            headers={"Content-Type": "application/json"}
+        )
+        if response.status_code not in [200, 204]:
+            print(f"[!] Failed to send {alert_system} alert. Status code: {response.status_code}")
+
+    elif (crit_count > 0 or high_count > 0) and alert_system == "slack":
+        print("[!] Sending Slack alert with severity breakdown...")
+
+        message = {
+            "text": ":rotating_light: *Vulnerability Severity Report*",
+            "attachments": [{
+                "color": "#FF0000",
+                "fields": [
+                    {"title": "Repo", "value": repo_name, "short": False},
+                    {"title": "Critical", "value": str(severity_counts["critical"]), "short": True},
+                    {"title": "High", "value": str(severity_counts["high"]), "short": True},
+                    {"title": "Medium", "value": str(severity_counts["medium"]), "short": True},
+                    {"title": "Low", "value": str(severity_counts["low"]), "short": True},
+                    {"title": "Unknown", "value": str(severity_counts["unknown"]), "short": True},
+                ]
+            }]
+        }
+        response = requests.post(
+            alert_system_webhook,
+            data=json.dumps(message),
+            headers={"Content-Type": "application/json"}
+        )
+        if response.status_code not in [200, 204]:
+            print(f"[!] Failed to send {alert_system} alert. Status code: {response.status_code}")
