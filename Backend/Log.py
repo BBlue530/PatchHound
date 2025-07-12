@@ -13,7 +13,7 @@ def log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author):
                 if data:
                     logs = json.loads(data)
         except json.JSONDecodeError:
-            print(f"[!] Warning: JSON decode error in existing log file. Appending anyway.")
+            print(f"[!] JSON decode error in log file.")
 
     log_entry = {
         "log_id": len(logs) + 1,

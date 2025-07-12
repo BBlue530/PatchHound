@@ -4,13 +4,18 @@ import subprocess
 import os
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
-import datetime
+import threading
+import io
 from File_Save import save_scan_files
 from Schedule_Handling import scheduled_event
 from License_Handling import validate_license
 from Check_Format import check_json_format
 from Kev_Catalog import compare_kev_catalog
 from System import install_tools
+
+def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author):
+    sbom_file_obj = io.BytesIO(sbom_content)
+    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -83,8 +88,13 @@ def scan_sbom():
     "prio_vulns": prio_vuln_data
     }
 
-    save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author)
+    sbom_file.seek(0)
+    sbom_content = sbom_file.read()
 
+    threading.Thread(
+        target=threading_save_scan_files,
+        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author)
+    ).start()
     return jsonify(result_parsed)
 
 if __name__ == "__main__":

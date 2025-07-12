@@ -32,19 +32,17 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
 
     if alert_system and alert_system_webhook:
         alert_system_json = {
-        "alert_system": alert_system,
-        "alert_system_webhook": alert_system_webhook
+            "alert_system": alert_system,
+            "alert_system_webhook": alert_system_webhook
         }
         alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
         with open(alert_path, "w") as f:
             json.dump(alert_system_json, f, indent=4)
-            print(f"[+] Alert system set for: {repo_name}")
+        print(f"[+] Alert system set for: {repo_name}")
 
     if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
         print(f"[~] Generating Cosign key for repo: {repo_name}")
         try:
-
-            # Create the key pairs for that specific commit
             subprocess.run(
                 ["cosign", "generate-key-pair"],
                 cwd=scan_dir,
@@ -58,18 +56,23 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
         except subprocess.CalledProcessError as e:
             message = f"[!] Failed to generate Cosign key for repo: {repo_name} {e.stderr}!"
             alert = "Workflow : Signature Fail"
-            print(f"{message}")
+            print(message)
             alert_event_system(message, alert, alert_path)
             log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
             return
 
     if hasattr(sbom_file, 'read'):
         sbom_file.seek(0)
-        with open(sbom_path, "w") as f:
-            json.dump(json.load(sbom_file), f, indent=4)
+        sbom_json = json.load(sbom_file)
+    elif isinstance(sbom_file, bytes):
+        sbom_json = json.loads(sbom_file.decode('utf-8'))
+    elif isinstance(sbom_file, str):
+        sbom_json = json.loads(sbom_file)
     else:
-        with open(sbom_path, "w") as f:
-            json.dump(sbom_file, f, indent=4)
+        sbom_json = sbom_file
+
+    with open(sbom_path, "w") as f:
+        json.dump(sbom_json, f, indent=4)
 
     try:
         subprocess.run(
@@ -89,12 +92,11 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     except subprocess.CalledProcessError as e:
         message = f"[!] Failed to attest SBOM for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        print(f"{message}")
+        print(message)
         alert_event_system(message, alert, alert_path)
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
     try:
-        # Sign the attestation using the private key
         subprocess.run(
             [
                 "cosign", "sign-blob",
@@ -110,7 +112,7 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     except subprocess.CalledProcessError as e:
         message = f"[!] Failed to sign Attestation for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        print(f"{message}")
+        print(message)
         alert_event_system(message, alert, alert_path)
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
