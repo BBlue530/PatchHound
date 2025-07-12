@@ -5,14 +5,15 @@ def log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author):
     
     log_path = os.path.join(repo_dir, f"{repo_name}_event_log.json")
 
+    logs = []
     if os.path.exists(log_path):
-        with open(log_path, "r") as f:
-            try:
-                logs = json.load(f)
-            except json.JSONDecodeError:
-                logs = []
-    else:
-        logs = []
+        try:
+            with open(log_path, "r") as f:
+                data = f.read().strip()
+                if data:
+                    logs = json.loads(data)
+        except json.JSONDecodeError:
+            print(f"[!] Warning: JSON decode error in existing log file. Appending anyway.")
 
     log_entry = {
         "log_id": len(logs) + 1,

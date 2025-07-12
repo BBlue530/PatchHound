@@ -6,7 +6,7 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
 from File_Save import save_scan_files
-from Backend.Schedule_Handling import scheduled_event
+from Schedule_Handling import scheduled_event
 from License_Handling import validate_license
 from Check_Format import check_json_format
 from Kev_Catalog import compare_kev_catalog

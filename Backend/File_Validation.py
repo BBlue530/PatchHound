@@ -55,7 +55,7 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
 
             if not os.path.exists(sbom_att_path):
@@ -64,7 +64,7 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
 
             if not os.path.exists(att_sig_path):
@@ -73,7 +73,7 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
             
             try:
@@ -95,7 +95,7 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
 
             try:
@@ -116,7 +116,7 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
@@ -146,5 +146,5 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(message, alert, alert_path)
-                log_event(latest_scan_dir, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
                 continue
