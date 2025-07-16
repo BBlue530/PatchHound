@@ -3,17 +3,19 @@ import json
 import requests
 
 def alert_event_system(message, alert, alert_config_path):
-    alert_system_name = None
     alert_system_webhook = None
 
     if os.path.isfile(alert_config_path):
         with open(alert_config_path, "r") as f:
             alert_system_json = json.load(f)
 
-        alert_system = alert_system_json.get("alert_system")
         alert_system_webhook = alert_system_json.get("alert_system_webhook")
 
-        if alert_system == "discord":
+        if not alert_system_webhook:
+            print("[!] Webhook URL missing")
+            return
+
+        if "discord" in alert_system_webhook:
             payload = {
                 "embeds": [{
                     "title": f"🚨 {alert}",
@@ -27,7 +29,7 @@ def alert_event_system(message, alert, alert_config_path):
                 headers={"Content-Type": "application/json"}
             )
 
-        elif alert_system == "slack":
+        elif "slack" in alert_system_webhook:
             payload = {
                 "text": f":rotating_light: {alert}",
                 "attachments": [

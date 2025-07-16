@@ -7,7 +7,7 @@ from Alerts import alert_event_system
 from Log import log_event
 from Vuln_Check import check_vuln_file
 
-def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author):
+def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
     
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
     env["COSIGN_PASSWORD"] = cosign_password
@@ -30,9 +30,8 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     
     os.makedirs(scan_dir, exist_ok=True)
 
-    if alert_system and alert_system_webhook:
+    if alert_system_webhook:
         alert_system_json = {
-            "alert_system": alert_system,
             "alert_system_webhook": alert_system_webhook
         }
         alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")

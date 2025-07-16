@@ -13,9 +13,9 @@ from Check_Format import check_json_format
 from Kev_Catalog import compare_kev_catalog
 from System import install_tools
 
-def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author):
+def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author)
+    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -49,7 +49,6 @@ def scan_sbom():
     current_repo = request.form.get("current_repo")
     commit_sha = request.form.get("commit_sha")
     commit_author = request.form.get("commit_author")
-    alert_system = request.form.get("alert_system")
     alert_system_webhook = request.form.get("alert_system_webhook")
 
     is_cyclonedx = check_json_format(sbom_file)
@@ -93,7 +92,7 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system, alert_system_webhook, commit_sha, commit_author)
+        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author)
     ).start()
     return jsonify(result_parsed)
 
