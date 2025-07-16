@@ -10,7 +10,7 @@ jobs:
 
     env:
       SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      ALER_WEBHOOK: ${{ secrets.ALER_WEBHOOK }}
       LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
 
     steps:

@@ -12,18 +12,8 @@ else
   exit 1
 fi
 
-# Ensure secrets are set
-if [[ -z "$DISCORD_WEBHOOK_URL" && -z "$SLACK_WEBHOOK_URL" ]]; then
-  echo "[!] SLACK_WEBHOOK_URL and DISCORD_WEBHOOK_URL are not set, no alerts will be sent."
-else
-  # This will prio discord for the alert inside the backend
-  if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
-    ALERT_SYSTEM="discord"
-    ALERT_SYSTEM_WEBHOOK="$DISCORD_WEBHOOK_URL"
-  elif [[ -n "$SLACK_WEBHOOK_URL" ]]; then
-    ALERT_SYSTEM="slack"
-    ALERT_SYSTEM_WEBHOOK="$SLACK_WEBHOOK_URL"
-  fi
+if [ -z "$ALER_WEBHOOK" ]; then
+  echo "[!] ALER_WEBHOOK not set, no alerts will be sent."
 fi
 
 if [[ -z "$SBOM_SCAN_API_URL" ]]; then
