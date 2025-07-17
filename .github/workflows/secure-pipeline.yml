@@ -10,30 +10,15 @@ jobs:
 
     env:
       SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
-      ALER_WEBHOOK: ${{ secrets.ALER_WEBHOOK }}
+      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
       LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
+      GHCR_PAT: ${{ secrets.GHCR_PAT }}
+      COMMIT_SHA: ${{ github.sha }}
+      AUTHOR_NAME: ${{ github.actor }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Check for GHCR_PAT
-        run: |
-          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
-            echo "[!] GHCR_PAT not set. Skipping auth. May fail for private images."
-          else
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u bblue530 --password-stdin
-          fi
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y jq curl
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: Set environment variables
-        run: |
-          echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
-          echo "AUTHOR_NAME=${{ github.actor }}" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
           
       - name: Run SBOM Scan script
         run: |
@@ -48,14 +33,3 @@ jobs:
             sbom.cyclonedx.json
             vulns.cyclonedx.json
             prio_vulns.json
-
-      - name: Cleanup scan files
-        run: |
-          rm -f sbom.cyclonedx.json vulns.cyclonedx.json summary.md prio_vulns.json
-
-      - name: Fail if critical vulns found
-        run: |
-          CRIT_COUNT=$(cat crit_count.txt)
-          if [ "$CRIT_COUNT" -gt 0 ]; then
-            exit 1
-          fi

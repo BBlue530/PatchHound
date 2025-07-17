@@ -1,10 +1,19 @@
 #!/bin/bash
-
 set -e
 
-CRIT_COUNT=${CRIT_COUNT:-0}
-
 CONFIG_FILE="${1:-scan.config}"
+
+echo "[~] Installing dependencies..."
+
+sudo apt-get update && sudo apt-get install -y jq curl
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+if [ -n "$GHCR_PAT" ]; then
+  echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+else
+  echo "[!] GHCR_PAT not set. Skipping Docker auth."
+fi
+
 if [ -f "$CONFIG_FILE" ]; then
   source "$CONFIG_FILE"
 else
@@ -12,19 +21,18 @@ else
   exit 1
 fi
 
-if [ -z "$ALER_WEBHOOK" ]; then
-  echo "[!] ALER_WEBHOOK not set, no alerts will be sent."
-fi
-
-if [[ -z "$SBOM_SCAN_API_URL" ]]; then
-  echo "[!] SBOM_SCAN_API_URL is not set! Workflow will not work and will now exit."
+if [[ -z "$SBOM_SCAN_API_URL" || -z "$LICENSE_SECRET" ]]; then
+  echo "[!] Missing SBOM_SCAN_API_URL or LICENSE_SECRET. Exiting."
   exit 2
 fi
 
-if [[ -z "$LICENSE_SECRET" ]]; then
-  echo "[!] LICENSE_SECRET is not set! Workflow will not work and will now exit."
-  exit 2
-fi
+echo "COMMIT_SHA=$COMMIT_SHA"
+echo "AUTHOR_NAME=$AUTHOR_NAME"
+echo "AUTHOR_EMAIL=$AUTHOR_EMAIL"
+echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+echo "ALERT_WEBHOOK=$ALERT_WEBHOOK"
+echo "SBOM_SCAN_API_URL=$SBOM_SCAN_API_URL"
+
 
 {
 echo "==============================================="
@@ -45,7 +53,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "sbom=@sbom.cyclonedx.json" \
   -F "license=$LICENSE_SECRET" \
   -F "current_repo=$GITHUB_REPOSITORY" \
-  -F "alert_system_webhook=$ALERT_SYSTEM_WEBHOOK" \
+  -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \
   -F "commit_author=$AUTHOR_NAME <$AUTHOR_EMAIL>" \
   "$SBOM_SCAN_API_URL")
@@ -135,9 +143,11 @@ echo ""
 
 sleep 0.2
 
+echo "$CRIT_COUNT" > crit_count.txt
 CRIT_COUNT=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
   echo "[!] Failing due to $CRIT_COUNT critical vulnerabilities."
+  exit 1
 fi
 
 echo "[+] Scan Finished"
