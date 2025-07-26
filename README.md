@@ -8,8 +8,17 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 
 - Automatically generates an SBOM using [Syft](https://github.com/anchore/syft)
 - Scans for vulnerabilities with [Grype](https://github.com/anchore/grype)
+- Signs attestation with [Cosign](https://github.com/sigstore/cosign)
+- Compare found vulnerabilities with [KEV catalong](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+- Daily SBOM scan for new vulnerabilities, including:
+   - Automatic update of the Grype vulnerability database
+   - Automatic fetch of the latest KEV catalog
+   - Re-scan of the latest SBOMs using updated databases
+   - Automatic verification of the SBOMs attestation and signing
+   - Alerts if verification fails or new vulnerabilities have been found
 - Outputs detailed vulnerability counts by severity
 - Lists top critical vulnerabilities found
+- Alerts on [Discord](https://discord.com/) / [Slack](https://slack.com/) when vulnerabilities are found
 - Configurable via a simple `scan.config` file
 - Works on local source repos or remote container images
 
