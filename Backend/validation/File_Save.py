@@ -2,10 +2,10 @@ import os
 import json
 from datetime import datetime
 import subprocess
-from Variables import all_repo_scans_folder, cosign_password, local_bin, env
-from Alerts import alert_event_system
-from Log import log_event
-from Vuln_Check import check_vuln_file
+from core.Variables import all_repo_scans_folder, cosign_password, local_bin, env
+from logs.Alerts import alert_event_system
+from logs.Log import log_event
+from vuln_scan.Vuln_Check import check_vuln_file
 
 def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
     

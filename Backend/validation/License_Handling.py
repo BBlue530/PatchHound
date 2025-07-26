@@ -1,6 +1,6 @@
 import requests
 import json
-from Variables import lambda_api_gateway_url
+from core.Variables import lambda_api_gateway_url
 
 def validate_license(license_key):
     headers = {"Content-Type": "application/json"}

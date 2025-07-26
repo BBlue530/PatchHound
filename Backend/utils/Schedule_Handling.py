@@ -3,8 +3,8 @@ import shutil
 from pathlib import Path
 import os
 import requests
-from File_Validation import sbom_validation
-from Variables import kev_catalog, kev_url
+from validation.File_Validation import sbom_validation
+from core.Variables import kev_catalog, kev_url
 
 def scheduled_event():
     print("[~] Warming up (may take a few seconds)...")

@@ -6,12 +6,12 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import threading
 import io
-from File_Save import save_scan_files
-from Schedule_Handling import scheduled_event
-from License_Handling import validate_license
-from Check_Format import check_json_format
-from Kev_Catalog import compare_kev_catalog
-from System import install_tools
+from validation.File_Save import save_scan_files
+from utils.Schedule_Handling import scheduled_event
+from validation.License_Handling import validate_license
+from validation.Check_Format import check_json_format
+from vuln_scan.Kev_Catalog import compare_kev_catalog
+from core.System import install_tools
 
 def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)

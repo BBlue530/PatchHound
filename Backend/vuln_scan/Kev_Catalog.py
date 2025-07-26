@@ -1,5 +1,5 @@
 import json
-from Variables import kev_catalog
+from core.Variables import kev_catalog
 
 def compare_kev_catalog(cyclonedx_data):
     with open(kev_catalog, "r") as f:

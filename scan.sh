@@ -26,14 +26,6 @@ if [[ -z "$SBOM_SCAN_API_URL" || -z "$LICENSE_SECRET" ]]; then
   exit 2
 fi
 
-echo "COMMIT_SHA=$COMMIT_SHA"
-echo "AUTHOR_NAME=$AUTHOR_NAME"
-echo "AUTHOR_EMAIL=$AUTHOR_EMAIL"
-echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-echo "ALERT_WEBHOOK=$ALERT_WEBHOOK"
-echo "SBOM_SCAN_API_URL=$SBOM_SCAN_API_URL"
-
-
 {
 echo "==============================================="
 echo "          PatchHound - by BBlue530"

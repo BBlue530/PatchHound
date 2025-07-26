@@ -2,11 +2,11 @@ import os
 import json
 from datetime import datetime
 import subprocess
-from Variables import all_repo_scans_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
-from Kev_Catalog import compare_kev_catalog
-from Alerts import alert_event_system
-from Log import log_event
-from Helpers import extract_cve_ids
+from core.Variables import all_repo_scans_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
+from vuln_scan.Kev_Catalog import compare_kev_catalog
+from logs.Alerts import alert_event_system
+from logs.Log import log_event
+from utils.Helpers import extract_cve_ids
 
 def sbom_validation():
 

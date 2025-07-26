@@ -8,7 +8,6 @@ def check_vuln_file(grype_path, alert_path, repo_name):
         with open(alert_path, "r") as f:
             alert_system_json = json.load(f)
 
-        alert_system = alert_system_json.get("alert_system")
         alert_system_webhook = alert_system_json.get("alert_system_webhook")
 
     with open(grype_path) as f:
@@ -28,7 +27,7 @@ def check_vuln_file(grype_path, alert_path, repo_name):
     crit_count = severity_counts.get("critical", 0)
     high_count = severity_counts.get("high", 0)
 
-    if crit_count > 0 and alert_system == "discord":
+    if crit_count > 0 and "discord" in alert_system_webhook:
         print("[!] Sending Discord alert with severity breakdown...")
 
         message = {
@@ -51,9 +50,9 @@ def check_vuln_file(grype_path, alert_path, repo_name):
             headers={"Content-Type": "application/json"}
         )
         if response.status_code not in [200, 204]:
-            print(f"[!] Failed to send {alert_system} alert. Status code: {response.status_code}")
+            print(f"[!] Failed to send {alert_system_webhook} alert. Status code: {response.status_code}")
 
-    elif (crit_count > 0 or high_count > 0) and alert_system == "slack":
+    elif (crit_count > 0 or high_count > 0) and "slack" in alert_system_webhook:
         print("[!] Sending Slack alert with severity breakdown...")
 
         message = {
@@ -76,4 +75,4 @@ def check_vuln_file(grype_path, alert_path, repo_name):
             headers={"Content-Type": "application/json"}
         )
         if response.status_code not in [200, 204]:
-            print(f"[!] Failed to send {alert_system} alert. Status code: {response.status_code}")
+            print(f"[!] Failed to send {alert_system_webhook} alert. Status code: {response.status_code}")
