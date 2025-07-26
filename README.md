@@ -139,10 +139,113 @@ Public images only require `read:packages`.
 
 ---
 
+## Workflow Diagram
+
+This diagram outlines the detailed structure of the security scanning and vulnerability prioritization workflow. It captures both the pipeline process triggered during code commits and the daily automated cron job that maintains and validates scan data integrity.
+
+# Pipeline Workflow
+
+```
+Pipeline Triggered
+
+   ↓
+
+[Syft] → Generate SBOM (CycloneDX JSON)
+
+   ↓
+
+[cURL] → Send payload to Backend API:
+   - Form data:
+     - SBOM file (CycloneDX JSON)
+     - license key
+     - current_repo (repo name)
+     - alert_system_webhook (URL)
+     - commit_sha
+     - commit_author
+
+   ↓
+
+[Backend / Flask API]
+   ├─ Validate license key (License_Handling.validate_license)
+   ├─ Validate SBOM JSON format (Check_Format.check_json_format + json.load)
+   ├─ Save SBOM temporarily
+   ├─ Run Grype scan on SBOM (subprocess, output CycloneDX JSON)
+   ├─ Compare vulnerabilities with KEV catalog (Kev_Catalog.compare_kev_catalog)
+   ├─ Start async thread to save scan data (File_Save.save_scan_files):
+   │    ├─ Save alert webhook config under:
+   │    │    license_key/repo_name/{repo_name}_alert.json
+   │    ├─ Generate Cosign key-pair if missing under:
+   │    │    license_key/repo_name/timestamp/{repo_name}.key & .pub
+   │    ├─ Save SBOM, vulnerabilities, prioritized KEV matches to:
+   │    │    license_key/repo_name/timestamp/
+   │    │        ├─ {repo_name}_sbom_cyclonedx.json
+   │    │        ├─ {repo_name}_vulns_cyclonedx.json
+   │    │        ├─ {repo_name}_prio_vuln_data.json
+   │    │        ├─ Cosign attestation & signature files
+   │    ├─ Check vulnerabilities and trigger alert if needed (Vuln_Check.check_vuln_file)
+   │    └─ Log all events to:
+   │         license_key/repo_name/{repo_name}_event_log.json
+   └─ Return JSON response with vulnerability scan and KEV prioritization
+```
+# Daily Cron Job Workflow
+
+```
+[Cosign]
+   ├─ Attest SBOM (cosign attest-blob)
+   └─ Sign attestation (cosign sign-blob)
+
+Cron Trigger: scheduled_event()
+
+   ↓
+
+[Update Grype DB]
+   ├─ Backup existing Grype DB cache (~/.cache/grype → ~/.cache/grype_backup)
+   ├─ Run "grype db update"
+   ├─ On success:
+   │    ├─ Remove backup cache
+   └─ On failure:
+        ├─ Restore backup cache (if available)
+        └─ Log error message
+
+   ↓
+
+[Update KEV Catalog]
+   ├─ Send HEAD request to KEV Catalog URL
+   ├─ If reachable (HTTP 200):
+   │    ├─ Remove old KEV catalog JSON file (if exists)
+   │    ├─ Download and save new KEV catalog JSON
+   │    └─ Log success
+   └─ If unreachable or error:
+        ├─ Log warning/error but continue
+
+   ↓
+
+[Run SBOM Validation & Rescanning]
+   ├─ Iterate over all license keys and repos under the `all_repo_scans_folder`
+   ├─ For each repo:
+   │    ├─ Find latest timestamp folder
+   │    ├─ Verify existence of SBOM, Attestation, and Signature files
+   │    ├─ Verify SBOM attestation and signature using Cosign
+   │    ├─ If any verification fails:
+   │    │    ├─ Trigger alert (with repo alert webhook config)
+   │    │    └─ Log event with commit info and timestamp
+   │    ├─ If verified:
+   │    │    ├─ Run Grype scan on SBOM (CycloneDX JSON output)
+   │    │    ├─ Save vulnerabilities report JSON
+   │    │    ├─ Compare vulnerabilities to KEV catalog, save priority report JSON
+   │    │    └─ Log scan success
+   │    └─ If scan fails:
+   │         ├─ Trigger alert
+   │         └─ Log failure event
+```
+
+---
+
 ## License
 
 This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
 ---
 ⚠️ **Warning:** Run this workflow on only one main branch to keep runs minimal and avoid GitHub Actions rate limits.
+
 ---
