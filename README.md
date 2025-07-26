@@ -1,4 +1,3 @@
-Base where all versions will branch out to
 # SBOM Vulnerability Report Generator
 
 An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability scanner** that generates comprehensive vulnerability reports for container images or source code repositories.
@@ -40,10 +39,15 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
    branches: [<your-branch-name>]
    ```
 4. Make sure to update your secrets.
+
    `SBOM_SCAN_API_URL` is the url of your backend (**MANDATORY**). If not set the backend will not receive the SBOM.
+
    `ALERT_WEBHOOK` is the webhook you will get alerts. If its not set you will not receive alerts.
+
    `LICENSE_SECRET` is a license that will get checked on your backend to restrict access if not set properly (**MANDATORY**).
+
    `GHCR_PAT` is the PAT you will have to provide but is not needed if you dont intend on scanning private images.
+
    ```
     SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
     ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
