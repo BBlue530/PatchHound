@@ -28,6 +28,7 @@ jobs:
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4
         with:
+          name: vulnerability-summary
           path: |
             summary.md
             sbom.cyclonedx.json
