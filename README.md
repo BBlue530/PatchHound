@@ -55,7 +55,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 
    `LICENSE_SECRET` is a license that will get checked on your backend to restrict access if not set properly (**MANDATORY**).
 
-   `GHCR_PAT` is the PAT you will have to provide but is not needed if you dont intend on scanning private images.
+   `GHCR_PAT` is the PAT you will have to provide but is not needed if you do not plan on scanning images.
 
    ```
     SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
@@ -64,7 +64,6 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
     GHCR_PAT: ${{ secrets.GHCR_PAT }}
    ```
 5. Start backend by installing dependencies using `pip install -r requirements.txt` and then starting the backend with `python Main.py`.
-   You can also start the application using this docker image `need to work on it`.
 
 6. Next time you push to the repository, the GitHub Actions workflow will automatically run the scan for you.
   
@@ -139,11 +138,11 @@ Public images only require `read:packages`.
 
 ---
 
-## Workflow Diagram
+# Workflow Diagram
 
 This diagram outlines the detailed structure of the security scanning and vulnerability prioritization workflow. It captures both the pipeline process triggered during code commits and the daily automated cron job that maintains and validates scan data integrity.
 
-# Pipeline Workflow
+## Pipeline Workflow
 
 ```
 Pipeline Triggered
@@ -187,13 +186,9 @@ Pipeline Triggered
    │         license_key/repo_name/{repo_name}_event_log.json
    └─ Return JSON response with vulnerability scan and KEV prioritization
 ```
-# Daily Cron Job Workflow
+## Daily Cron Job Workflow
 
 ```
-[Cosign]
-   ├─ Attest SBOM (cosign attest-blob)
-   └─ Sign attestation (cosign sign-blob)
-
 Cron Trigger: scheduled_event()
 
    ↓
@@ -231,7 +226,13 @@ Cron Trigger: scheduled_event()
    │    │    └─ Log event with commit info and timestamp
    │    ├─ If verified:
    │    │    ├─ Run Grype scan on SBOM (CycloneDX JSON output)
-   │    │    ├─ Save vulnerabilities report JSON
+   │    │    ├─ Load previous vulnerability report (if exists)
+   │    │    ├─ Compare current vulnerabilities with previous scan
+   │    │    │    ├─ Identify new vulnerabilities
+   │    │    │    ├─ If new vulnerabilities found:
+   │    │    │    │    ├─ Trigger alert (with details of new vulns)
+   │    │    │    └─ Else: continue silently
+   │    │    ├─ Save vulnerabilities report JSON (overwrite previous)
    │    │    ├─ Compare vulnerabilities to KEV catalog, save priority report JSON
    │    │    └─ Log scan success
    │    └─ If scan fails:
@@ -246,6 +247,7 @@ Cron Trigger: scheduled_event()
 This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
 ---
+
 ⚠️ **Warning:** Run this workflow on only one main branch to keep runs minimal and avoid GitHub Actions rate limits.
 
 ---
