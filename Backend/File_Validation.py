@@ -6,6 +6,7 @@ from Variables import all_repo_scans_folder, scheduled_event_commit_sha, schedul
 from Kev_Catalog import compare_kev_catalog
 from Alerts import alert_event_system
 from Log import log_event
+from Helpers import extract_cve_ids
 
 def sbom_validation():
 
@@ -130,7 +131,26 @@ def sbom_validation():
 
                 vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
 
-                # Save the scan output
+                previous_vulns_data = None
+                
+                if os.path.exists(vulns_output_path):
+                    with open(vulns_output_path, "r") as f:
+                        try:
+                            previous_vulns_data = json.load(f)
+                        except json.JSONDecodeError:
+                            previous_vulns_data = None
+
+                current_cve_ids = extract_cve_ids(vulns_cyclonedx_json_data)
+                previous_cve_ids = extract_cve_ids(previous_vulns_data) if previous_vulns_data else set()
+
+                new_cves = current_cve_ids - previous_cve_ids
+
+                if new_cves:
+                    message = f"[!] New vulnerabilities detected in repo {repo_name}: {', '.join(sorted(new_cves))}"
+                    alert = "Scheduled Event : New Vulnerabilities Detected"
+                    print(message)
+                    alert_event_system(message, alert, alert_path)
+
                 with open(vulns_output_path, "w") as f:
                     f.write(vulns_cyclonedx_json.stdout)
 
