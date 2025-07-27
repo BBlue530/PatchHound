@@ -63,7 +63,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
     LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
     GHCR_PAT: ${{ secrets.GHCR_PAT }}
    ```
-5. Start backend by installing dependencies using `pip install -r requirements.txt` and then starting the backend with `python Main.py`.
+5. Start backend by being in the `Backend` directory `cd Backend` and starting the bash script `bash Start.sh`.
 
 6. Next time you push to the repository, the GitHub Actions workflow will automatically run the scan for you.
   
