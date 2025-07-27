@@ -239,6 +239,23 @@ Cron Trigger: scheduled_event()
    │         ├─ Trigger alert
    │         └─ Log failure event
 ```
+## Deployment
+
+```
+[Deployment / Runtime]
+
+└─ Start.sh (Bash script):
+     ├─ Create Python virtual environment if missing
+     ├─ Install dependencies from requirements.txt
+     └─ Launch Gunicorn:
+         - 2 workers × 4 threads
+         - Preloaded app (Main:app)
+
+↓
+[Gunicorn WSGI Server]
+   ├─ Worker 1 (4 threads)
+   └─ Worker 2 (4 threads)
+```
 
 ---
 
