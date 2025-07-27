@@ -120,7 +120,7 @@ Out of the box this project currently only works with **GitHub Actions** for aut
 
 When scanning a directory (`TARGET="."`), Syft will warn about missing explicit name/version metadata. This does **not** affect scan results.
 
-If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to false
+If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to `false`
 
 If you are scanning a container image, make sure to add a secret named `GHCR_PAT` to your repository:
 
