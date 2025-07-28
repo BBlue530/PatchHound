@@ -20,7 +20,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Lists top critical vulnerabilities found
 - Alerts on [Discord](https://discord.com/) / [Slack](https://slack.com/) when vulnerabilities are found
 - Configurable via a simple `scan.config` file
-- Works on local source repos or remote container images
+- Works on source repos or container images
 - Supports multiple concurrent scans with worker-based processing
 
 ---
