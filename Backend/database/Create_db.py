@@ -7,7 +7,7 @@ def create_database():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Key_Validation (
-            LicenseKey TEXT PRIMARY KEY,
+            TokenKey TEXT PRIMARY KEY,
             Organization TEXT NOT NULL,
             ExpirationDate TEXT NOT NULL,
             Enabled INTEGER NOT NULL CHECK (Enabled IN (0,1))

@@ -8,7 +8,7 @@ import threading
 import io
 from validation.File_Handling import save_scan_files
 from utils.Schedule_Handling import scheduled_event
-from database.Validate_License import validate_license
+from database.Validate_Token import validate_token
 from database.Create_db import create_database
 from database.Create_Key import create_key
 from database.Key_Status import enable_key, disable_key
@@ -17,9 +17,9 @@ from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
 from core.Variables import version
 
-def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
+def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author)
+    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -28,12 +28,12 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 @app.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
     
-    license_key = request.form.get("license")
-    if not license_key:
-        return jsonify({"error": "License key missing"}), 400
+    token_key = request.form.get("token")
+    if not token_key:
+        return jsonify({"error": "Token missing"}), 400
     
-    response, valid_license = validate_license(license_key)
-    if valid_license == False:
+    response, valid_token = validate_token(token_key)
+    if valid_token == False:
         return jsonify({"error": f"{response}"}), 404
         
     missing_fields = []
@@ -96,12 +96,12 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author)
+        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author)
     ).start()
     return jsonify(result_parsed)
 
-@app.route('/v1/create-license-key', methods=['POST'])
-def create_license_key():
+@app.route('/v1/create-token-key', methods=['POST'])
+def create_token_key():
 
     organization = request.form.get("organization")
     if not organization:
@@ -110,6 +110,10 @@ def create_license_key():
     expiration_days = request.form.get("expiration_days")
     if not expiration_days:
         return jsonify({"error": "expiration_days missing"}), 400
+    try:
+        expiration_days = int(expiration_days)
+    except ValueError:
+        return jsonify({"error": "expiration_days must be an integer"}), 400
     
     # i plan to have an api key thing here
 #    api_key = request.form.get("api-key")
@@ -120,11 +124,11 @@ def create_license_key():
     return response
 
 @app.route('/v1/change-key-status', methods=['POST'])
-def create_license_key():
+def change_token_key_status():
 
-    license_key = request.form.get("license")
-    if not license_key:
-        return jsonify({"error": "License key missing"}), 400
+    token_key = request.form.get("token")
+    if not token_key:
+        return jsonify({"error": "token key missing"}), 400
     
     instructions = request.form.get("instructions")
     if not instructions:
@@ -136,11 +140,11 @@ def create_license_key():
 #        return jsonify({"error": "api_key missing"}), 403
 
     if instructions == "enable":
-        response = enable_key(license_key)
+        response = enable_key(token_key)
         return response
     
     elif instructions == "disable":
-        response = disable_key(license_key)
+        response = disable_key(token_key)
         return response
 
 @app.route('/v1/healthcheck', methods=['GET'])

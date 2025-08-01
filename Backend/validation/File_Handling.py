@@ -7,7 +7,7 @@ from logs.Log import log_event
 from vuln_scan.Vuln_Check import check_vuln_file
 from utils.File_Save import save_files, attest_sbom, sign_attest, key_generating
 
-def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
+def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author):
     
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
     env["COSIGN_PASSWORD"] = cosign_password
@@ -15,8 +15,8 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     repo_name = current_repo.replace("/", "_")
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
-    scan_dir = os.path.join(all_repo_scans_folder, license_key, repo_name, timestamp)
-    repo_dir = os.path.join(all_repo_scans_folder, license_key, repo_name)
+    scan_dir = os.path.join(all_repo_scans_folder, token_key, repo_name, timestamp)
+    repo_dir = os.path.join(all_repo_scans_folder, token_key, repo_name)
 
     sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
@@ -53,11 +53,11 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     else:
         sbom_json = sbom_file
 
+    save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json)
+    
     attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
 
     sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-    
-    save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json)
 
     check_vuln_file(grype_path, alert_path, repo_name)
     

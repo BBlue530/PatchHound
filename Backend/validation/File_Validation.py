@@ -16,16 +16,16 @@ def sbom_validation():
         print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
         os.makedirs(all_repo_scans_folder, exist_ok=True)
     
-    # List all directories inside all_repo_scans_folder aka the license keys
-    for license_key in os.listdir(all_repo_scans_folder):
-        license_path = os.path.join(all_repo_scans_folder, license_key)
-        if not os.path.isdir(license_path):
+    # List all directories inside all_repo_scans_folder aka the token keys
+    for token_key in os.listdir(all_repo_scans_folder):
+        token_path = os.path.join(all_repo_scans_folder, token_key)
+        if not os.path.isdir(token_path):
             continue
-        print(f"[~] Scanning for license key: {license_key}")
+        print(f"[~] Scanning for token key: {token_key}")
 
-        # List all directories inside the license key dir which will be the repo_name
-        for repo_name in os.listdir(license_path):
-            repo_path = os.path.join(license_path, repo_name)
+        # List all directories inside the token key dir which will be the repo_name
+        for repo_name in os.listdir(token_path):
+            repo_path = os.path.join(token_path, repo_name)
             if not os.path.isdir(repo_path):
                 continue
 
@@ -38,7 +38,7 @@ def sbom_validation():
                 continue
             
             # Create the full path for the latest scan inside the repo
-            # all_repo_scans_folder, license_key, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
+            # all_repo_scans_folder, token_key, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
 
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")

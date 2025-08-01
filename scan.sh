@@ -2,6 +2,24 @@
 set -e
 
 CONFIG_FILE="${1:-scan.config}"
+if [ -f "$CONFIG_FILE" ]; then
+  source "$CONFIG_FILE"
+else
+  echo "[-] Config file '$CONFIG_FILE' not found!"
+  exit 1
+fi
+
+SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
+HEALTH_CHECK_API_URL="${BASE_URL}/v1/healthcheck"
+
+health_response=$(curl -s "$HEALTH_CHECK_API_URL")
+if echo "$health_response" | grep -q '"status":"ok"'; then
+  :
+else
+  echo "[!] Backend health check failed:"
+  echo "$health_response"
+  exit 1
+fi
 
 echo "[~] Installing dependencies..."
 
@@ -14,15 +32,8 @@ else
   echo "[!] GHCR_PAT not set. Skipping Docker auth."
 fi
 
-if [ -f "$CONFIG_FILE" ]; then
-  source "$CONFIG_FILE"
-else
-  echo "[-] Config file '$CONFIG_FILE' not found!"
-  exit 1
-fi
-
-if [[ -z "$SBOM_SCAN_API_URL" || -z "$LICENSE_SECRET" ]]; then
-  echo "[!] Missing SBOM_SCAN_API_URL or LICENSE_SECRET. Exiting."
+if [[ -z "$SBOM_SCAN_API_URL" || -z "$TOKEN" ]]; then
+  echo "[!] Missing SBOM_SCAN_API_URL or TOKEN. Exiting."
   exit 2
 fi
 
@@ -43,7 +54,7 @@ echo "[~] Uploading SBOM to scan service..."
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
-  -F "license=$LICENSE_SECRET" \
+  -F "token=$TOKEN" \
   -F "current_repo=$GITHUB_REPOSITORY" \
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \

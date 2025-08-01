@@ -9,9 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
-      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
-      LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
+      TOKEN: ${{ secrets.TOKEN }}
       GHCR_PAT: ${{ secrets.GHCR_PAT }}
       COMMIT_SHA: ${{ github.sha }}
       AUTHOR_NAME: ${{ github.actor }}

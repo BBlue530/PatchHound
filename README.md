@@ -35,6 +35,8 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
    # Example config to scan a container image
    TARGET="ghcr.io/<your-name>/<your-image>"
    FAIL_ON_CRITICAL=true
+   BASE_URL="https://<your-backend>"
+   ALERT_WEBHOOK="https://<your-webhook>"
    ```
    
    or to scan the current repository directory:
@@ -43,27 +45,24 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
    # Example config to scan a current repository
    TARGET="."
    FAIL_ON_CRITICAL=true
+   BASE_URL="https://<your-backend>"
+   ALERT_WEBHOOK="https://<your-webhook>"
    ```
+
+   `BASE_URL` is the url of your backend (**MANDATORY**).
+
+   `ALERT_WEBHOOK` is the webhook you will get alerts. If its not set you will not receive alerts.
+
 3. Make sure to update the GitHub Actions workflow file (`secure-pipeline.yml`) inside `.github\workflows\secure-pipeline.yml` and change the branch.
    ```
    branches: [<your-branch-name>]
    ```
 4. Make sure to update your secrets.
 
-   `SBOM_SCAN_API_URL` is the url of your backend (**MANDATORY**). If not set the backend will not receive the SBOM.
-
-   `ALERT_WEBHOOK` is the webhook you will get alerts. If its not set you will not receive alerts.
-
-   `LICENSE_SECRET` is a license that will get checked on your backend to restrict access if not set properly (**MANDATORY**).
+   `TOKEN` is a token that will get checked on your backend to restrict access if not set properly (**MANDATORY**).
 
    `GHCR_PAT` is the PAT you will have to provide but is not needed if you do not plan on scanning images.
 
-   ```
-    SBOM_SCAN_API_URL: ${{ secrets.SBOM_SCAN_API_URL }}
-    ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
-    LICENSE_SECRET: ${{ secrets.LICENSE_SECRET }}
-    GHCR_PAT: ${{ secrets.GHCR_PAT }}
-   ```
 5. Start backend by being in the `Backend` directory `cd Backend` and starting the bash script `bash Start.sh`.
 
 6. Next time you push to the repository, the GitHub Actions workflow will automatically run the scan for you.
@@ -157,7 +156,7 @@ Pipeline Triggered
 [cURL] → Send payload to Backend API:
    - Form data:
      - SBOM file (CycloneDX JSON)
-     - license key
+     - token
      - current_repo (repo name)
      - alert_system_webhook (URL)
      - commit_sha
@@ -166,25 +165,25 @@ Pipeline Triggered
    ↓
 
 [Backend / Flask API]
-   ├─ Validate license key (License_Handling.validate_license)
+   ├─ Validate token key
    ├─ Validate SBOM JSON format (Check_Format.check_json_format + json.load)
    ├─ Save SBOM temporarily
    ├─ Run Grype scan on SBOM (subprocess, output CycloneDX JSON)
    ├─ Compare vulnerabilities with KEV catalog (Kev_Catalog.compare_kev_catalog)
    ├─ Start async thread to save scan data (File_Save.save_scan_files):
    │    ├─ Save alert webhook config under:
-   │    │    license_key/repo_name/{repo_name}_alert.json
+   │    │    token_key/repo_name/{repo_name}_alert.json
    │    ├─ Generate Cosign key-pair if missing under:
-   │    │    license_key/repo_name/timestamp/{repo_name}.key & .pub
+   │    │    token_key/repo_name/timestamp/{repo_name}.key & .pub
    │    ├─ Save SBOM, vulnerabilities, prioritized KEV matches to:
-   │    │    license_key/repo_name/timestamp/
+   │    │    token_key/repo_name/timestamp/
    │    │        ├─ {repo_name}_sbom_cyclonedx.json
    │    │        ├─ {repo_name}_vulns_cyclonedx.json
    │    │        ├─ {repo_name}_prio_vuln_data.json
    │    │        ├─ Cosign attestation & signature files
    │    ├─ Check vulnerabilities and trigger alert if needed (Vuln_Check.check_vuln_file)
    │    └─ Log all events to:
-   │         license_key/repo_name/{repo_name}_event_log.json
+   │         token_key/repo_name/{repo_name}_event_log.json
    └─ Return JSON response with vulnerability scan and KEV prioritization
 ```
 ## Daily Cron Job Workflow
@@ -217,7 +216,7 @@ Cron Trigger: scheduled_event()
    ↓
 
 [Run SBOM Validation & Rescanning]
-   ├─ Iterate over all license keys and repos under the `all_repo_scans_folder`
+   ├─ Iterate over all token keys and repos under the `all_repo_scans_folder`
    ├─ For each repo:
    │    ├─ Find latest timestamp folder
    │    ├─ Verify existence of SBOM, Attestation, and Signature files

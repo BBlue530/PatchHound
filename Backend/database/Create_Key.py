@@ -4,7 +4,7 @@ import uuid
 from core.Variables import db_path
 
 def create_key(organization, expiration_days):
-    license_key = str(uuid.uuid4())
+    token_key = str(uuid.uuid4())
     expiration_date = (datetime.now() + timedelta(days=expiration_days)).strftime("%Y-%m-%d")
     enabled = 1
 
@@ -12,18 +12,18 @@ def create_key(organization, expiration_days):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Key_Validation (LicenseKey, Organization, ExpirationDate, Enabled)
+            INSERT INTO Key_Validation (TokenKey, Organization, ExpirationDate, Enabled)
             VALUES (?, ?, ?, ?)
-        """, (license_key, organization, expiration_date, enabled))
+        """, (token_key, organization, expiration_date, enabled))
         conn.commit()
         conn.close()
 
-        response = f"License Key Created For: {organization} Key: {license_key} Expires: {expiration_date}"
+        response = f"Token Key Created For: {organization} Key: {token_key} Expires: {expiration_date}"
         return response
 
     except sqlite3.IntegrityError:
-        return "License creation error: Duplicate key"
+        return "Token creation error: Duplicate key"
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return f"License creation error: {str(e)}"
+        return f"Token creation error: {str(e)}"
