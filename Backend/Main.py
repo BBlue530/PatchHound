@@ -8,7 +8,10 @@ import threading
 import io
 from validation.File_Handling import save_scan_files
 from utils.Schedule_Handling import scheduled_event
-from validation.License_Handling import validate_license
+from database.Validate_License import validate_license
+from database.Create_db import create_database
+from database.Create_Key import create_key
+from database.Key_Status import enable_key, disable_key
 from validation.Check_Format import check_json_format
 from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
@@ -96,8 +99,53 @@ def scan_sbom():
     ).start()
     return jsonify(result_parsed)
 
+@app.route('/v1/create-license-key', methods=['POST'])
+def create_license_key():
+
+    organization = request.form.get("organization")
+    if not organization:
+        return jsonify({"error": "organization missing"}), 400
+    
+    expiration_days = request.form.get("expiration_days")
+    if not expiration_days:
+        return jsonify({"error": "expiration_days missing"}), 400
+    
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
+    response = create_key(organization, expiration_days)
+    return response
+
+@app.route('/v1/change-key-status', methods=['POST'])
+def create_license_key():
+
+    license_key = request.form.get("license")
+    if not license_key:
+        return jsonify({"error": "License key missing"}), 400
+    
+    instructions = request.form.get("instructions")
+    if not instructions:
+        return jsonify({"error": "instructions missing"}), 400
+    
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
+    if instructions == "enable":
+        response = enable_key(license_key)
+        return response
+    
+    elif instructions == "disable":
+        response = disable_key(license_key)
+        return response
+
+
 install_tools()
 scheduled_event()
+create_database()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
