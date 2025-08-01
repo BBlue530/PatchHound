@@ -15,6 +15,7 @@ from database.Key_Status import enable_key, disable_key
 from validation.Check_Format import check_json_format
 from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
+from core.Variables import version
 
 def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, license_key, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)
@@ -142,6 +143,13 @@ def create_license_key():
         response = disable_key(license_key)
         return response
 
+@app.route('/v1/healthcheck', methods=['GET'])
+def healthcheck():
+    return jsonify({
+        "status": "ok",
+        "message": "Backend is alive",
+        "version": version
+    }), 200
 
 install_tools()
 scheduled_event()
