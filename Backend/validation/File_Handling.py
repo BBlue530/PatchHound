@@ -1,11 +1,11 @@
 import os
 import json
 from datetime import datetime
-from filelock import FileLock
 from core.Variables import all_repo_scans_folder, cosign_password, local_bin, env
 from logs.Log import log_event
 from vuln_scan.Vuln_Check import check_vuln_file
 from utils.File_Save import save_files, attest_sbom, sign_attest, key_generating
+from utils.Folder_Lock import repo_lock
 
 def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
     
@@ -38,11 +38,6 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
 
         print(f"[+] Alert system set for: {repo_name}")
 
-    cosign_lock = FileLock(os.path.join(repo_dir, "cosign_key.lock"))
-    with cosign_lock:
-        if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
-            key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-
     if hasattr(sbom_file, 'read'):
         sbom_file.seek(0)
         sbom_json = json.load(sbom_file)
@@ -53,13 +48,15 @@ def save_scan_files(current_repo, sbom_file, vulns_cyclonedx_json, prio_vuln_dat
     else:
         sbom_json = sbom_file
 
-    save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json)
-    
-    attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+    def repo_files():
+        if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
+            key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+        save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json)
+        attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+        sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+        check_vuln_file(grype_path, alert_path, repo_name)
 
-    sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-
-    check_vuln_file(grype_path, alert_path, repo_name)
+    repo_lock(repo_dir, repo_files)
     
     message = f"[+] Scan of '{repo_name}_sbom_cyclonedx.json' Completed"
     log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)

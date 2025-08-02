@@ -9,11 +9,10 @@ from utils.Helpers import file_stable_check
 
 def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json):
 
-    alert_lock = FileLock(alert_path + ".lock")
-    with alert_lock:
-        with open(alert_path, "w") as f:
-            json.dump(alert_system_json, f, indent=4)
-        file_stable_check(alert_path)
+
+    with open(alert_path, "w") as f:
+        json.dump(alert_system_json, f, indent=4)
+    file_stable_check(alert_path)
 
     with open(sbom_path, "w") as f:
         json.dump(sbom_json, f, indent=4)
