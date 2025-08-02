@@ -6,14 +6,20 @@ def validate_token(token_key):
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT ExpirationDate, Enabled FROM Key_Validation WHERE TokenKey = ?", (token_key,))
+
+        cursor.execute("""
+            SELECT ExpirationDate, Enabled, Organization 
+            FROM Key_Validation 
+            WHERE TokenKey = ?
+        """, (token_key,))
+        
         result = cursor.fetchone()
         conn.close()
 
         if result is None:
-            return "Token validation: TokenKey Not Found", False
+            return "Token validation: TokenKey Not Found", False, None
 
-        expiration_date, enabled = result
+        expiration_date, enabled, organization = result
 
         if not enabled:
             return "Token validation: TokenKey Disabled", False
@@ -21,8 +27,8 @@ def validate_token(token_key):
         if datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now():
             return "Token validation: TokenKey Expired", False
 
-        return "Token validation: TokenKey Valid", True
+        return organization, True
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return f"Token validation: Internal error {str(e)}", False
+        return f"Token validation: Internal error {str(e)}", False, None

@@ -17,11 +17,11 @@ def sbom_validation():
         os.makedirs(all_repo_scans_folder, exist_ok=True)
     
     # List all directories inside all_repo_scans_folder aka the token keys
-    for token_key in os.listdir(all_repo_scans_folder):
-        token_path = os.path.join(all_repo_scans_folder, token_key)
+    for organization in os.listdir(all_repo_scans_folder):
+        token_path = os.path.join(all_repo_scans_folder, organization)
         if not os.path.isdir(token_path):
             continue
-        print(f"[~] Scanning for token key: {token_key}")
+        print(f"[~] Scanning for token key: {organization}")
 
         # List all directories inside the token key dir which will be the repo_name
         for repo_name in os.listdir(token_path):
@@ -38,7 +38,7 @@ def sbom_validation():
                 continue
             
             # Create the full path for the latest scan inside the repo
-            # all_repo_scans_folder, token_key, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
+            # all_repo_scans_folder, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
 
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")

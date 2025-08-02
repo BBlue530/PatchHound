@@ -172,18 +172,18 @@ Pipeline Triggered
    ├─ Compare vulnerabilities with KEV catalog (Kev_Catalog.compare_kev_catalog)
    ├─ Start async thread to save scan data (File_Save.save_scan_files):
    │    ├─ Save alert webhook config under:
-   │    │    token_key/repo_name/{repo_name}_alert.json
+   │    │    organization/repo_name/{repo_name}_alert.json
    │    ├─ Generate Cosign key-pair if missing under:
-   │    │    token_key/repo_name/timestamp/{repo_name}.key & .pub
+   │    │    organization/repo_name/timestamp/{repo_name}.key & .pub
    │    ├─ Save SBOM, vulnerabilities, prioritized KEV matches to:
-   │    │    token_key/repo_name/timestamp/
+   │    │    organization/repo_name/timestamp/
    │    │        ├─ {repo_name}_sbom_cyclonedx.json
    │    │        ├─ {repo_name}_vulns_cyclonedx.json
    │    │        ├─ {repo_name}_prio_vuln_data.json
    │    │        ├─ Cosign attestation & signature files
    │    ├─ Check vulnerabilities and trigger alert if needed (Vuln_Check.check_vuln_file)
    │    └─ Log all events to:
-   │         token_key/repo_name/{repo_name}_event_log.json
+   │         organization/repo_name/{repo_name}_event_log.json
    └─ Return JSON response with vulnerability scan and KEV prioritization
 ```
 ## Daily Cron Job Workflow

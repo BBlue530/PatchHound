@@ -17,9 +17,9 @@ from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
 from core.Variables import version
 
-def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author):
+def threading_save_scan_files(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author)
+    save_scan_files(current_repo, sbom_file_obj, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -35,7 +35,8 @@ def scan_sbom():
     response, valid_token = validate_token(token_key)
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 404
-        
+    organization = response
+
     missing_fields = []
     if 'sbom' not in request.files:
         missing_fields.append("SBOM file")
@@ -96,7 +97,7 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, token_key, alert_system_webhook, commit_sha, commit_author)
+        args=(current_repo, sbom_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
     ).start()
     return jsonify(result_parsed)
 
