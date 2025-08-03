@@ -10,6 +10,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Scans for vulnerabilities with [Grype](https://github.com/anchore/grype)
 - Signs attestation with [Cosign](https://github.com/sigstore/cosign)
 - Compare found vulnerabilities with [KEV catalong](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+- Runs Static Application Security Testing (SAST) with [Semgrep](https://github.com/semgrep/semgrep), catching code vulnerabilities and security issues directly in your source code
 - Daily SBOM scan for new vulnerabilities, including:
    - Automatic update of the Grype vulnerability database
    - Automatic fetch of the latest KEV catalog
@@ -156,6 +157,7 @@ Pipeline Triggered
 [cURL] → Send payload to Backend API:
    - Form data:
      - SBOM file (CycloneDX JSON)
+     - SAST report
      - token
      - current_repo (repo name)
      - alert_system_webhook (URL)
@@ -175,9 +177,10 @@ Pipeline Triggered
    │    │    organization/repo_name/{repo_name}_alert.json
    │    ├─ Generate Cosign key-pair if missing under:
    │    │    organization/repo_name/timestamp/{repo_name}.key & .pub
-   │    ├─ Save SBOM, vulnerabilities, prioritized KEV matches to:
+   │    ├─ Save SBOM, SAST report, vulnerabilities, prioritized KEV matches to:
    │    │    organization/repo_name/timestamp/
    │    │        ├─ {repo_name}_sbom_cyclonedx.json
+   │    │        ├─ {repo_name}_sast_report.json
    │    │        ├─ {repo_name}_vulns_cyclonedx.json
    │    │        ├─ {repo_name}_prio_vuln_data.json
    │    │        ├─ Cosign attestation & signature files
