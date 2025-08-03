@@ -17,9 +17,9 @@ from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
 from core.Variables import version
 
-def threading_save_scan_files(current_repo, sbom_content, sast_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
+def threading_save_scan_files(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, sast_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
+    save_scan_files(current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -48,12 +48,15 @@ def scan_sbom():
         missing_fields.append("commit sha")
     if not request.form.get("commit_author"):
         missing_fields.append("commit author")
+    if not request.form.get("trivy_report"):
+        missing_fields.append("trivy report")
 
     if missing_fields:
         return jsonify({"error": f"Missing: {', '.join(missing_fields)}"}), 400
 
     sbom_file = request.files['sbom']
     sast_report = request.files['sast_report']
+    trivy_report = request.files['trivy_report']
     current_repo = request.form.get("current_repo")
     commit_sha = request.form.get("commit_sha")
     commit_author = request.form.get("commit_author")
@@ -100,7 +103,7 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, sast_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
+        args=(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
     ).start()
     return jsonify(result_parsed)
 

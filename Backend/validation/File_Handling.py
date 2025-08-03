@@ -7,7 +7,7 @@ from vuln_scan.Vuln_Check import check_vuln_file
 from utils.File_Save import save_files, attest_sbom, sign_attest, key_generating
 from utils.Folder_Lock import repo_lock
 
-def save_scan_files(current_repo, sbom_file, sast_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
+def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
     
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
     env["COSIGN_PASSWORD"] = cosign_password
@@ -20,6 +20,7 @@ def save_scan_files(current_repo, sbom_file, sast_report, vulns_cyclonedx_json, 
 
     sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     sast_report_path = os.path.join(scan_dir, f"{repo_name}_sast_report.json")
+    trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
     prio_path = os.path.join(scan_dir, f"{repo_name}_prio_vuln_data.json")
 
@@ -52,7 +53,7 @@ def save_scan_files(current_repo, sbom_file, sast_report, vulns_cyclonedx_json, 
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-        save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report)
+        save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report, trivy_report_path, trivy_report)
         attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         check_vuln_file(grype_path, alert_path, repo_name)

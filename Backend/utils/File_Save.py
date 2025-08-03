@@ -7,7 +7,7 @@ from logs.Alerts import alert_event_system
 from logs.Log import log_event
 from utils.Helpers import file_stable_check
 
-def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report):
+def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report, trivy_report_path, trivy_report):
 
     with open(alert_path, "w") as f:
         json.dump(alert_system_json, f, indent=4)
@@ -20,6 +20,10 @@ def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, aler
     with open(sast_report_path, "w") as f:
         json.dump(sast_report, f, indent=4)
     file_stable_check(sast_report_path)
+
+    with open(trivy_report_path, "w") as f:
+        json.dump(trivy_report, f, indent=4)
+    file_stable_check(trivy_report_path)
 
     with open(grype_path, "w") as f:
         json.dump(vulns_cyclonedx_json, f, indent=4)

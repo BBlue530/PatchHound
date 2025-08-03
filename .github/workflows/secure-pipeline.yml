@@ -33,3 +33,4 @@ jobs:
             vulns.cyclonedx.json
             prio_vulns.json
             sast_report.json
+            trivy_report.json
