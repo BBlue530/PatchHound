@@ -32,3 +32,4 @@ jobs:
             sbom.cyclonedx.json
             vulns.cyclonedx.json
             prio_vulns.json
+            sast_report.json

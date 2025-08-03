@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+REPO_DIR="${2:-.}"
 CONFIG_FILE="${1:-scan.config}"
 if [ -f "$CONFIG_FILE" ]; then
   source "$CONFIG_FILE"
@@ -26,6 +27,19 @@ echo "[~] Installing dependencies..."
 sudo apt-get update && sudo apt-get install -y jq curl
 curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
+if ! command -v pipx &> /dev/null; then
+  echo "[~] Installing pipx for semgrep..."
+  sudo apt-get install -y python3-pip
+  python3 -m pip install --user pipx
+  python3 -m pipx ensurepath
+  export PATH="$PATH:$HOME/.local/bin"
+fi
+
+if ! command -v semgrep &> /dev/null; then
+  echo "[~] Installing semgrep..."
+  pipx install semgrep
+fi
+
 if [ -n "$GHCR_PAT" ]; then
   echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 else
@@ -41,6 +55,34 @@ fi
 echo "==============================================="
 echo "          PatchHound - by BBlue530"
 echo "==============================================="
+
+semgrep --config=p/security-audit --config=p/ci --json "$REPO_DIR" > "sast_report.json"
+
+CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")] | length' sast_report.json)
+
+ISSUES_COUNT=$(jq '.results | length' "sast_report.json")
+
+echo "[i] Semgrep found $ISSUES_COUNT issues."
+
+if [ "$ISSUES_COUNT" -gt 0 ]; then
+  echo "[!] SAST issues found in $REPO_DIR"
+  echo "---------------------------------------------------------------------------"
+  jq -r '
+    (.results // [])[] 
+    | "Rule: \(.check_id)
+  Severity: \(.extra.severity)
+  Message: \(.extra.message)
+  Location: \(.path):\(.start.line)
+  ---------------------------------------------------------------------------"
+  ' sast_report.json
+else
+  echo "[+] No SAST issues found."
+fi
+
+if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRITICAL_COUNT" -gt 0 ]; then
+  echo "[!] Failing due to $CRITICAL_COUNT critical issues."
+  exit 1
+fi
 
 echo "[~] Generating SBOM for: $TARGET"
 syft "$TARGET" -o cyclonedx-json > sbom.cyclonedx.json
@@ -75,14 +117,6 @@ fi
 if [ $curl_exit_code -ne 0 ]; then
   echo "[!] Error: curl failed with exit code $curl_exit_code"
   exit $curl_exit_code
-fi
-
-http_status=$(echo "$response_and_status" | tail -n1)
-response_body=$(echo "$response_and_status" | head -n -1)
-
-if [[ "$http_status" -ne 200 ]]; then
-  echo "[!] Error: Server returned status $http_status"
-  exit 5
 fi
 
 echo "[+] Upload to scan service finished"
