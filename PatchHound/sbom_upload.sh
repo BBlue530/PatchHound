@@ -2,6 +2,7 @@ echo "[~] Uploading SBOM to scan service..."
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
+  -F "sast_report=@sast_report.json" \
   -F "token=$TOKEN" \
   -F "current_repo=$GITHUB_REPOSITORY" \
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
