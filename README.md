@@ -8,6 +8,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 
 - Automatically generates an SBOM using [Syft](https://github.com/anchore/syft)
 - Scans for vulnerabilities with [Grype](https://github.com/anchore/grype)
+- Includes [trivy](https://github.com/aquasecurity/trivy) to complement Syft + Grype with misconfigurations and secrets detection
 - Signs attestation with [Cosign](https://github.com/sigstore/cosign)
 - Compare found vulnerabilities with [KEV catalong](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
 - Runs Static Application Security Testing (SAST) with [Semgrep](https://github.com/semgrep/semgrep), catching code vulnerabilities and security issues directly in your source code
@@ -35,6 +36,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
    ```bash
    # Example config to scan a container image
    TARGET="ghcr.io/<your-name>/<your-image>"
+   SCAN_IMAGE=true
    FAIL_ON_CRITICAL=true
    BASE_URL="https://<your-backend>"
    ALERT_WEBHOOK="https://<your-webhook>"
@@ -45,6 +47,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
    ```bash
    # Example config to scan a current repository
    TARGET="."
+   SCAN_IMAGE=false
    FAIL_ON_CRITICAL=true
    BASE_URL="https://<your-backend>"
    ALERT_WEBHOOK="https://<your-webhook>"
@@ -158,6 +161,7 @@ Pipeline Triggered
    - Form data:
      - SBOM file (CycloneDX JSON)
      - SAST report
+     - Trivy report
      - token
      - current_repo (repo name)
      - alert_system_webhook (URL)
@@ -177,7 +181,7 @@ Pipeline Triggered
    │    │    organization/repo_name/{repo_name}_alert.json
    │    ├─ Generate Cosign key-pair if missing under:
    │    │    organization/repo_name/timestamp/{repo_name}.key & .pub
-   │    ├─ Save SBOM, SAST report, vulnerabilities, prioritized KEV matches to:
+   │    ├─ Save SBOM, SAST report, Trivy report, vulnerabilities, prioritized KEV matches to:
    │    │    organization/repo_name/timestamp/
    │    │        ├─ {repo_name}_sbom_cyclonedx.json
    │    │        ├─ {repo_name}_sast_report.json
