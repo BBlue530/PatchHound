@@ -20,8 +20,8 @@ jobs:
           
       - name: Run SBOM Scan script
         run: |
-          chmod +x ./scan.sh
-          ./scan.sh scan.config
+          chmod +x ./PatchHound/main.sh
+          ./PatchHound/main.sh ./PatchHound/scan.config
       
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4
