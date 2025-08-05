@@ -4,6 +4,7 @@ from datetime import datetime
 from core.Variables import all_repo_scans_folder, cosign_password, local_bin, env
 from logs.Log import log_event
 from vuln_scan.Vuln_Check import check_vuln_file
+from vuln_scan.Trivy_Vuln_Check import check_vuln_file_trivy
 from utils.File_Save import save_files, attest_sbom, sign_attest, key_generating
 from utils.Folder_Lock import repo_lock
 
@@ -57,6 +58,7 @@ def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cy
         attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         check_vuln_file(grype_path, alert_path, repo_name)
+        check_vuln_file_trivy(trivy_report_path, alert_path, repo_name)
 
     repo_lock(repo_dir, repo_files)
     
