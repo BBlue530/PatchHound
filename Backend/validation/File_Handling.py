@@ -57,8 +57,8 @@ def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cy
         save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report, trivy_report_path, trivy_report)
         attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-        check_vuln_file(grype_path, alert_path, repo_name)
-        check_vuln_file_trivy(trivy_report_path, alert_path, repo_name)
+        trivy_crit_count, trivy_misconf_count, trivy_secret_count = check_vuln_file_trivy(trivy_report_path)
+        check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_misconf_count, trivy_secret_count)
 
     repo_lock(repo_dir, repo_files)
     

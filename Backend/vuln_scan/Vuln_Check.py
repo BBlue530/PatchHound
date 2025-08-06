@@ -2,7 +2,7 @@ import json
 import os
 import requests
 
-def check_vuln_file(grype_path, alert_path, repo_name):
+def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_misconf_count, trivy_secret_count):
 
     if os.path.isfile(alert_path):
         with open(alert_path, "r") as f:
@@ -40,6 +40,11 @@ def check_vuln_file(grype_path, alert_path, repo_name):
                     f"**Medium:** {severity_counts['medium']}\n"
                     f"**Low:** {severity_counts['low']}\n"
                     f"**Unknown:** {severity_counts['unknown']}"
+                    f"\n"
+                    f"**Trivy Scan:**\n"
+                    f"**Critical:** {trivy_crit_count}\n"
+                    f"**Misconfiguration:** {trivy_misconf_count}\n"
+                    f"**Exposed Secret:** {trivy_secret_count}\n"
                 ),
                 "color": 16711680
             }]
@@ -57,17 +62,28 @@ def check_vuln_file(grype_path, alert_path, repo_name):
 
         message = {
             "text": ":rotating_light: *Vulnerability Severity Report*",
-            "attachments": [{
-                "color": "#FF0000",
-                "fields": [
-                    {"title": "Repo", "value": repo_name, "short": False},
-                    {"title": "Critical", "value": str(severity_counts["critical"]), "short": True},
-                    {"title": "High", "value": str(severity_counts["high"]), "short": True},
-                    {"title": "Medium", "value": str(severity_counts["medium"]), "short": True},
-                    {"title": "Low", "value": str(severity_counts["low"]), "short": True},
-                    {"title": "Unknown", "value": str(severity_counts["unknown"]), "short": True},
-                ]
-            }]
+            "attachments": [
+                {
+                    "color": "#FF0000",
+                    "fields": [
+                        {"title": "Repo", "value": repo_name, "short": False},
+                        {"title": "Critical", "value": str(severity_counts["critical"]), "short": True},
+                        {"title": "High", "value": str(severity_counts["high"]), "short": True},
+                        {"title": "Medium", "value": str(severity_counts["medium"]), "short": True},
+                        {"title": "Low", "value": str(severity_counts["low"]), "short": True},
+                        {"title": "Unknown", "value": str(severity_counts["unknown"]), "short": True},
+                    ]
+                },
+                {
+                    "color": "#FF0000",
+                    "fields": [
+                        {"title": "Trivy Scan", "value": "", "short": False},
+                        {"title": "Critical", "value": str(trivy_crit_count), "short": True},
+                        {"title": "Misconfiguration", "value": str(trivy_misconf_count), "short": True},
+                        {"title": "Exposed Secret", "value": str(trivy_secret_count), "short": True},
+                    ]
+                }
+            ]
         }
         response = requests.post(
             alert_system_webhook,
