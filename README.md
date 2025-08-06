@@ -154,13 +154,15 @@ Pipeline Triggered
    ↓
 
 [Syft] → Generate SBOM (CycloneDX JSON)
+[Semgrep] → Vulnerability report
+[Trivy] → Vulnerability, misconfig, exposed secrets report
 
    ↓
 
 [cURL] → Send payload to Backend API:
    - Form data:
      - SBOM file (CycloneDX JSON)
-     - SAST report
+     - Semgrep SAST report
      - Trivy report
      - token
      - current_repo (repo name)
@@ -188,7 +190,7 @@ Pipeline Triggered
    │    │        ├─ {repo_name}_vulns_cyclonedx.json
    │    │        ├─ {repo_name}_prio_vuln_data.json
    │    │        ├─ Cosign attestation & signature files
-   │    ├─ Check vulnerabilities and trigger alert if needed (Vuln_Check.check_vuln_file)
+   │    ├─ Check vulnerabilities, misconfigurations, exposed secrets and trigger alert if needed
    │    └─ Log all events to:
    │         organization/repo_name/{repo_name}_event_log.json
    └─ Return JSON response with vulnerability scan and KEV prioritization
@@ -223,7 +225,7 @@ Cron Trigger: scheduled_event()
    ↓
 
 [Run SBOM Validation & Rescanning]
-   ├─ Iterate over all token keys and repos under the `all_repo_scans_folder`
+   ├─ Iterate over all organizations and repos under the `all_repo_scans_folder`
    ├─ For each repo:
    │    ├─ Find latest timestamp folder
    │    ├─ Verify existence of SBOM, Attestation, and Signature files
