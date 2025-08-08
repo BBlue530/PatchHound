@@ -43,6 +43,9 @@ Link: \($LINK)
 ---------------------------------------------------------------------------"
 ' vulns.cyclonedx.json | tee summary.md
 
+echo "$PATH_TO_RESOURCES_TOKEN" > path_to_resources_token.txt
+echo "[+] Token to access resources sent to backend: $PATH_TO_RESOURCES_TOKEN"
+
 echo "$CRIT_COUNT" > crit_count.txt
 
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then

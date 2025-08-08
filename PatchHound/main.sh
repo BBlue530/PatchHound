@@ -11,6 +11,7 @@ source "$(dirname "$0")/sast_scan.sh"
 source "$(dirname "$0")/trivy_scan.sh"
 source "$(dirname "$0")/sbom_generate.sh"
 source "$(dirname "$0")/sbom_upload.sh"
+source "$(dirname "$0")/scan_results.sh"
 source "$(dirname "$0")/vuln_report.sh"
 
 echo "[+] Scan Finished"

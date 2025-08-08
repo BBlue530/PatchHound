@@ -17,4 +17,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", "database", "keys_db.sqlite")
 db_path = os.path.normpath(DB_PATH)
 
+jwt_secret = "secretjwt"
+
 version = "0.0.1"

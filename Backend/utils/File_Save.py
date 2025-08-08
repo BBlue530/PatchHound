@@ -17,13 +17,14 @@ def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, aler
         json.dump(sbom_json, f, indent=4)
     file_stable_check(sbom_path)
 
-    with open(sast_report_path, "w") as f:
-        json.dump(sast_report, f, indent=4)
-    file_stable_check(sast_report_path)
+# Fix me
+#    with open(sast_report_path, "w") as f:
+#        json.dump(sast_report, f, indent=4)
+#    file_stable_check(sast_report_path)
 
-    with open(trivy_report_path, "w") as f:
-        json.dump(trivy_report, f, indent=4)
-    file_stable_check(trivy_report_path)
+#    with open(trivy_report_path, "w") as f:
+#        json.dump(trivy_report, f, indent=4)
+#    file_stable_check(trivy_report_path)
 
     with open(grype_path, "w") as f:
         json.dump(vulns_cyclonedx_json, f, indent=4)

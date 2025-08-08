@@ -1,5 +1,7 @@
 echo "[~] Uploading SBOM to scan service..."
 
+COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
@@ -8,7 +10,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "current_repo=$GITHUB_REPOSITORY" \
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \
-  -F "commit_author=$AUTHOR_NAME <$AUTHOR_EMAIL>" \
+  -F "commit_author=$COMMIT_AUTHOR" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?
@@ -30,3 +32,4 @@ echo "[+] Upload to scan service finished"
 
 echo "$response_body" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
 echo "$response_body" | jq '.prio_vulns' > prio_vulns.json
+PATH_TO_RESOURCES_TOKEN=$(echo "$response_body" | jq -r '.path_to_resources_token')

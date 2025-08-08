@@ -34,3 +34,4 @@ jobs:
             prio_vulns.json
             sast_report.json
             trivy_report.json
+            path_to_resources_token.txt

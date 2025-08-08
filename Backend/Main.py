@@ -6,8 +6,11 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import threading
 import io
+from datetime import datetime
 from validation.File_Handling import save_scan_files
 from utils.Schedule_Handling import scheduled_event
+from utils.JWT_Path import jwt_path_to_resources, decode_jwt_path_to_resources
+from utils.Resource_Handling import get_resources
 from database.Validate_Token import validate_token
 from database.Create_db import create_database
 from database.Create_Key import create_key
@@ -17,9 +20,9 @@ from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
 from core.Variables import version
 
-def threading_save_scan_files(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author):
+def threading_save_scan_files(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
+    save_scan_files(current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp)
 
 app = Flask(__name__)
 # Dont think i need this anymore but scared to remove it for now since its working like it should
@@ -40,16 +43,16 @@ def scan_sbom():
     missing_fields = []
     if 'sbom' not in request.files:
         missing_fields.append("SBOM file")
-    if not request.form.get("sast_report"):
+    if 'sast_report' not in request.files:
         missing_fields.append("sast report")
+    if 'trivy_report' not in request.files:
+        missing_fields.append("trivy report")
     if not request.form.get("current_repo"):
         missing_fields.append("current repo")
     if not request.form.get("commit_sha"):
         missing_fields.append("commit sha")
     if not request.form.get("commit_author"):
         missing_fields.append("commit author")
-    if not request.form.get("trivy_report"):
-        missing_fields.append("trivy report")
 
     if missing_fields:
         return jsonify({"error": f"Missing: {', '.join(missing_fields)}"}), 400
@@ -93,9 +96,13 @@ def scan_sbom():
     vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
     prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json_data)
 
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    path_to_resources_token = jwt_path_to_resources(organization ,current_repo, timestamp)
+
     result_parsed = {
     "vulns_cyclonedx_json": vulns_cyclonedx_json_data,
-    "prio_vulns": prio_vuln_data
+    "prio_vulns": prio_vuln_data,
+    "path_to_resources_token": path_to_resources_token
     }
 
     sbom_file.seek(0)
@@ -103,7 +110,7 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author)
+        args=(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp)
     ).start()
     return jsonify(result_parsed)
 
@@ -154,13 +161,49 @@ def change_token_key_status():
         response = disable_key(token_key)
         return response
 
-@app.route('/v1/healthcheck', methods=['GET'])
-def healthcheck():
+@app.route('/v1/health-check', methods=['GET'])
+def health_check():
+
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
     return jsonify({
         "status": "ok",
         "message": "Backend is alive",
         "version": version
     }), 200
+
+@app.route('/v1/get-resources', methods=['GET'])
+def get_resource():
+
+    file_name = request.args.getlist('file_name') or None
+    
+    token_key = request.args.get("token")
+    if not token_key:
+        return jsonify({"error": "Token missing"}), 400
+    
+    response, valid_token = validate_token(token_key)
+    if valid_token == False:
+        return jsonify({"error": f"{response}"}), 404
+    organization = response
+
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
+    path_to_resources_token = request.args.get("path_to_resources_token")
+    if not path_to_resources_token:
+        return jsonify({"error": "path_to_resources_token missing"}), 400
+    
+    organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
+
+    if valid == True:
+        return get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_name)
+    else:
+        return jsonify({"error": "invalid jwt token"}), 404
 
 install_tools()
 scheduled_event()

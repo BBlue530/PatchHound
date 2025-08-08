@@ -17,7 +17,7 @@ def validate_token(token_key):
         conn.close()
 
         if result is None:
-            return "Token validation: TokenKey Not Found", False, None
+            return "Token validation: TokenKey Not Found", False
 
         expiration_date, enabled, organization = result
 
@@ -31,4 +31,4 @@ def validate_token(token_key):
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return f"Token validation: Internal error {str(e)}", False, None
+        return f"Token validation: Internal error {str(e)}", False

@@ -1,4 +1,4 @@
-CONFIG_FILE="${1:-scan.config}"
+CONFIG_FILE="scan.config"
 
 source "$(dirname "$0")/config.sh"
 
@@ -9,7 +9,6 @@ usage_create() {
 
 if [[ "$1" != "org" ]]; then usage_create; fi
 
-shift
 org=""
 exp_days=""
 
