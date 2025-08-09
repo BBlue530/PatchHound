@@ -107,10 +107,14 @@ def scan_sbom():
 
     sbom_file.seek(0)
     sbom_content = sbom_file.read()
+    sast_report.seek(0)
+    sast_report_content = sast_report.read()
+    trivy_report.seek(0)
+    trivy_report_content = trivy_report.read()
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp)
+        args=(current_repo, sbom_content, sast_report_content, trivy_report_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp)
     ).start()
     return jsonify(result_parsed)
 
