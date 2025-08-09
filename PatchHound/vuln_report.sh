@@ -43,8 +43,10 @@ Link: \($LINK)
 ---------------------------------------------------------------------------"
 ' vulns.cyclonedx.json | tee summary.md
 
-echo "$PATH_TO_RESOURCES_TOKEN" > path_to_resources_token.txt
-echo "[+] Token to access resources sent to backend: $PATH_TO_RESOURCES_TOKEN"
+PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64)
+
+echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
+echo "[+] Token to access resources sent to backend: $PATH_TO_RESOURCES_TOKEN_BASE64"
 
 echo "$CRIT_COUNT" > crit_count.txt
 

@@ -9,7 +9,7 @@ usage() {
 }
 
 TOKEN=""
-PATH_TO_RESOURCES_TOKEN=""
+PATH_TO_RESOURCES_TOKEN_BASE64=""
 FILE_NAME=()
 
 while [[ $# -gt 0 ]]; do
@@ -19,7 +19,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --path-token)
-            PATH_TO_RESOURCES_TOKEN="$2"
+            PATH_TO_RESOURCES_TOKEN_BASE64="$2"
             shift 2
             ;;
         *)
@@ -28,6 +28,8 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode)
 
 if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
     echo "Error: --token and --path-token are required"
