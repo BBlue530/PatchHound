@@ -1,10 +1,27 @@
 import os
 import io
 import zipfile
-from flask import send_file, abort
+from flask import send_file, abort, jsonify
 from core.Variables import all_repo_scans_folder
 
-def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_names=None):
+def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded):
+    base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+
+    if not os.path.isdir(base_dir):
+        abort(404, description=f"Directory not found: {base_dir}")
+    
+    files_to_return = [
+        f
+        for f in os.listdir(base_dir)
+        if os.path.isfile(os.path.join(base_dir, f))
+    ]
+
+    if not files_to_return:
+        abort(404, description="No files found to return")
+
+    return jsonify({"files": files_to_return})
+
+def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_names):
     base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
     if not os.path.isdir(base_dir):

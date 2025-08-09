@@ -10,7 +10,7 @@ from datetime import datetime
 from validation.File_Handling import save_scan_files
 from utils.Schedule_Handling import scheduled_event
 from utils.JWT_Path import jwt_path_to_resources, decode_jwt_path_to_resources
-from utils.Resource_Handling import get_resources
+from utils.Resource_Handling import get_resources, list_resources
 from database.Validate_Token import validate_token
 from database.Create_db import create_database
 from database.Create_Key import create_key
@@ -206,6 +206,34 @@ def get_resource():
 
     if valid == True:
         return get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_name)
+    else:
+        return jsonify({"error": "invalid jwt token"}), 404
+    
+@app.route('/v1/list-resources', methods=['GET'])
+def list_resource():
+    
+    token_key = request.args.get("token")
+    if not token_key:
+        return jsonify({"error": "Token missing"}), 400
+    
+    response, valid_token = validate_token(token_key)
+    if valid_token == False:
+        return jsonify({"error": f"{response}"}), 404
+    organization = response
+
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
+    path_to_resources_token = request.args.get("path_to_resources_token")
+    if not path_to_resources_token:
+        return jsonify({"error": "path_to_resources_token missing"}), 400
+    
+    organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
+
+    if valid == True:
+        return list_resources(organization_decoded, current_repo_decoded, timestamp_decoded)
     else:
         return jsonify({"error": "invalid jwt token"}), 404
 

@@ -37,7 +37,8 @@ Location: \(.path):\(.start.line)
   ' sast_report.json | tee summary.md
 fi
 
-if ["$CRIT_COUNT_GRYPE" -gt 0 ]; then
+if [ "$CRIT_COUNT_GRYPE" -gt 0 ]; then
+echo "[!] Critical Vulnerabilities Found by Grype"
 jq -r '
   (.vulnerabilities // [])[] 
   | select((.ratings[]?.severity | ascii_downcase) == "critical") 
@@ -69,7 +70,6 @@ Link: \($LINK)
 fi
 
 if [ "$CRIT_COUNT_TRIVY" -gt 0 ]; then
-  echo
   echo "[!] Critical Vulnerabilities Found by Trivy"
   jq -r '
     .Results[]?.Vulnerabilities[]?
