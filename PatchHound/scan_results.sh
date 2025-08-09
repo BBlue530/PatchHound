@@ -1,9 +1,31 @@
-CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")] | length' sast_report.json)
-ISSUES_COUNT=$(jq '.results | length' "sast_report.json")
+echo "[~] Generating Summary"
 
-echo "[i] Semgrep found $ISSUES_COUNT issues."
+{
+echo "[i] Vulnerability assessment:"
+echo "---------------------------------------------------------------------------"
+echo "[+] Grype Results:"
+echo "Critical: $CRIT_COUNT_GRYPE"
+echo "High: $HIGH_COUNT_GRYPE"
+echo "Medium: $MED_COUNT_GRYPE"
+echo "Low: $LOW_COUNT_GRYPE"
+echo "Unknown: $UNKNOWN_COUNT_GRYPE"
+echo "---------------------------------------------------------------------------"
+echo "[+] Trivy Results:"
+echo "Critical: $CRIT_COUNT_TRIVY"
+echo "High: $HIGH_COUNT_TRIVY"
+echo "Medium: $MED_COUNT_TRIVY"
+echo "Low: $LOW_COUNT_TRIVY"
+echo "Unknown: $UNKNOWN_COUNT_TRIVY"
+echo "Misconfigurations: $MISCONF_COUNT_TRIVY"
+echo "Exposed Secrets: $SECRET_COUNT_TRIVY"
+echo "---------------------------------------------------------------------------"
+echo "[+] SAST Results:"
+echo "Critical: $CRITICAL_COUNT_SAST"
+echo "Issues: $ISSUES_COUNT_SAST"
+echo "---------------------------------------------------------------------------"
+} | tee summary.md
 
-if [ "$ISSUES_COUNT" -gt 0 ]; then
+if [ "$ISSUES_COUNT_SAST" -gt 0 ]; then
   echo "[!] SAST issues found:"
   jq -r '
     (.results // [])[] 
@@ -12,19 +34,41 @@ Severity: \(.extra.severity)
 Message: \(.extra.message)
 Location: \(.path):\(.start.line)
 ---------------------------------------------------------------------------"
-  ' sast_report.json
-else
-  echo "[+] No SAST issues found."
+  ' sast_report.json | tee summary.md
 fi
 
-if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRITICAL_COUNT" -gt 0 ]; then
-  echo "[!] Failing due to $CRITICAL_COUNT critical issues."
-  exit 1
+if ["$CRIT_COUNT_GRYPE" -gt 0 ]; then
+jq -r '
+  (.vulnerabilities // [])[] 
+  | select((.ratings[]?.severity | ascii_downcase) == "critical") 
+  | .id as $ID
+  | (.description // "No description available") as $DESC
+  | (
+      .references[0]?.url
+      // (
+        if ($ID | test("^GHSA")) then
+          "https://github.com/advisories/" + $ID
+        elif ($ID | test("^CVE")) then
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + $ID
+        else
+          "No link available"
+        end
+      )
+    ) as $LINK
+  | (
+      (.affects[0]?.ref | capture("pkg:(?<type>[^/]+)/(?<name>[^@]+)@(?<version>.+)") 
+      // {type: "unknown", name: "unknown", version: "unknown"})
+    ) as $PKG
+  | "ID: \($ID)
+Severity: Critical
+Package: \($PKG.name)@\($PKG.version)
+Cause: \($DESC)
+Link: \($LINK)
+---------------------------------------------------------------------------"
+' vulns.cyclonedx.json | tee summary.md
 fi
 
-
-CRIT_COUNT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy_report.json)
-if [ "$CRIT_COUNT" -gt 0 ]; then
+if [ "$CRIT_COUNT_TRIVY" -gt 0 ]; then
   echo
   echo "[!] Critical Vulnerabilities Found by Trivy"
   jq -r '
@@ -36,11 +80,10 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ---------------------------------------------------------------------------"
-  ' trivy_report.json
+  ' trivy_report.json | tee summary.md
 fi
 
-MISCONF_COUNT=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy_report.json)
-if [ "$MISCONF_COUNT" -gt 0 ]; then
+if [ "$MISCONF_COUNT_TRIVY" -gt 0 ]; then
   echo
   echo "[!] Misconfigurations Found by Trivy"
   jq -r '
@@ -52,11 +95,10 @@ Check: \(.Title // .Description // "No description")
 Resolution: \(.Resolution // "No fix guidance")
 Link: \(.PrimaryURL // .References[0] // "No link available")
 ---------------------------------------------------------------------------"
-  ' trivy_report.json
+  ' trivy_report.json | tee summary.md
 fi
 
-SECRET_COUNT=$(jq '[.Results[]?.Secrets[]?] | length' trivy_report.json)
-if [ "$SECRET_COUNT" -gt 0 ]; then
+if [ "$SECRET_COUNT_TRIVY" -gt 0 ]; then
   echo
   echo "[!] Secrets Found by Trivy"
   jq -r '
@@ -66,20 +108,5 @@ File: \(.Target)
 Severity: \(.Severity)
 Title: \(.Title // "No title")
 ---------------------------------------------------------------------------"
-  ' trivy_report.json
-fi
-
-if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT" -gt 0 ]; then
-  echo "[!] Trivy found $CRIT_COUNT critical vulnerabilities."
-  exit 1
-fi
-
-if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$MISCONF_COUNT" -gt 0 ]; then
-  echo "[!] Trivy found $MISCONF_COUNT misconfigurations."
-  exit 1
-fi
-
-if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$SECRET_COUNT" -gt 0 ]; then
-  echo "[!] Trivy found $SECRET_COUNT secrets."
-  exit 1
+  ' trivy_report.json | tee summary.md
 fi

@@ -1,0 +1,16 @@
+CRITICAL_COUNT_SAST=$(jq '[.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")] | length' sast_report.json)
+ISSUES_COUNT_SAST=$(jq '.results | length' "sast_report.json")
+
+CRIT_COUNT_TRIVY=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy_report.json)
+HIGH_COUNT_TRIVY=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy_report.json)
+MED_COUNT_TRIVY=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy_report.json)
+LOW_COUNT_TRIVY=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")] | length' trivy_report.json)
+UNKNOWN_COUNT_TRIVY=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "UNKNOWN")] | length' trivy_report.json)
+MISCONF_COUNT_TRIVY=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy_report.json)
+SECRET_COUNT_TRIVY=$(jq '[.Results[]?.Secrets[]?] | length' trivy_report.json)
+
+CRIT_COUNT_GRYPE=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")] | length' vulns.cyclonedx.json)
+HIGH_COUNT_GRYPE=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "high")] | length' vulns.cyclonedx.json)
+MED_COUNT_GRYPE=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "medium")] | length' vulns.cyclonedx.json)
+LOW_COUNT_GRYPE=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "low")] | length' vulns.cyclonedx.json)
+UNKNOWN_COUNT_GRYPE=$(jq '[.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "unknown")] | length' vulns.cyclonedx.json)
