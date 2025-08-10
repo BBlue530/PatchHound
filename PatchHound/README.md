@@ -27,17 +27,10 @@ You can update multiple keys in one command by chaining them:
 ```
 patchhound config --set <KEY1> <VALUE1> <KEY2> <VALUE2>
 ```
-   ```bash
-   # Example config to scan a container image
-   TARGET="ghcr.io/<your-name>/<your-image>"
-   SCAN_IMAGE=true
-   FAIL_ON_CRITICAL=true
-   BASE_URL="https://<your-backend>"
-   ALERT_WEBHOOK="https://<your-webhook>"
-   ```
-   
-   or to scan the current repository directory:
-
+If you wish for the values to be secret and not displayed after being set use `--set-secret` instead:
+```
+patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
+```
    ```bash
    # Example config to scan a current repository
    TARGET="."
@@ -113,6 +106,10 @@ To download specific stored available resources in the directory:
 ```
 patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]
 ```
+---
+## Usage in pipeline
+
+For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound_Advanced/blob/master/.github/workflows/secure-pipeline.yml)
 
 ---
 

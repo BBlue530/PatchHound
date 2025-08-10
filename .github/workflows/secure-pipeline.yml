@@ -10,17 +10,18 @@ jobs:
 
     env:
       TOKEN: ${{ secrets.TOKEN }}
-      COMMIT_SHA: ${{ github.sha }}
-      AUTHOR_NAME: ${{ github.actor }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
 
     steps:
       - uses: actions/checkout@v3
           
       - name: Run SBOM Scan script
         run: |
-          chmod +x ./PatchHound/patchhound.sh
-          ./PatchHound/patchhound.sh scan --token "$TOKEN"
+          cd PatchHound
+          chmod +x ./patchhound.sh
+          ./patchhound.sh config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK" FAIL_ON_CRITICAL false
+          ./patchhound.sh scan --token "$TOKEN"
       
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4

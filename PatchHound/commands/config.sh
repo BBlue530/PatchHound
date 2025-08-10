@@ -27,6 +27,23 @@ case "$1" in
             shift 2
         done
         ;;
+    --set-secret)
+        if (( $# < 3 )) || (( ($# - 1) % 2 != 0 )); then
+            usage_config
+        fi
+        shift
+        while (( $# > 0 )); do
+            KEY="$1"
+            VALUE="$2"
+            if grep -q "^${KEY}=" "$CONFIG_FILE"; then
+                sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" "$CONFIG_FILE"
+            else
+                echo "${KEY}=${VALUE}" >> "$CONFIG_FILE"
+            fi
+            echo "[+] Set $KEY=***"
+            shift 2
+        done
+        ;;
     --get)
         if [[ -z "$2" ]]; then usage_config; fi
         grep "^$2=" "$CONFIG_FILE" | cut -d= -f2-
