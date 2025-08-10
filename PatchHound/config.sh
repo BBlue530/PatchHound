@@ -12,13 +12,14 @@ fi
 
 PATCHHOUND_VERSION="0.0.1"
 
-SYFT_VERSION="0.85.0"
-TRIVY_VERSION="0.45.2"
-SEMGREP_VERSION="1.34.0"
-
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
 KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"
 CREATE_TOKEN_API_URL="${BASE_URL}/v1/create-token-key"
 GET_RESOURCES_API_URL="${BASE_URL}/v1/get-resources"
 LIST_RESOURCES_API_URL="${BASE_URL}/v1/list-resources"
+
+echo "==============================================="
+echo "          PatchHound - by BBlue530"
+echo "          Version: $PATCHHOUND_VERSION"
+echo "==============================================="

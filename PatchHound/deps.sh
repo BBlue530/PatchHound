@@ -2,14 +2,14 @@ echo "[~] Installing dependencies..."
 
 sudo apt-get update && sudo apt-get install -y jq curl
 
-curl -sSfL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" | tar -xz -C /usr/local/bin syft
-chmod +x /usr/local/bin/syft
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
 if ! command -v trivy &> /dev/null; then
   echo "[~] Installing Trivy..."
-  wget https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.deb
-  sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
-  rm trivy_${TRIVY_VERSION}_Linux-64bit.deb
+  wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+  echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+  sudo apt-get update
+  sudo apt-get install -y trivy
 fi
 
 if ! check_command pipx; then
@@ -22,7 +22,7 @@ fi
 
 if ! check_command semgrep; then
   echo "[~] Installing semgrep..."
-  pipx install semgrep==${SEMGREP_VERSION}
+  pipx install semgrep
 fi
 
 if [ -n "$GHCR_PAT" ]; then

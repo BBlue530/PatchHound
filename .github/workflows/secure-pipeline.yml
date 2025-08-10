@@ -10,7 +10,6 @@ jobs:
 
     env:
       TOKEN: ${{ secrets.TOKEN }}
-      GHCR_PAT: ${{ secrets.GHCR_PAT }}
       COMMIT_SHA: ${{ github.sha }}
       AUTHOR_NAME: ${{ github.actor }}
       GITHUB_REPOSITORY: ${{ github.repository }}
@@ -20,8 +19,8 @@ jobs:
           
       - name: Run SBOM Scan script
         run: |
-          chmod +x ./PatchHound/main.sh
-          ./PatchHound/main.sh ./PatchHound/scan.config
+          chmod +x ./PatchHound/patchhound.sh
+          ./PatchHound/patchhound.sh scan --token "$TOKEN"
       
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4

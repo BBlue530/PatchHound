@@ -1,4 +1,5 @@
-CONFIG_FILE="scan.config"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 
 usage_config() {
     echo "Usage:"
