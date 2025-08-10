@@ -24,7 +24,7 @@ bash Start.sh
 
 This single command will:
 - Install all necessary scanning tools and dependencies automatically.
-- Initialize the database to store tokens and related data if it doesnt already exist.
+- Initialize the database to store token keys and related data if it doesnt already exist.
 - Start the daily vulnerability scan scheduler to keep all resources continuously monitored.
 
 Once running the backend will be managing updates, scans and alerts.

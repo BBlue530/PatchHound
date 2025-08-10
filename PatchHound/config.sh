@@ -10,6 +10,12 @@ if [ -z "$BASE_URL" ]; then
   exit 1
 fi
 
+PATCHHOUND_VERSION="0.0.1"
+
+SYFT_VERSION="0.85.0"
+TRIVY_VERSION="0.45.2"
+SEMGREP_VERSION="1.34.0"
+
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
 KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"

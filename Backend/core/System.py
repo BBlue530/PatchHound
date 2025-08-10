@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import sys
 import urllib.request
+from core.Variables import GRYPE_VERSION, COSIGN_VERSION
 
 local_bin = os.path.expanduser("~/.local/bin")
 
@@ -16,16 +17,17 @@ def make_local_bin():
         print(f"[!] Warning: {local_bin} is not in PATH")
 
 def install_grype():
-    print("[~] Installing Grype...")
+    print(f"[~] Installing Grype version {GRYPE_VERSION}...")
+    install_script_url = f"https://raw.githubusercontent.com/anchore/grype/v{GRYPE_VERSION}/install.sh"
     subprocess.run(
-        f"curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b {local_bin}",
+        f"curl -sSfL {install_script_url} | sh -s -- -b {local_bin} v{GRYPE_VERSION}",
         shell=True,
         check=True
     )
     print("[+] Grype is installed")
 
 def install_cosign():
-    print("[~] Installing Cosign...")
+    print(f"[~] Installing Cosign version {COSIGN_VERSION}...")
 
     arch_map = {
         "x86_64": "amd64",
@@ -38,7 +40,7 @@ def install_cosign():
         print(f"[!] Unsupported arch for Cosign: {uname_arch}")
         sys.exit(1)
 
-    cosign_url = f"https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-{arch}"
+    cosign_url = f"https://github.com/sigstore/cosign/releases/download/v{COSIGN_VERSION}/cosign-linux-{arch}"
     cosign_path = os.path.join(local_bin, "cosign")
 
     urllib.request.urlretrieve(cosign_url, cosign_path)
@@ -46,8 +48,8 @@ def install_cosign():
 
     print("[+] Cosign is installed")
 
-def version_check(tool, version, env=None):
-    result = subprocess.run([tool, version], capture_output=True, text=True, env=env)
+def version_check(tool, version_arg, env=None):
+    result = subprocess.run([tool, version_arg], capture_output=True, text=True, env=env)
     print(result.stdout)
 
 def install_tools():

@@ -20,3 +20,6 @@ db_path = os.path.normpath(DB_PATH)
 jwt_secret = "secretjwt"
 
 version = "0.0.1"
+
+GRYPE_VERSION = "0.68.0"
+COSIGN_VERSION = "1.15.1"

@@ -10,7 +10,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Scans for vulnerabilities with [Grype](https://github.com/anchore/grype)
 - Includes [trivy](https://github.com/aquasecurity/trivy) to complement Syft + Grype with misconfigurations and secrets detection
 - Signs attestation with [Cosign](https://github.com/sigstore/cosign)
-- Compare found vulnerabilities with [KEV catalong](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+- Compare found vulnerabilities with [KEV catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
 - Runs Static Application Security Testing (SAST) with [Semgrep](https://github.com/semgrep/semgrep), catching code vulnerabilities and security issues directly in your source code
 - Daily SBOM scan for new vulnerabilities, including:
    - Automatic update of the Grype vulnerability database
@@ -116,7 +116,7 @@ Pipeline Triggered
      - SBOM file (CycloneDX JSON)
      - Semgrep SAST report
      - Trivy report
-     - token
+     - token key
 
    ↓
 
