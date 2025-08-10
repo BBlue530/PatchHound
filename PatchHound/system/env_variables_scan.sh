@@ -3,9 +3,30 @@ usage() {
     exit 1
 }
 
-COMMIT_SHA="$GITHUB_SHA"
-COMMIT_AUTHOR="$GITHUB_ACTOR"
-GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+if [ -n "$GITHUB_SHA" ]; then
+    COMMIT_SHA="$GITHUB_SHA"
+elif [ -n "$CI_COMMIT_SHA" ]; then
+    COMMIT_SHA="$CI_COMMIT_SHA"
+else
+    COMMIT_SHA=""
+fi
+
+if [ -n "$GITHUB_ACTOR" ]; then
+    COMMIT_AUTHOR="$GITHUB_ACTOR"
+elif [ -n "$GITLAB_USER_NAME" ]; then
+    COMMIT_AUTHOR="$GITLAB_USER_NAME"
+else
+    COMMIT_AUTHOR=""
+fi
+
+if [ -n "$GITHUB_REPOSITORY" ]; then
+    REPO_NAME="$GITHUB_REPOSITORY"
+elif [ -n "$CI_PROJECT_PATH" ]; then
+    REPO_NAME="$CI_PROJECT_PATH"
+else
+    echo "[!] Repository name is empty"
+    exit 1
+fi
 
 TOKEN=""
 PAT_TOKEN=""
