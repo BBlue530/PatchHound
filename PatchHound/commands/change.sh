@@ -1,4 +1,4 @@
-CONFIG_FILE="${1:-scan.config}"
+CONFIG_FILE="scan.config"
 
 source "$(dirname "$0")/config.sh"
 
