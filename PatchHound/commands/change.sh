@@ -1,26 +1,36 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 
-source "$(dirname "$0")/config.sh"
+source "$(dirname "$0")/system/config.sh"
 
-usage_change() {
-    echo "Usage: patchhound change token <TOKEN_KEY> <enable|disable>"
+usage() {
+    echo "Usage: patchhound change --token <TOKEN_KEY> --ins <enable|disable>"
     exit 1
 }
 
-if [[ "$1" != "token" ]]; then
-    usage_change
-fi
+TOKEN=""
+INSTRUCTION=""
 
-TOKEN="$2"
-INSTRUCTION="$3"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --token)
+            TOKEN="$2" 
+            shift 2 
+            ;;
+        --ins)
+            INSTRUCTION="$2"
+            shift 2 
+            ;;
+        *)
+    esac
+done
 
 if [[ -z "$TOKEN" || -z "$INSTRUCTION" ]]; then
-    usage_change
+    usage
 fi
 
 if [[ "$INSTRUCTION" != "enable" && "$INSTRUCTION" != "disable" ]]; then
-    usage_change
+    usage
 fi
 
 response=$(curl -s -X POST "$KEY_STATUS_API_URL" \

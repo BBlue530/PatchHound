@@ -3,14 +3,14 @@ CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 
 usage_config() {
     echo "Usage:"
-    echo "  patchhound config set <KEY> <VALUE> [<KEY> <VALUE> ...]"
-    echo "  patchhound config get <KEY>"
-    echo "  patchhound config list"
+    echo "  patchhound config --set <KEY> <VALUE> [<KEY> <VALUE> ...]"
+    echo "  patchhound config --get <KEY>"
+    echo "  patchhound config --list"
     exit 1
 }
 
 case "$1" in
-    set)
+    --set)
         if (( $# < 3 )) || (( ($# - 1) % 2 != 0 )); then
             usage_config
         fi
@@ -27,11 +27,11 @@ case "$1" in
             shift 2
         done
         ;;
-    get)
+    --get)
         if [[ -z "$2" ]]; then usage_config; fi
         grep "^$2=" "$CONFIG_FILE" | cut -d= -f2-
         ;;
-    list)
+    --list)
         cat "$CONFIG_FILE"
         ;;
     *)

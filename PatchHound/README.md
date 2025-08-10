@@ -21,11 +21,11 @@ Patchhound uses a `scan.config` file to store variables and scan settings.
 #### Set values
 To update a variable (KEY) in the config file:
 ```
-patchhound config set <KEY> <VALUE>
+patchhound config --set <KEY> <VALUE>
 ```
 You can update multiple keys in one command by chaining them:
 ```
-patchhound config set <KEY1> <VALUE1> <KEY2> <VALUE2>
+patchhound config --set <KEY1> <VALUE1> <KEY2> <VALUE2>
 ```
    ```bash
    # Example config to scan a container image
@@ -54,12 +54,12 @@ patchhound config set <KEY1> <VALUE1> <KEY2> <VALUE2>
 #### Get a single value
 Retrieve the current value for a specific key:
 ```
-patchhound config get <KEY>
+patchhound config --get <KEY>
 ```
 #### List all settings
 Show all keys and their values:
 ```
-patchhound config list
+patchhound config --list
 ```
 
 ### Scan
@@ -78,13 +78,13 @@ patchhound health
 ### Create
 Create a new token key for an organization with a specified expiration period:
 ```
-patchhound create org <organization> exp <expiration_days>
+patchhound create --org <organization> --exp <expiration_days>
 ```
 
 ### Change
 Enable or disable a specific token keys:
 ```
-patchhound change token <TOKEN_KEY> <enable|disable>
+patchhound change --token <TOKEN_KEY> --ins <enable|disable>
 ```
 ### Resources
 PatchHound saves all resources ingested by it in a organized system and will return a path to the resources in the form of a path token.
