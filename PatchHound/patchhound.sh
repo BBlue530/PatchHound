@@ -1,34 +1,35 @@
 #!/bin/bash
 set -e
 
+BASE_DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" && pwd )"
 COMMAND="$1"
 shift || true
 
 case "$COMMAND" in
     config)
-        source "$(dirname "$0")/commands/config.sh" "$@"
+        source "$BASE_DIR/commands/config.sh" "$@"
         ;;
     scan)
-        source "$(dirname "$0")/commands/scan.sh" "$@"
+        source "$BASE_DIR/commands/scan.sh" "$@"
         ;;
     health)
-        source "$(dirname "$0")/commands/health.sh" "$@"
+        source "$BASE_DIR/commands/health.sh" "$@"
         ;;
     create)
-        source "$(dirname "$0")/commands/create.sh" "$@"
+        source "$BASE_DIR/commands/create.sh" "$@"
         ;;
     change)
-        source "$(dirname "$0")/commands/change.sh" "$@"
+        source "$BASE_DIR/commands/change.sh" "$@"
         ;;
     resource)
         SUBCOMMAND="$1"
         shift || true
         case "$SUBCOMMAND" in
             get)
-                source "$(dirname "$0")/commands/get-resource.sh" "$@"
+                source "$BASE_DIR/commands/get-resource.sh" "$@"
                 ;;
             list)
-                source "$(dirname "$0")/commands/list-resource.sh" "$@"
+                source "$BASE_DIR/commands/list-resource.sh" "$@"
                 ;;
             *)
                 echo "Usage: patchhound resource <get|list> [args]"

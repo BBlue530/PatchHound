@@ -1,7 +1,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 
-source "$(dirname "$0")/system/config.sh"
+source "$BASE_DIR/system/config.sh"
 
 usage() {
     echo "Usage: patchhound create --org <organization> --exp <expiration_days>"

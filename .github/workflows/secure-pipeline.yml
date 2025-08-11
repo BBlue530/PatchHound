@@ -16,12 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
           
-      - name: Run SBOM Scan script
+      - name: Install PatchHound
         run: |
           cd PatchHound
-          chmod +x ./patchhound.sh
-          ./patchhound.sh config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK" FAIL_ON_CRITICAL false
-          ./patchhound.sh scan --token "$TOKEN"
+          chmod +x install.sh
+          ./install.sh
+
+      - name: Run SBOM Scan script
+        run: |
+          patchhound config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK" FAIL_ON_CRITICAL false
+          patchhound scan --token "$TOKEN"
       
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4
