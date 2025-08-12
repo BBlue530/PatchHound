@@ -1,12 +1,12 @@
 if [ -f "$CONFIG_FILE" ]; then
   source "$CONFIG_FILE"
 else
-  echo "[!] Config file '$CONFIG_FILE' not found!"
+  print_message "[!]" "Config missing" "Config file '$CONFIG_FILE' not found!"
   exit 1
 fi
 
 if [ -z "$BASE_URL" ]; then
-  echo "[!] BASE_URL is not set in config file"
+  print_message "[!]" "BASE_URL missing" "BASE_URL is not set in config file"
   exit 1
 fi
 

@@ -4,6 +4,7 @@ set -e
 BASE_DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" && pwd )"
 COMMAND="$1"
 shift || true
+source "$BASE_DIR/system/env_system.sh"
 
 case "$COMMAND" in
     config)
@@ -32,13 +33,11 @@ case "$COMMAND" in
                 source "$BASE_DIR/commands/list-resource.sh" "$@"
                 ;;
             *)
-                echo "Usage: patchhound resource <get|list> [args]"
-                exit 1
+                usage_cli_resource
                 ;;
         esac
         ;;
     *)
-        echo "Usage: patchhound <config|scan|health|create|change|resource> [args]"
-        exit 1
+        usage_cli
         ;;
 esac

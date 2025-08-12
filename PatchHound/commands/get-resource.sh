@@ -1,13 +1,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
-
-source "$BASE_DIR/system/config.sh"¨
+source "$BASE_DIR/system/env_system.sh"
 source "$BASE_DIR/utils/health_check.sh"
-
-usage() {
-    echo "Usage: $0 --token TOKEN --path-token PATH_TO_RESOURCES_TOKEN [file1 file2 ...]"
-    exit 1
-}
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
@@ -33,8 +28,8 @@ done
 PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode)
 
 if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
-    echo "Error: --token and --path-token are required"
-    usage
+    print_message "[!]" "Missing flags" "--token and --path-token are required"
+    usage_get_resource
 fi
 
 if [ "${#FILE_NAME[@]}" -eq 0 ]; then
@@ -60,9 +55,9 @@ fi
 CONTENT_TYPE=$(file --mime-type downloaded_resources | awk '{print $2}')
 
 if [[ "$CONTENT_TYPE" == "application/zip" ]]; then
-    echo "[+] Received ZIP archive, extracting..."
+    print_message "[~]" "Zip received" "Received ZIP archive, extracting..."
     unzip -o downloaded_resources -d downloaded_resources_extracted
-    echo "[+] FILE_NAME extracted to ./downloaded_resources_extracted/"
+    print_message "[+]" "Zip extracted" "Files extracted to ./downloaded_resources_extracted/"
 else
-    echo "[+] Received single file, saved as downloaded_resources"
+    print_message "[+]" "Received file" "Received single file, saved as downloaded_resources"
 fi

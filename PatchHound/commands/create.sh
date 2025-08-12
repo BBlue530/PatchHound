@@ -1,14 +1,9 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
+source "$BASE_DIR/system/env_system.sh"
 
-source "$BASE_DIR/system/config.sh"
-
-usage() {
-    echo "Usage: patchhound create --org <organization> --exp <expiration_days>"
-    exit 1
-}
-
-if [[ "$1" != "org" ]]; then usage; fi
+if [[ "$1" != "org" ]]; then usage_create; fi
 
 org=""
 exp_days=""
@@ -28,8 +23,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$org" || -z "$exp_days" ]]; then
-    echo "[!] Missing org/exp"
-    usage
+    print_message "[!]" "Missing flags" "--org and --exp are required"
+    usage_create
 fi
 
 response=$(curl -s -X POST "$CREATE_TOKEN_API_URL" \
@@ -38,8 +33,8 @@ response=$(curl -s -X POST "$CREATE_TOKEN_API_URL" \
 
 curl_exit_code=$?
 if [ $curl_exit_code -ne 0 ]; then
-    echo "[!] Failed to contact server (curl exit code $curl_exit_code)"
+    print_message "[!]" "Connection fail" "Failed to contact server (curl exit code $curl_exit_code)"
     exit $curl_exit_code
 fi
 
-echo "$response"
+print_message "[i]" "Response from backend" "$response"

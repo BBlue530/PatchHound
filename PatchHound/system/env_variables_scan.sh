@@ -24,12 +24,12 @@ if [ -n "$GITHUB_REPOSITORY" ]; then
 elif [ -n "$CI_PROJECT_PATH" ]; then
     REPO_NAME="$CI_PROJECT_PATH"
 else
-    echo "[!] Repository name is empty"
+    print_message "[!]" "Repository empty" "Repository name is empty"
     exit 1
 fi
 
 TOKEN=""
-PAT_TOKEN=""
+GHCR_PAT=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --pat)
-            PAT_TOKEN="$2"
+            GHCR_PAT="$2"
             shift 2
             ;;
         *)
@@ -46,6 +46,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$TOKEN" ]; then
-    echo "Error: --token are required"
+    print_message "[!]" "Missing flag" "--token is required"
     usage
 fi

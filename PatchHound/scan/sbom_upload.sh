@@ -1,4 +1,4 @@
-echo "[~] Uploading SBOM to scan service..."
+print_message "[~]" "Uploading SBOM to scan service..." ""
 
 COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
 
@@ -18,17 +18,17 @@ http_status=$(echo "$response_and_status" | tail -n1)
 response_body=$(echo "$response_and_status" | head -n -1)
 
 if [[ "$http_status" -ne 200 ]]; then
-  echo "[!] Error: Status Code: $http_status"
-  echo "$response_body"
+  print_message "[!]" "Backend error" "Status Code: $http_status
+  $response_body"
   exit 1
 fi
 
 if [ $curl_exit_code -ne 0 ]; then
-  echo "[!] Error: curl failed with exit code $curl_exit_code"
+  print_message "[!]" "Backend error" "Curl failed with exit code: $curl_exit_code"
   exit $curl_exit_code
 fi
 
-echo "[+] Upload to scan service finished"
+print_message "[+]" "Upload finished" "Upload to backend finished successfully"
 
 echo "$response_body" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
 echo "$response_body" | jq '.prio_vulns' > prio_vulns.json

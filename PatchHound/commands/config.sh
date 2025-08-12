@@ -1,13 +1,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
-
-usage_config() {
-    echo "Usage:"
-    echo "  patchhound config --set <KEY> <VALUE> [<KEY> <VALUE> ...]"
-    echo "  patchhound config --get <KEY>"
-    echo "  patchhound config --list"
-    exit 1
-}
+source "$BASE_DIR/system/env_system.sh"
 
 case "$1" in
     --set)

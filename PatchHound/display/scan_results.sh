@@ -1,28 +1,24 @@
 echo "[~] Generating Summary"
 
 {
-echo "[i] Vulnerability assessment:"
-echo "---------------------------------------------------------------------------"
-echo "[+] Grype Results:"
-echo "Critical: $CRIT_COUNT_GRYPE"
-echo "High: $HIGH_COUNT_GRYPE"
-echo "Medium: $MED_COUNT_GRYPE"
-echo "Low: $LOW_COUNT_GRYPE"
-echo "Unknown: $UNKNOWN_COUNT_GRYPE"
-echo "---------------------------------------------------------------------------"
-echo "[+] Trivy Results:"
-echo "Critical: $CRIT_COUNT_TRIVY"
-echo "High: $HIGH_COUNT_TRIVY"
-echo "Medium: $MED_COUNT_TRIVY"
-echo "Low: $LOW_COUNT_TRIVY"
-echo "Unknown: $UNKNOWN_COUNT_TRIVY"
-echo "Misconfigurations: $MISCONF_COUNT_TRIVY"
-echo "Exposed Secrets: $SECRET_COUNT_TRIVY"
-echo "---------------------------------------------------------------------------"
-echo "[+] SAST Results:"
-echo "Critical: $CRITICAL_COUNT_SAST"
-echo "Issues: $ISSUES_COUNT_SAST"
-echo "---------------------------------------------------------------------------"
+print_message "[i]" "Vulnerability assessment:" "---------------------------------------------------------------------------"
+print_message "[+]" "Grype Results:" "Critical: $CRIT_COUNT_GRYPE
+High: $HIGH_COUNT_GRYPE
+Medium: $MED_COUNT_GRYPE
+Low: $LOW_COUNT_GRYPE
+Unknown: $UNKNOWN_COUNT_GRYPE
+---------------------------------------------------------------------------"
+print_message "[+]" "Trivy Results:" "Critical: $CRIT_COUNT_TRIVY
+High: $HIGH_COUNT_TRIVY
+Medium: $MED_COUNT_TRIVY
+Low: $LOW_COUNT_TRIVY
+Unknown: $UNKNOWN_COUNT_TRIVY
+Misconfigurations: $MISCONF_COUNT_TRIVY
+Exposed Secrets: $SECRET_COUNT_TRIVY
+---------------------------------------------------------------------------"
+print_message "[+]" "SAST Results:" "Critical: $CRITICAL_COUNT_SAST
+Issues: $ISSUES_COUNT_SAST
+---------------------------------------------------------------------------"
 } | tee summary.md
 
 if [ "$ISSUES_COUNT_SAST" -gt 0 ]; then

@@ -1,13 +1,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
-
-source "$BASE_DIR/system/config.sh"
+source "$BASE_DIR/system/env_system.sh"
 source "$BASE_DIR/utils/health_check.sh"
-
-usage() {
-    echo "Usage: $0 --token TOKEN --path-token PATH_TO_RESOURCES_TOKEN [file1 file2 ...]"
-    exit 1
-}
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
@@ -30,8 +25,8 @@ done
 PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode)
 
 if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
-    echo "Error: --token and --path-token are required"
-    usage
+    print_message "[!]" "Missing flags" "--token and --path-token are required"
+    usage_list_resource
 fi
 
 RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
@@ -39,7 +34,7 @@ RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
         --data-urlencode "token=$TOKEN" \
         --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN")
 
-echo "[+] Files in resource directory:"
+print_message "[+]" "Resources found" "Files in resource directory:"
 mapfile -t FILES < <(echo "$RESPONSE" | grep -oP '"files":\s*\[\K[^\]]+' | tr -d '"' | tr ',' '\n' | sed 's/^\s*//;s/\s*$//')
 
 for file in "${FILES[@]}"; do
