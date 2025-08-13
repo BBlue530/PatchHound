@@ -59,7 +59,11 @@ patchhound config --list
 `patchhound scan` runs the vulnerability scanning.
 Scan is designed for use in a pipeline and might not work properly if used outside of one.
 ```
-patchhound scan
+patchhound scan --token <TOKEN>
+```
+If your scanning a private image in github container registry you will need to pass a `GHCR_PAT`. You can read on how to do that [here](https://github.com/BBlue530/PatchHound?tab=readme-ov-file#notes).
+```
+patchhound scan --token <TOKEN> --pat <GHCR_PAT>
 ```
 
 ### Health
@@ -83,7 +87,9 @@ patchhound change --token <TOKEN_KEY> --ins <enable|disable>
 PatchHound saves all resources ingested by it in a organized system and will return a path to the resources in the form of a path token.
 Example path token to access resources (**this token is not sensitive and can be shared**)
 ```
-[+] Path Token to access resources sent to backend: ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnZjbWRoYm1sNllYUnBiMjRp
+[+] Path token
+Path token to access resources sent to backend:
+ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnZjbWRoYm1sNllYUnBiMjRp
 T2lKMFpYTjBiM0puSWl3aVkzVnljbVZ1ZEY5eVpYQnZJam9pUWtKc2RXVTFNekJmVUdGMFkyaEli
 M1Z1WkY5QlpIWmhibU5sWkNJc0luUnBiV1Z6ZEdGdGNDSTZJakl3TWpVd09EQTVYekUxTkRReU9D
 SjkucnFDOHVMbG5FeGtPOEpsTlFuenlTM2RGYndXWk9YRU1Rc0M0alhYRE1fVQ==

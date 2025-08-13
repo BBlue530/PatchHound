@@ -2,7 +2,8 @@ FAIL="false"
 PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64)
 
 echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
-print_message "[+]" "Path token" "Path Token to access resources sent to backend: $PATH_TO_RESOURCES_TOKEN_BASE64"
+print_message "[+]" "Path token" "Path token to access resources sent to backend: 
+$PATH_TO_RESOURCES_TOKEN_BASE64"
 
 if [ "$FAIL_ON_CRITICAL" = "true" ] && [ "$CRIT_COUNT_GRYPE" -gt 0 ]; then
   print_message "[!]" "Critical vulnerability found" "Failing due to $CRIT_COUNT_GRYPE critical vulnerabilities found by Grype scan."

@@ -84,6 +84,7 @@ If you are scanning a container image, make sure to add a secret named `GHCR_PAT
 2. Click **New repository secret**
 3. Name it: `GHCR_PAT`
 4. Paste your [GitHub Personal Access Token (PAT)](https://github.com/settings/tokens)
+5. Make sure you pass the `GHCR_PAT` secret in the CLI
 
 ### Required Token Permissions
 

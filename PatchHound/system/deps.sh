@@ -24,9 +24,3 @@ if ! check_command semgrep; then
   print_message "[~]" "Installing semgrep..." ""
   pipx install semgrep
 fi
-
-if [ -n "$GHCR_PAT" ]; then
-  echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-else
-  print_message "[~]" "GHCR_PAT not set" "GHCR_PAT not set. Skipping Docker auth."
-fi
