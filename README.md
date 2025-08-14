@@ -22,7 +22,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Lists top critical vulnerabilities found
 - Alerts on [Discord](https://discord.com/) / [Slack](https://slack.com/) when vulnerabilities are found
 - Configurable via a simple `scan.config` file
-- Works on source repos or container images
+- Works on source repos or remote and local container images
 - Supports multiple concurrent scans with worker-based processing
 - CLI for interacting with the backend
 
@@ -78,17 +78,17 @@ When scanning a directory (`TARGET="."`), Syft will warn about missing explicit 
 
 If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to `false`
 
-If you are scanning a container image, make sure to add a secret named `GHCR_PAT` to your repository:
+If you are scanning a container image make sure to add a secret named `PAT_TOKEN` to your repository.
 
 1. Go to **Settings > Secrets and variables > Actions**
 2. Click **New repository secret**
-3. Name it: `GHCR_PAT`
-4. Paste your [GitHub Personal Access Token (PAT)](https://github.com/settings/tokens)
-5. Make sure you pass the `GHCR_PAT` secret in the CLI
+3. Name it: `PAT_TOKEN`
+4. Paste your PAT
+5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/tree/master/PatchHound#scan)
 
 ### Required Token Permissions
 
-- **`read:packages`** - required to pull images from GitHub Container Registry (GHCR)
+- **`read:packages`** - required to pull images
 - **`repo`** - only required if you are accessing **private images** or **private repositories**
 
 Public images only require `read:packages`.

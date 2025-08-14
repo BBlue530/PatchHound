@@ -61,9 +61,9 @@ Scan is designed for use in a pipeline and might not work properly if used outsi
 ```
 patchhound scan --token <TOKEN>
 ```
-If your scanning a private image in github container registry you will need to pass a `GHCR_PAT`. You can read on how to do that [here](https://github.com/BBlue530/PatchHound?tab=readme-ov-file#notes).
+If your scanning a private image you will need to pass a `PAT_TOKEN` for your registry.
 ```
-patchhound scan --token <TOKEN> --pat <GHCR_PAT>
+patchhound scan --token <TOKEN> --pat <PAT_TOKEN>
 ```
 
 ### Health
