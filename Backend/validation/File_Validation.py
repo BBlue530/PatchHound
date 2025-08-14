@@ -43,6 +43,7 @@ def sbom_validation():
 
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
+            exclusions_file_path = os.path.join(repo_path, f"{repo_name}_exclusions_file.json")
             att_sig_path = f"{sbom_path}_att.sig"
             sbom_att_path = f"{sbom_path}.att"
             cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}.pub")
@@ -140,16 +141,23 @@ def sbom_validation():
                         except json.JSONDecodeError:
                             previous_vulns_data = None
 
+                with open(exclusions_file_path, "r") as f:
+                    exclusions_data = json.load(f)
+                excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
+
                 current_cve_ids = extract_cve_ids(vulns_cyclonedx_json_data)
                 previous_cve_ids = extract_cve_ids(previous_vulns_data) if previous_vulns_data else set()
 
                 new_cves = current_cve_ids - previous_cve_ids
 
-                if new_cves:
-                    message = f"[!] New vulnerabilities detected in repo {repo_name}: {', '.join(sorted(new_cves))}"
+                new_cves_to_alert = new_cves - excluded_ids
+
+                if new_cves_to_alert:
+                    message = f"[!] New vulnerabilities detected in repo {repo_name}: {', '.join(sorted(new_cves_to_alert))}"
                     alert = "Scheduled Event : New Vulnerabilities Detected"
                     print(message)
                     alert_event_system(message, alert, alert_path)
+                    log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
                 with open(vulns_output_path, "w") as f:
                     f.write(vulns_cyclonedx_json.stdout)

@@ -22,6 +22,9 @@ case "$COMMAND" in
     change)
         source "$BASE_DIR/commands/change.sh" "$@"
         ;;
+    exclude)
+        source "$BASE_DIR/commands/exclude.sh" "$@"
+        ;;
     resource)
         SUBCOMMAND="$1"
         shift || true

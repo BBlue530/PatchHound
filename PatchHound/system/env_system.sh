@@ -1,4 +1,5 @@
 source "$BASE_DIR/display/print_display.sh"
+EXCLUDE_FILE="exclusions.json"
 
 usage_config() {
     echo "Usage:"
@@ -34,6 +35,6 @@ usage_cli_resource() {
 }
 
 usage_cli() {
-    echo "Usage: patchhound <config|scan|health|create|change|resource> [args]"
+    echo "Usage: patchhound <config|scan|health|create|change|resource|exclude> [args]"
     exit 1
 }

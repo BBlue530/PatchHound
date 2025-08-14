@@ -83,6 +83,23 @@ Enable or disable a specific token keys:
 ```
 patchhound change --token <TOKEN_KEY> --ins <enable|disable>
 ```
+
+### Exclusions
+You can exclude CVEs found in your workflow and attach a comment explaining the exclusion:
+```
+patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>
+```
+To view all current exclusions in the `exclusions.json` file in the current directory:
+```
+patchhound exclude --list
+```
+To remove an exclusion by CVE ID:
+```
+patchhound exclude --remove <CVE_ID>
+```
+Excluding a CVE means that if it is found, it will not trigger alerts and will appear in a separate part of the summary.
+Exclusions affect the entire repository and persist across versions. To update the exclusion file, simply edit the existing file and replace it with the updated version.
+
 ### Resources
 PatchHound saves all resources ingested by it in a organized system and will return a path to the resources in the form of a path token.
 Example path token to access resources (**this token is not sensitive and can be shared**)

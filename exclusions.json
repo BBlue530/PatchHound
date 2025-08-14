@@ -1,0 +1,8 @@
+{
+  "exclusions": [
+    {
+      "vulnerability": "CVE-2020-5310",
+      "comment": "Testing exclusion in this123"
+    }
+  ]
+}

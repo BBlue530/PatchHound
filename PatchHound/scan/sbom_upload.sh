@@ -1,11 +1,15 @@
 print_message "[~]" "Uploading SBOM to scan service..." ""
 
 COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
+if [[ ! -f "$EXCLUDE_FILE" ]]; then
+    echo '{"exclusions":[]}' > "$EXCLUDE_FILE"
+fi
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
   -F "trivy_report=@trivy_report.json" \
+  -F "exclusions=@exclusions.json" \
   -F "token=$TOKEN" \
   -F "current_repo=$REPO_NAME" \
   -F "alert_system_webhook=$ALERT_WEBHOOK" \

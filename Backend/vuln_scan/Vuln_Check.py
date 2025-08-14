@@ -2,7 +2,7 @@ import json
 import os
 import requests
 
-def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_misconf_count, trivy_secret_count):
+def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
 
     if os.path.isfile(alert_path):
         with open(alert_path, "r") as f:
@@ -12,22 +12,27 @@ def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_m
 
     with open(grype_path) as f:
         vuln_data = json.load(f)
+
+    with open(exclusions_file_path, "r") as f:
+        exclusions_data = json.load(f)
+    excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
     
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
     severity_counts = {level: 0 for level in severity_levels}
 
     # Severities count
     for vuln in vuln_data.get("vulnerabilities", []):
-        ratings = vuln.get("ratings", [])
-        for rating in ratings:
+        vuln_ids = [v.get("VulnerabilityID") for v in vuln.get("Vulnerabilities", [])]
+        if any(v_id in excluded_ids for v_id in vuln_ids):
+            continue
+        for rating in vuln.get("ratings", []):
             severity = rating.get("severity", "").lower()
             if severity in severity_counts:
                 severity_counts[severity] += 1
     
     crit_count = severity_counts.get("critical", 0)
-    high_count = severity_counts.get("high", 0)
 
-    if crit_count > 0 and "discord" in alert_system_webhook:
+    if (crit_count > 0 or trivy_crit_count > 0) and "discord" in alert_system_webhook:
         print("[!] Sending Discord alert with severity breakdown...")
 
         message = {
@@ -57,7 +62,7 @@ def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_m
         if response.status_code not in [200, 204]:
             print(f"[!] Failed to send {alert_system_webhook} alert. Status code: {response.status_code}")
 
-    elif (crit_count > 0 or high_count > 0) and "slack" in alert_system_webhook:
+    elif (crit_count > 0 or trivy_crit_count > 0) and "slack" in alert_system_webhook:
         print("[!] Sending Slack alert with severity breakdown...")
 
         message = {
