@@ -1,13 +1,12 @@
 import json
 import os
 import subprocess
-from filelock import FileLock
 from core.Variables import env
 from logs.Alerts import alert_event_system
 from logs.Log import log_event
 from utils.Helpers import file_stable_check
 
-def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json):
+def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report):
 
     with open(alert_path, "w") as f:
         json.dump(alert_system_json, f, indent=4)
@@ -32,6 +31,10 @@ def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, aler
     with open(prio_path, "w") as f:
         json.dump(prio_vuln_data, f, indent=4)
     file_stable_check(prio_path)
+
+    with open(summary_report_path, "w") as f:
+        json.dump(summary_report, f, indent=4)
+    file_stable_check(summary_report_path)
 
 def attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:

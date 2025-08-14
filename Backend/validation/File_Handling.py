@@ -6,6 +6,7 @@ from vuln_scan.Trivy_Vuln_Check import check_vuln_file_trivy
 from utils.File_Save import save_files, attest_sbom, sign_attest, key_generating
 from utils.Folder_Lock import repo_lock
 from utils.Helpers import load_json
+from utils.Summary_Generator import generate_summary
 
 def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp):
     
@@ -22,6 +23,7 @@ def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cy
     trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
     prio_path = os.path.join(scan_dir, f"{repo_name}_prio_vuln_data.json")
+    summary_report_path = os.path.join(scan_dir, f"{repo_name}_summary_report.json")
 
     att_sig_path = f"{sbom_path}_att.sig"
     sbom_attestation_path = f"{sbom_path}.att"
@@ -42,11 +44,14 @@ def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cy
     sbom_json = load_json(sbom_file)
     sast_report_json = load_json(sast_report)
     trivy_report_json = load_json(trivy_report)
+    vulns_cyclonedx_json = load_json(vulns_cyclonedx_json)
+    prio_vuln_data = load_json(prio_vuln_data)
 
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-        save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json)
+        summary_report = generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json)
+        save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report)
         attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         trivy_crit_count, trivy_misconf_count, trivy_secret_count = check_vuln_file_trivy(trivy_report_path)
