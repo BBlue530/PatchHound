@@ -14,6 +14,19 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
             exclusions_dict[key] = data
         else:
             summary_dict[key] = data
+    
+    if sast_report_json.get("SAST_SCAN") is False:
+        summary_dict["SAST_SCAN_SKIPPED"] = {
+            "source": "semgrep",
+            "status": "scan skipped",
+            "reason": "SAST_SCAN=false"
+        }
+    if trivy_report_json.get("TRIVY_SCAN") is False:
+        summary_dict["TRIVY_SCAN_SKIPPED"] = {
+            "source": "trivy",
+            "status": "scan skipped",
+            "reason": "TRIVY_SCAN=false"
+        }
 
     for vuln in vulns_cyclonedx_json.get("vulnerabilities", []):
         key = vuln.get("id")
