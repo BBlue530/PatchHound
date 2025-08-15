@@ -6,7 +6,7 @@ from vuln_scan.Trivy_Vuln_Check import check_vuln_file_trivy
 from file_system.File_Save import save_files, attest_sbom, sign_attest, key_generating
 from utils.Folder_Lock import repo_lock
 from utils.Helpers import load_json
-from Backend.file_system.Summary_Generator import generate_summary
+from file_system.Summary_Generator import generate_summary
 
 def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
     

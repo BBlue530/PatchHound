@@ -19,7 +19,10 @@ def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded
     if not files_to_return:
         abort(404, description="No files found to return")
 
-    return jsonify({"files": files_to_return})
+    files_to_return_json = {
+    "files": files_to_return
+    }
+    return files_to_return_json
 
 def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_names):
     base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
@@ -56,5 +59,5 @@ def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded,
         for filepath in files_to_return:
             zf.write(filepath, arcname=os.path.basename(filepath))
     memory_file.seek(0)
-
-    return send_file(memory_file, download_name='resources.zip', as_attachment=True)
+    files_to_get_and_return = send_file(memory_file, download_name='resources.zip', as_attachment=True)
+    return files_to_get_and_return

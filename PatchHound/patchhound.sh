@@ -35,6 +35,9 @@ case "$COMMAND" in
             list)
                 source "$BASE_DIR/commands/list-resource.sh" "$@"
                 ;;
+            pdf)
+                source "$BASE_DIR/commands/pdf-summary-resource.sh" "$@"
+                ;;
             *)
                 usage_cli_resource
                 ;;

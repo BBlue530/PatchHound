@@ -8,9 +8,10 @@ import threading
 import io
 from datetime import datetime
 from file_system.File_Handling import save_scan_files
+from file_system.PDF_Generator import summary_to_pdf
 from utils.Schedule_Handling import scheduled_event
 from utils.JWT_Path import jwt_path_to_resources, decode_jwt_path_to_resources
-from utils.Resource_Handling import get_resources, list_resources
+from file_system.Resource_Handling import get_resources, list_resources
 from database.Validate_Token import validate_token
 from database.Create_db import create_database
 from database.Create_Key import create_key
@@ -210,7 +211,8 @@ def get_resource():
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
 
     if valid == True:
-        return get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_name)
+        files_to_get_and_return = get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_name)
+        return files_to_get_and_return
     else:
         return jsonify({"error": "invalid jwt token"}), 404
     
@@ -238,7 +240,36 @@ def list_resource():
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
 
     if valid == True:
-        return list_resources(organization_decoded, current_repo_decoded, timestamp_decoded)
+        files_to_return_json = list_resources(organization_decoded, current_repo_decoded, timestamp_decoded)
+        return files_to_return_json
+    else:
+        return jsonify({"error": "invalid jwt token"}), 404
+    
+@app.route('/v1/generate-pdf', methods=['GET'])
+def generate_pdf():
+    
+    token_key = request.args.get("token")
+    if not token_key:
+        return jsonify({"error": "Token missing"}), 400
+    
+    response, valid_token = validate_token(token_key)
+    if valid_token == False:
+        return jsonify({"error": f"{response}"}), 404
+    organization = response
+
+    # i plan to have an api key thing here
+#    api_key = request.form.get("api-key")
+#    if not api_key:
+#        return jsonify({"error": "api_key missing"}), 403
+
+    path_to_resources_token = request.args.get("path_to_resources_token")
+    if not path_to_resources_token:
+        return jsonify({"error": "path_to_resources_token missing"}), 400
+    organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
+    
+    if valid == True:
+        pdf_filename_path = summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded)
+        return send_file(pdf_filename_path, mimetype="application/pdf", as_attachment=True) 
     else:
         return jsonify({"error": "invalid jwt token"}), 404
 

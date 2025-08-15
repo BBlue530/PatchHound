@@ -7,7 +7,6 @@ source "$BASE_DIR/utils/health_check.sh"
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
-FILE_NAME=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -22,22 +21,15 @@ while [[ $# -gt 0 ]]; do
         *)
     esac
 done
-
-PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode)
+PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode | tr -d '\n')
 
 if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
     print_message "[!]" "Missing flags" "--token and --path-token are required"
     usage_list_resource
 fi
-
-RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
+RESPONSE=$(curl -sSL "$PDF_SUMMARY_API_URL" \
         -G \
         --data-urlencode "token=$TOKEN" \
-        --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN")
-
-print_message "[+]" "Resources found" "Files in resource directory:"
-mapfile -t FILES < <(echo "$RESPONSE" | grep -oP '"files":\s*\[\K[^\]]+' | tr -d '"' | tr ',' '\n' | sed 's/^\s*//;s/\s*$//')
-
-for file in "${FILES[@]}"; do
-    echo "File: $file"
-done
+        --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
+        --output vulnerability_report_summary.pdf
+        )
