@@ -189,7 +189,7 @@ This command will:
 ---
 ## Usage in pipeline
 
-For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound_Advanced/blob/master/.github/workflows/secure-pipeline.yml)
+For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-pipeline.yml)
 
 ---
 
