@@ -7,7 +7,8 @@ print_message() {
   local RESET=$'\e[0m'
   local BOLD=$'\e[1m'
 
-  printf "%b %b%b%b\n" "$prefix" "$BOLD" "$title:" "$RESET"
-  echo "$description" | fold -s -w "$width"
-  echo ""
+  printf "%b %b%b%b\n" "$prefix" "$BOLD" "$title" "$RESET"
+  if [[ -n "$description" ]]; then
+    echo "$description" | fold -s -w "$width"
+  fi
 }
