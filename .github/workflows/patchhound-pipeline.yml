@@ -1,32 +1,39 @@
-name: Secure Pipeline
+name: PatchHound Pipeline
 
 on:
-  push:
-    branches: [master]
+  workflow_call:
+    secrets:
+      BASE_URL:
+        required: true
+      ALERT_WEBHOOK:
+        required: true
+      TOKEN:
+        required: true
 
 jobs:
   security-check:
     runs-on: ubuntu-latest
 
-    env:
-      TOKEN: ${{ secrets.TOKEN }}
-      BASE_URL: ${{ secrets.BASE_URL }}
-      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
-
     steps:
       - uses: actions/checkout@v3
-          
+
       - name: Install PatchHound
         run: |
           cd PatchHound
           chmod +x install.sh
           ./install.sh
 
-      - name: Run SBOM Scan script
-        run: |
-          patchhound config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK" FAIL_ON_CRITICAL false
-          patchhound scan --token "$TOKEN"
-      
+      - name: Configure PatchHound
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+        run: patchhound config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK" FAIL_ON_CRITICAL false
+
+      - name: Run SBOM Scan
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+        run: patchhound scan --token "$TOKEN"
+
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4
         with:

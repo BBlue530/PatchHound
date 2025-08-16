@@ -4,6 +4,11 @@ CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
 
+echo "==============================================="
+echo "          PatchHound - by BBlue530"
+echo "          Version: $PATCHHOUND_VERSION"
+echo "==============================================="
+
 source "$BASE_DIR/system/env_variables_scan.sh"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/utils/health_check.sh"

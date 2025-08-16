@@ -1,0 +1,39 @@
+name: Orchestrator Pipeline
+
+on:
+  push:
+
+jobs:
+
+  check-backend-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.check.outputs.backend_changed }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check if Backend changed
+        id: check
+        run: |
+          git fetch origin master --depth=1
+          CHANGED=$(git diff --name-only origin/master HEAD | grep '^Backend/' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "[+] Backend not changed"
+            echo "backend_changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "[+] Backend changed"
+            echo "backend_changed=true" >> $GITHUB_OUTPUT
+          fi
+
+  trigger-docker-build:
+    needs: check-backend-changes
+    if: needs.check-backend-changes.outputs.backend_changed == 'true'
+    uses: ./.github/workflows/docker-builder.yml
+
+  trigger-patchhound:
+    needs: check-backend-changes
+    uses: ./.github/workflows/patchhound-pipeline.yml
+    secrets:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+      TOKEN: ${{ secrets.TOKEN }}
