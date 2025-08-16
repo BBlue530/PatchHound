@@ -11,12 +11,13 @@ jobs:
       backend_changed: ${{ steps.check.outputs.backend_changed }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Check if Backend changed
         id: check
         run: |
-          git fetch origin master --depth=1
-          CHANGED=$(git diff --name-only origin/master HEAD | grep '^Backend/' || true)
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^Backend/' || true)
           if [ -z "$CHANGED" ]; then
             echo "[+] Backend not changed"
             echo "backend_changed=false" >> $GITHUB_OUTPUT

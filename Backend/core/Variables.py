@@ -22,4 +22,4 @@ jwt_secret = "secretjwt"
 version = "0.0.1"
 
 GRYPE_VERSION = "0.68.0"
-COSIGN_VERSION = "1.15.1"
+COSIGN_VERSION = "2.5.3"
