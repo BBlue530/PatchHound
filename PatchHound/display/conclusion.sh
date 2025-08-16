@@ -9,12 +9,8 @@ if [ "$FAIL_ON_CRITICAL" = "true" ]; then
 
   if [[ "$FAIL_ON_SEVERITY" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
 
-    FAIL_COUNT_GRYPE=$(jq --argjson t "$FAIL_ON_SEVERITY" '[.vulnerabilities[] | select(.ratings[]?.score? >= $t)] | length' vulns.cyclonedx.json)
-
-    FAIL_COUNT_TRIVY=$(jq --argjson t "$FAIL_ON_SEVERITY" '[.Results[]?.Vulnerabilities[]? | select(.CVSS?.nvd?.V3Score? >= $t or .CVSS?.redhat?.V3Score? >= $t)] | length' trivy_report.json)
-
-    if [ "$FAIL_COUNT_GRYPE" -gt 0 ] || [ "$FAIL_COUNT_TRIVY" -gt 0 ]; then
-      print_message "[!]" "Failing on CVSS: $FAIL_ON_SEVERITY" "Found $((FAIL_COUNT_GRYPE + FAIL_COUNT_TRIVY)) vulnerabilities above CVSS: $FAIL_ON_SEVERITY"
+    if [ "$CVSS_COUNT_GRYPE" -gt 0 ] || [ "$CVSS_COUNT_TRIVY" -gt 0 ]; then
+      print_message "[!]" "Failing on CVSS: $FAIL_ON_SEVERITY" "Found $((CVSS_COUNT_GRYPE + CVSS_COUNT_TRIVY)) vulnerabilities above CVSS: $FAIL_ON_SEVERITY"
       FAIL="true"
     fi
   fi
@@ -51,7 +47,7 @@ if [ "$FAIL_ON_CRITICAL" = "true" ]; then
       fi
       ;;
   esac
-  
+
   if [ "$FAIL" = "true" ]; then
     exit 1
   fi
