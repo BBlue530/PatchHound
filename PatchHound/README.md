@@ -40,6 +40,7 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
    TARGET="."
    SCAN_IMAGE=false
    FAIL_ON_CRITICAL=true
+   FAIL_ON_SEVERITY=CRITICAL
    BASE_URL="https://<your-backend>"
    ALERT_WEBHOOK="https://<your-webhook>"
    SAST_SCAN=true
@@ -57,6 +58,10 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
 
    - `FAIL_ON_CRITICAL` (default: `true`)
       If `true` the pipeline will fail when critical vulnerabilities are found.
+
+   - `FAIL_ON_SEVERITY` (default: `CRITICAL`)
+      Determines which vulnerability severity will cause the pipeline to fail if detected. 
+      You can use standard severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`) or numeric values corresponding to CVSS scores.
 
    - `BASE_URL` (**MANDATORY**).
       The base URL of your backend.
