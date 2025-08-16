@@ -25,6 +25,8 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Works on source repos or remote and local container images
 - Supports multiple concurrent scans with worker-based processing
 - CLI for interacting with the backend
+- Exclusion of vulnerabilities in workflow that carry across versions
+- PDF summary report of the workflow
 
 ---
 
@@ -46,16 +48,16 @@ The CLI is a core part of the communication between the backend and user. Read m
           PatchHound - by BBlue530
 ===============================================
 [~] Generating Summary
-[i] Vulnerability assessment:
----------------------------------------------------------------------------
-[+] Grype Results:
+[i] Vulnerability assessment::
+----------------------------------------------------------------------
+[+] Grype Results::
 Critical: 18
 High: 38
 Medium: 28
 Low: 3
 Unknown: 0
----------------------------------------------------------------------------
-[+] Trivy Results:
+----------------------------------------------------------------------
+[+] Trivy Results::
 Critical: 18
 High: 38
 Medium: 28
@@ -63,11 +65,11 @@ Low: 3
 Unknown: 0
 Misconfigurations: 0
 Exposed Secrets: 0
----------------------------------------------------------------------------
-[+] SAST Results:
+----------------------------------------------------------------------
+[+] SAST Results::
 Critical: 1
 Issues: 2
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 ```
 
 ---

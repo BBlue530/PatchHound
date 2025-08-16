@@ -11,6 +11,7 @@
 - Retrieve stored scan artifacts by listing or downloading from the backend
 - Enable/disable token keys without deleting them
 - Add and remove exclusions of vulnerabilties
+- Request a PDF summary report of a specific workflow
 
 ---
 
@@ -170,6 +171,16 @@ To download specific stored available resources in the directory:
 ```
 patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]
 ```
+
+### PDF summary report
+You can generate a complete summary report in PDF format using the pdf command:
+```
+patchhound resource pdf --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> 
+``` 
+This command will:
+- Download the PDF report to your local machine.
+- Save a copy of the report in the same directory where the summary was extracted.
+
 ---
 ## Usage in pipeline
 
