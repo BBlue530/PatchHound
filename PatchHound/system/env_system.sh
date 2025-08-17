@@ -20,12 +20,12 @@ usage_create() {
 }
 
 usage_get_resource() {
-    echo "Usage: $0 --token TOKEN --path-token PATH_TO_RESOURCES_TOKEN [file1 file2 ...]"
+    echo "Usage: patchhound --token <token> --path-token <path_to_resources_token>  [file1 file2 ...]"
     exit 1
 }
 
 usage_list_resource() {
-    echo "Usage: $0 --token TOKEN --path-token PATH_TO_RESOURCES_TOKEN [file1 file2 ...]"
+    echo "Usage: patchhound --token <token> --path-token <path_to_resources_token> [file1 file2 ...]"
     exit 1
 }
 
@@ -36,5 +36,27 @@ usage_cli_resource() {
 
 usage_cli() {
     echo "Usage: patchhound <config|scan|health|create|change|resource|exclude> [args]"
+    exit 1
+}
+
+usage_cli_image() {
+    echo "Usage: patchhound scan --image <image_name> --token <token>"
+    echo "Usage: patchhound sign --image <image_name> --token <token>"
+    echo "Usage: patchhound verify --image <image_name> --token <token> --path-token <path_to_resources_token>"
+    exit 1
+}
+
+usage_sign_image() {
+    echo "Usage: patchhound sign --image <image_name> --token <token> --pat <pat_token(needed for private images)>"
+    exit 1
+}
+
+usage_verify_image() {
+    echo "Usage: patchhound verify --image <image_name> --token <token> --pat <pat_token(needed for private images)> --path-token <path_to_resources_token>"
+    exit 1
+}
+
+usage_scan() {
+    echo "Usage: patchhound scan --token <token> --pat <pat_token(needed for private images)>"
     exit 1
 }

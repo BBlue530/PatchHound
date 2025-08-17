@@ -3,14 +3,25 @@ BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
+source "$BASE_DIR/utils/health_check.sh"
 
+IMAGE=""
 TOKEN=""
+PATH_TO_RESOURCES_TOKEN_BASE64=""
 PAT_TOKEN=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --image)
+            IMAGE="$2"
+            shift 2
+            ;;
         --token)
             TOKEN="$2"
+            shift 2
+            ;;
+        --path-token)
+            PATH_TO_RESOURCES_TOKEN_BASE64="$2"
             shift 2
             ;;
         --pat)
@@ -21,9 +32,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [ -z "$TOKEN" ]; then
-    print_message "[!]" "Missing flag" "--token is required"
-    usage_scan
+PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --decode)
+
+if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" || -z "$IMAGE" ]]; then
+    print_message "[!]" "Missing flags" "--image and --token and --path-token are required"
+    usage_verify_image
 fi
 
 echo "==============================================="
@@ -34,13 +47,6 @@ echo "==============================================="
 source "$BASE_DIR/system/env_variables_scan.sh"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/utils/health_check.sh"
-source "$BASE_DIR/system/deps.sh"
-source "$BASE_DIR/scan/sast_scan.sh"
-source "$BASE_DIR/scan/trivy_scan.sh"
-source "$BASE_DIR/scan/sbom_generate.sh"
-source "$BASE_DIR/scan/sbom_upload.sh"
-source "$BASE_DIR/system/vulns_found.sh"
-source "$BASE_DIR/display/scan_results.sh"
-source "$BASE_DIR/display/conclusion.sh"
+source "$BASE_DIR/scan/image_verify.sh"
 
-print_message "[+]" "Scan result" "Scan finished successfully"
+print_message "[+]" "Verification done" "Verification finished successfully"

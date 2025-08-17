@@ -1,6 +1,8 @@
+from flask import jsonify
 import json
 import os
 import subprocess
+import json
 from core.Variables import env
 from logs.Alerts import alert_event_system
 from logs.Log import log_event
@@ -103,3 +105,48 @@ def key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_
         print(message)
         alert_event_system(message, alert, alert_path)
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
+
+def sign_image(cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+    try:
+        subprocess.run(
+            [
+                "cosign", "sign-blob",
+                "-y",
+                "--key", cosign_key_path,
+                "--output-signature", image_sig_path,
+                image_digest_path
+            ],
+            check=True,
+            env=env
+        )
+        print(f"[+] Image signed: {image_sig_path}")
+    except subprocess.CalledProcessError as e:
+        message = f"[!] Failed to sign image for repo: {repo_name} {e.stderr}!"
+        alert = "Workflow : Signature Fail"
+        print(message)
+        alert_event_system(message, alert, alert_path)
+        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
+
+def verify_image(cosign_pub_path, image_sig_path, image_digest_path_verify, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+    try:
+        subprocess.run(
+            [
+                "cosign", "verify-blob",
+                "--key", cosign_pub_path,
+                "--signature", image_sig_path,
+                image_digest_path_verify
+            ],
+            check=True,
+            env=env
+        )
+        print(f"[+] Image verified: {image_sig_path}")
+        verify_image_status = jsonify({"verify_image_status": "image verified and is trusted"}), 200
+        return verify_image_status
+    except subprocess.CalledProcessError as e:
+        message = f"[!] Failed to verify image for repo: {repo_name} {e.stderr}!"
+        alert = "Workflow : Verification Fail"
+        print(message)
+        alert_event_system(message, alert, alert_path)
+        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
+        verify_image_status = jsonify({"verify_image_status": "image verification mismatch and is not trusted"}), 422
+        return verify_image_status

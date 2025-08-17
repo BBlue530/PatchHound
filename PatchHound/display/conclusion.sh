@@ -1,5 +1,5 @@
 FAIL="false"
-PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64)
+PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64 -w 0)
 
 echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
 print_message "[+]" "Path token" "Path token to access resources sent to backend: 

@@ -1,9 +1,6 @@
-print_message "[~]" "Uploading SBOM to scan service..." ""
+print_message "[~]" "Verifying image with verification service..." ""
 
 COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
-if [[ ! -f "$EXCLUDE_FILE" ]]; then
-    echo '{"exclusions":[]}' > "$EXCLUDE_FILE"
-fi
 
 if [ -z "$REPO_NAME" ]; then
     SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/../scan_profile.config"
@@ -27,17 +24,19 @@ if [ -z "$COMMIT_SHA" ]; then
     COMMIT_SHA="Null"
 fi
 
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    docker pull "$IMAGE"
+fi
+
+IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE")
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
-  -F "sbom=@sbom.cyclonedx.json" \
-  -F "sast_report=@sast_report.json" \
-  -F "trivy_report=@trivy_report.json" \
-  -F "exclusions=@exclusions.json" \
   -F "token=$TOKEN" \
-  -F "current_repo=$REPO_NAME" \
-  -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \
   -F "commit_author=$COMMIT_AUTHOR" \
-  "$SBOM_SCAN_API_URL")
+  -F "image=$IMAGE_DIGEST" \
+  -F "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
+  "$IMAGE_VERIFY_API_URL")
 
 curl_exit_code=$?
 http_status=$(echo "$response_and_status" | tail -n1)
@@ -54,8 +53,6 @@ if [ $curl_exit_code -ne 0 ]; then
   exit $curl_exit_code
 fi
 
-print_message "[+]" "Upload finished" "Upload to backend finished successfully"
+print_message "[+]" "Verification finished" "Verification of image with backend finished successfully"
 
-echo "$response_body" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
-echo "$response_body" | jq '.prio_vulns' > prio_vulns.json
 PATH_TO_RESOURCES_TOKEN=$(echo "$response_body" | jq -r '.path_to_resources_token')

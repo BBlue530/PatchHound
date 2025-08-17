@@ -1,4 +1,4 @@
-print_message "[~]" "Uploading SBOM to scan service..." ""
+print_message "[~]" "Uploading image to scan service..." ""
 
 COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
 if [[ ! -f "$EXCLUDE_FILE" ]]; then
@@ -27,6 +27,13 @@ if [ -z "$COMMIT_SHA" ]; then
     COMMIT_SHA="Null"
 fi
 
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    docker pull "$IMAGE"
+fi
+
+IMAGE_TAR="image.tar"
+docker save "$IMAGE" -o "$IMAGE_TAR"
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
@@ -37,11 +44,14 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \
   -F "commit_author=$COMMIT_AUTHOR" \
-  "$SBOM_SCAN_API_URL")
+  -F "image=@$IMAGE_TAR" \
+  "$IMAGE_SCAN_API_URL")
 
 curl_exit_code=$?
 http_status=$(echo "$response_and_status" | tail -n1)
 response_body=$(echo "$response_and_status" | head -n -1)
+
+rm -f "$IMAGE_TAR"
 
 if [[ "$http_status" -ne 200 ]]; then
   print_message "[!]" "Backend error" "Status Code: $http_status
@@ -56,6 +66,4 @@ fi
 
 print_message "[+]" "Upload finished" "Upload to backend finished successfully"
 
-echo "$response_body" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
-echo "$response_body" | jq '.prio_vulns' > prio_vulns.json
 PATH_TO_RESOURCES_TOKEN=$(echo "$response_body" | jq -r '.path_to_resources_token')

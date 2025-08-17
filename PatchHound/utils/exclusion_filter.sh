@@ -9,3 +9,15 @@ exclusions_filter() {
          | (\$exclusions[0].exclusions | map(.vulnerability) | index(\$vid)) | not)
     ] | length" "$file"
 }
+
+find_exclusions_file() {
+    local dir="${1:-$PWD}"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/exclusions.json" ]]; then
+            echo "$dir/exclusions.json"
+            return
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}

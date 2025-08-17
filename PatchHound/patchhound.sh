@@ -30,16 +30,31 @@ case "$COMMAND" in
         shift || true
         case "$SUBCOMMAND" in
             get)
-                source "$BASE_DIR/commands/get-resource.sh" "$@"
+                source "$BASE_DIR/commands/resource-get.sh" "$@"
                 ;;
             list)
-                source "$BASE_DIR/commands/list-resource.sh" "$@"
+                source "$BASE_DIR/commands/resource-list.sh" "$@"
                 ;;
             pdf)
-                source "$BASE_DIR/commands/pdf-summary-resource.sh" "$@"
+                source "$BASE_DIR/commands/resource-pdf-summary.sh" "$@"
                 ;;
             *)
                 usage_cli_resource
+                ;;
+        esac
+        ;;
+    image)
+        SUBCOMMAND="$1"
+        shift || true
+        case "$SUBCOMMAND" in
+            sign)
+                source "$BASE_DIR/commands/image-sign.sh" "$@"
+                ;;
+            verify)
+                source "$BASE_DIR/commands/image-verify.sh" "$@"
+                ;;
+            *)
+                usage_cli_image
                 ;;
         esac
         ;;

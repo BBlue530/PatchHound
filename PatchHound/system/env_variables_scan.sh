@@ -1,8 +1,3 @@
-usage() {
-    echo "Usage: $0 --token TOKEN --pat PAT_TOKEN"
-    exit 1
-}
-
 if [ -n "$GITHUB_SHA" ]; then
     COMMIT_SHA="$GITHUB_SHA"
 elif [ -n "$CI_COMMIT_SHA" ]; then
@@ -24,30 +19,16 @@ if [ -n "$GITHUB_REPOSITORY" ]; then
 elif [ -n "$CI_PROJECT_PATH" ]; then
     REPO_NAME="$CI_PROJECT_PATH"
 else
-    print_message "[!]" "Repository empty" "Repository name is empty"
-    exit 1
+    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/../scan_profile.config"
+    REPO_NAME=$(grep "^REPO_NAME=" "$SCAN_PROFILE_CONFIG_FILE" | cut -d= -f2-)
+    if [ -z "$REPO_NAME" ]; then
+      print_message "[!]" "Missing config" "REPO_NAME is missing"
+      exit 1
+    fi
 fi
 
-TOKEN=""
-PAT_TOKEN=""
-
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --token)
-            TOKEN="$2"
-            shift 2
-            ;;
-        --pat)
-            PAT_TOKEN="$2"
-            shift 2
-            ;;
-        *)
-    esac
-done
-
-if [ -z "$TOKEN" ]; then
-    print_message "[!]" "Missing flag" "--token is required"
-    usage
+if [[ -n "$IMAGE" ]]; then
+    TARGET="$IMAGE"
 fi
 
 if [[ "$TARGET" == "." ]]; then
