@@ -27,6 +27,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - CLI for interacting with the backend
 - Exclusion of vulnerabilities in workflow that carry across versions
 - PDF summary report of the workflow
+- Signing and verifying of container images
 
 ---
 

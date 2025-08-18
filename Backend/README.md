@@ -12,6 +12,7 @@
 - Handle multiple request at the same time
 - Generates json and pdf summary report for each workflow
 - Handles exclusions of vulnerabilities in the workflow and carry across versions
+- Handles signing and verification of container images
 
 ---
 

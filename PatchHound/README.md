@@ -47,6 +47,14 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
    TRIVY_SCAN=true
    ```
 
+   ```bash
+   # Default scan_profile.config file
+   REPO_NAME="<your-repo-name>"
+   AUTHOR_NAME="<your-name>"
+   AUTHOR_EMAIL="<your-email>"
+   COMMIT_AUTHOR="$AUTHOR_NAME <$AUTHOR_EMAIL>"
+   ```
+
    - `TARGET`
       The target to scan.
       By default, this is set to `.` (the current repositorys source code).
@@ -182,9 +190,24 @@ You can generate a complete summary report in PDF format using the pdf command:
 ```
 patchhound resource pdf --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> 
 ``` 
-This command will:
-- Download the PDF report to your local machine.
-- Save a copy of the report in the same directory where the summary was extracted.
+Download the PDF report to your local machine and save a copy of the report in the same directory where the summary was extracted.
+
+## Container image signing
+Patchhound can sign and verify container images within your workflow to ensure that the image you are using is the exact one that was originally signed.
+
+### Sign image
+You can sign an image using the CLI. This generates a signature for the pulled image which can later be used to verify its integrity.
+```
+patchhound sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>
+``` 
+This command outputs a path token which you will need for image verification.
+
+### Verify image
+To verify an image you will have to provide the same path token you got when signing the image.
+```
+patchhound verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>
+``` 
+This will validate the image against the previously generated signature ensuring it has not been altered.
 
 ---
 ## Usage in pipeline
