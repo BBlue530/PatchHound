@@ -21,7 +21,7 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 - Outputs detailed vulnerability counts by severity
 - Lists top critical vulnerabilities found
 - Alerts on [Discord](https://discord.com/) / [Slack](https://slack.com/) when vulnerabilities are found
-- Configurable via a simple `scan.config` file
+- Configurable via CLI
 - Works on source repos or remote and local container images
 - Supports multiple concurrent scans with worker-based processing
 - CLI for interacting with the backend
@@ -38,10 +38,10 @@ An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability 
 The backend handles file ingestion, vulnerability scanning, prioritization, and storage.
 It receives SBOMs, SAST reports, and Trivy results from the CLI or CI/CD pipelines, processes them, signs results, compares vulnerabilities against the CISA KEV catalog, and triggers alerts when needed.
 
-For installation, setup, and detailed API documentation, see the [Backend README](https://github.com/BBlue530/PatchHound_Advanced/tree/master/Backend/README.md).
+For installation, setup, and detailed API documentation, see the [Backend README](https://github.com/BBlue530/PatchHound/blob/master/docs/backend.md#backend-patchhound).
 
 # CLI
-The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound_Advanced/tree/master/PatchHound/README.md).
+The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound).
 
 ## What you can expect:
 ```
@@ -87,7 +87,7 @@ If you are scanning a container image make sure to add a secret named `PAT_TOKEN
 2. Click **New repository secret**
 3. Name it: `PAT_TOKEN`
 4. Paste your PAT
-5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/tree/master/PatchHound#scan)
+5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#scan)
 
 ### Required Token Permissions
 
@@ -98,125 +98,8 @@ Public images only require `read:packages`.
 
 ---
 
-# Workflow Diagram
-
-This diagram outlines the detailed structure of the security scanning and vulnerability prioritization workflow. It captures both the pipeline process triggered during code commits and the daily automated cron job that maintains and validates scan data integrity.
-
-## Pipeline Workflow
-
-```
-Pipeline Triggered
-
-   ↓
-
-[Syft] → Generate SBOM (CycloneDX JSON)
-[Semgrep] → Vulnerability report
-[Trivy] → Vulnerability, misconfig, exposed secrets report
-
-   ↓
-
-[cURL] → Send payload to Backend API:
-   - Form data:
-     - SBOM file (CycloneDX JSON)
-     - Semgrep SAST report
-     - Trivy report
-     - token key
-
-   ↓
-
-[Backend / Flask API]
-   ├─ Validate token key
-   ├─ Validate SBOM JSON format
-   ├─ Run Grype scan on SBOM
-   ├─ Compare vulnerabilities with KEV catalog
-   ├─ Start async thread to save scan data:
-   │    ├─ Save alert webhook config under:
-   │    │    organization/repo_name/{repo_name}_alert.json
-   │    ├─ Generate Cosign key-pair under:
-   │    │    organization/repo_name/timestamp/{repo_name}.key & .pub
-   │    ├─ Save SBOM, SAST report, Trivy report, vulnerabilities, prioritized KEV matches to:
-   │    │    organization/repo_name/timestamp/
-   │    │        ├─ {repo_name}_sbom_cyclonedx.json
-   │    │        ├─ {repo_name}_sast_report.json
-   │    │        ├─ {repo_name}_vulns_cyclonedx.json
-   │    │        ├─ {repo_name}_prio_vuln_data.json
-   │    │        ├─ Cosign attestation & signature files
-   │    ├─ Check vulnerabilities, misconfigurations, exposed secrets and trigger alert if needed
-   │    └─ Log all events to:
-   │         organization/repo_name/{repo_name}_event_log.json
-   └─ Return JSON response with vulnerability scan, KEV prioritization and jwt for accessing the stored resources.
-```
-## Daily Cron Job Workflow
-
-```
-Cron Trigger: scheduled_event()
-
-   ↓
-
-[Update Grype DB]
-   ├─ Backup existing Grype DB cache (~/.cache/grype → ~/.cache/grype_backup)
-   ├─ Run "grype db update"
-   ├─ On success:
-   │    ├─ Remove backup cache
-   └─ On failure:
-        ├─ Restore backup cache (if available)
-        └─ Log error message
-
-   ↓
-
-[Update KEV Catalog]
-   ├─ Send HEAD request to KEV Catalog URL
-   ├─ If reachable:
-   │    ├─ Remove old KEV catalog JSON file
-   │    ├─ Download and save new KEV catalog JSON
-   │    └─ Log success
-   └─ If unreachable or error:
-        ├─ Log warning/error but continue
-
-   ↓
-
-[Run SBOM Validation & Rescanning]
-   ├─ Iterate over all organizations and repos under the `all_repo_scans_folder`
-   ├─ For each repo:
-   │    ├─ Find latest timestamp folder
-   │    ├─ Verify existence of SBOM, Attestation, and Signature files
-   │    ├─ Verify SBOM attestation and signature using Cosign
-   │    ├─ If any verification fails:
-   │    │    ├─ Trigger alert
-   │    │    └─ Log event with timestamp
-   │    ├─ If verified:
-   │    │    ├─ Run Grype scan on SBOM
-   │    │    ├─ Load previous vulnerability report
-   │    │    ├─ Compare current vulnerabilities with previous scan
-   │    │    │    ├─ Identify new vulnerabilities
-   │    │    │    ├─ If new vulnerabilities found:
-   │    │    │    │    ├─ Trigger alert (with details of new vulns)
-   │    │    │    └─ Else: continue silently
-   │    │    ├─ Save vulnerabilities report JSON (overwrite previous)
-   │    │    ├─ Compare vulnerabilities to KEV catalog, save priority report JSON
-   │    │    └─ Log scan success
-   │    └─ If scan fails:
-   │         ├─ Trigger alert
-   │         └─ Log failure event
-```
-## Deployment
-
-```
-[Deployment / Runtime]
-
-└─ Start.sh (Bash script):
-     ├─ Create Python virtual environment if missing
-     ├─ Install dependencies from requirements.txt
-     └─ Launch Gunicorn:
-         - 2 workers × 4 threads
-         - Preloaded app (Main:app)
-
-↓
-
-[Gunicorn WSGI Server]
-   ├─ Worker 1 (4 threads)
-   └─ Worker 2 (4 threads)
-```
+# Docs
+If PatchHound is something that looks interesting you can learn more about it [here](https://github.com/BBlue530/PatchHound/tree/master/docs).
 
 ---
 

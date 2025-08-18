@@ -2,6 +2,12 @@
 
 ---
 
+## Overview
+
+PatchHound CLI provides an interface to run vulnerability scans, manage configurations and tokens, request pdf reports, handle exclusions, and sign or verify container images. Its designed to make security scanning, reporting, and workflow integration simple and automated.
+
+---
+
 # Features
 
 - Run vulnerability scans using SBOM, SAST, and container scanning tools in one command
@@ -12,6 +18,7 @@
 - Enable/disable token keys without deleting them
 - Add and remove exclusions of vulnerabilties
 - Request a PDF summary report of a specific workflow
+- Sign and verify container images
 
 ---
 
@@ -213,11 +220,5 @@ This will validate the image against the previously generated signature ensuring
 ## Usage in pipeline
 
 For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-pipeline.yml)
-
----
-
-## License
-
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
 ---
