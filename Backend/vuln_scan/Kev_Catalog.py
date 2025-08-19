@@ -18,7 +18,7 @@ def compare_kev_catalog(cyclonedx_data):
     prio_vuln_data = {
         "version": kev_version,
         "release_date": kev_release_date,
-        "prioritized_vulnerabilities": matched_vulns
+        "prioritized_vulns": matched_vulns
     }
     
     return prio_vuln_data

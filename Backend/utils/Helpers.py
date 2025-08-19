@@ -30,3 +30,8 @@ def load_json(file):
     else:
         file_json = file
         return file_json
+
+def safe_text(value):
+    if value is None:
+        return ""
+    return str(value)

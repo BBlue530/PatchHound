@@ -1,6 +1,7 @@
 def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
 
     summary_dict = {}
+    kev_prio_dict = {}
     exclusions_dict = {}
 
     excluded_ids = {
@@ -14,6 +15,12 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
             exclusions_dict[key] = data
         else:
             summary_dict[key] = data
+
+    def add_vuln_kev(key, data):
+        if key in excluded_ids:
+            exclusions_dict[key] = data
+        else:
+            kev_prio_dict[key] = data
     
     if sast_report_json.get("SAST_SCAN") is False:
         summary_dict["SAST_SCAN_SKIPPED"] = {
@@ -30,54 +37,91 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
 
     for vuln in vulns_cyclonedx_json.get("vulnerabilities", []):
         key = vuln.get("id")
-        vuln_id = key or ""
-        if vuln_id.startswith("GHSA"):
-            link = f"https://github.com/advisories/{vuln_id}"
-        elif vuln_id.startswith("CVE"):
-            link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln_id}"
+        if not key:
+            continue
+
+        severity = None
+        for rating in vuln.get("ratings", []):
+            if rating.get("severity"):
+                severity = rating["severity"]
+                break
+
+        pkg_ref = vuln.get("affects", [{}])[0].get("ref") or ""
+        pkg_name, pkg_version = "unknown", "unknown"
+        if pkg_ref.startswith("pkg:"):
+            try:
+                _, rest = pkg_ref.split("pkg:", 1)
+                _, rest = rest.split("/", 1)
+                pkg_name, pkg_version = rest.split("@", 1)
+            except ValueError:
+                pass
+
+        if key.startswith("GHSA"):
+            link = f"https://github.com/advisories/{key}"
+        elif key.startswith("CVE"):
+            link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={key}"
         else:
             link = vuln.get("references", [{}])[0].get("url", "No link available")
 
         add_vuln(key, {
             "source": "grype",
             "id": key,
-            "severity": vuln.get("severity"),
-            "package": vuln.get("packageName"),
-            "version": vuln.get("version"),
-            "description": vuln.get("description"),
+            "severity": severity,
+            "package": pkg_name,
+            "version": pkg_version,
+            "description": vuln.get("description", "No description available"),
             "link": link,
         })
 
     for vuln in prio_vuln_data.get("prioritized_vulns", []):
-        key = vuln.get("id")
+        key = vuln.get("cveID")
+        if not key:
+            continue
+
         target_dict = summary_dict if key in summary_dict else exclusions_dict
-        if key in summary_dict or key in exclusions_dict:
-            target_dict[key]["kev_priority"] = vuln.get("priority")
+
+        if key in target_dict:
+            target_dict[key]["kev_priority"] = "CISA_KEV"
+            target_dict[key]["kev_added_date"] = vuln.get("dateAdded")
+            target_dict[key]["kev_due_date"] = vuln.get("dueDate")
         else:
-            add_vuln(key, {
+            add_vuln_kev(key, {
                 "source": "kev",
                 "id": key,
-                "kev_priority": vuln.get("priority"),
+                "kev_priority": "CISA_KEV",
                 "severity": vuln.get("severity", "Unknown"),
+                "description": vuln.get("shortDescription", ""),
+                "title": vuln.get("vulnerabilityName", ""),
+                "vendor": vuln.get("vendorProject", ""),
+                "product": vuln.get("product", ""),
+                "required_action": vuln.get("requiredAction", ""),
+                "kev_added_date": vuln.get("dateAdded"),
+                "kev_due_date": vuln.get("dueDate"),
+                "link": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
             })
 
     for issue in sast_report_json.get("results", []):
-        rule_id = issue.get("rule_id", "unknown_rule")
-        start_line = issue.get("start", "0")
+        rule_id = issue.get("check_id", "unknown_rule")
+        severity = issue.get("extra", {}).get("severity", "Unknown")
+        message = issue.get("extra", {}).get("message", "")
         path = issue.get("path", "unknown_path")
-        key = f"{path}:{start_line}_{rule_id}"
+        line = issue.get("start", {}).get("line", "0")
+
+        key = f"{path}:{line}_{rule_id}"
         add_vuln(key, {
             "source": "semgrep",
-            "rule_id": rule_id,
+            "id": rule_id,
             "path": path,
-            "line": start_line,
-            "message": issue.get("message", ""),
-            "severity": issue.get("severity", "Unknown"),
+            "line": line,
+            "message": message,
+            "severity": severity,
         })
 
     for result in trivy_report_json.get("Results", []):
         for v in result.get("Vulnerabilities", []):
             key = v.get("VulnerabilityID")
+            if not key:
+                continue
             add_vuln(key, {
                 "source": "trivy",
                 "id": key,
@@ -85,39 +129,45 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
                 "package": v.get("PkgName"),
                 "version": v.get("InstalledVersion"),
                 "severity": v.get("Severity"),
-                "title": v.get("Title"),
+                "title": v.get("Title") or v.get("Description") or "No description available",
                 "link": v.get("PrimaryURL", "No link available"),
             })
 
         for m in result.get("Misconfigurations", []):
             key = m.get("ID")
+            if not key:
+                continue
+            link = m.get("PrimaryURL") or (m.get("References") or ["No link available"])[0]
             add_vuln(key, {
                 "source": "trivy",
                 "id": key,
                 "type": "misconfiguration",
-                "title": m.get("Title"),
+                "title": m.get("Title") or m.get("Description") or "No description",
                 "description": m.get("Description"),
+                "resolution": m.get("Resolution", "No fix guidance"),
                 "severity": m.get("Severity"),
-                "message": m.get("Message"),
-                "file": m.get("File"),
-                "link": m.get("PrimaryURL", "No link available"),
+                "file": m.get("Target"),
+                "links": [r.get("url") for r in m.get("References", []) if r.get("url")]
             })
 
         for s in result.get("Secrets", []):
             key = s.get("RuleID")
+            if not key:
+                continue
             add_vuln(key, {
                 "source": "trivy",
                 "id": key,
                 "type": "secret",
-                "title": s.get("Title"),
+                "title": s.get("Title") or "No title",
                 "description": s.get("Description"),
-                "severity": "HIGH",
+                "severity": s.get("Severity", "HIGH"),
+                "file": s.get("Target"),
                 "message": s.get("Message"),
-                "file": s.get("File"),
             })
 
     summary_report = {
         "vulnerabilities": list(summary_dict.values()),
+        "kev_vulnerabilities": list(kev_prio_dict.values()),
         "exclusions": list(exclusions_dict.values())
     }
 
