@@ -98,7 +98,7 @@ Retrieve the current value for a specific key:
 patchhound config --get <KEY>
 ```
 #### List all settings
-Show all keys and their values:
+Show all values:
 ```
 patchhound config --list
 ```
@@ -121,7 +121,7 @@ patchhound scan --token <TOKEN> --pat <PAT_TOKEN>
 ## Health
 Check the backends health status and version with this command:
 ```
-patchhound health
+patchhound health --token <TOKEN_KEY>
 ```
 
 ---
@@ -129,7 +129,7 @@ patchhound health
 ## Create
 Create a new token key for an organization with a specified expiration period:
 ```
-patchhound create --org <organization> --exp <expiration_days>
+patchhound create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>
 ```
 
 ---
@@ -137,7 +137,7 @@ patchhound create --org <organization> --exp <expiration_days>
 ## Change
 Enable or disable a specific token keys:
 ```
-patchhound change --token <TOKEN_KEY> --ins <enable|disable>
+patchhound change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>
 ```
 
 ---

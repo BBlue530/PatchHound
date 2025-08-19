@@ -32,6 +32,14 @@ To use PatchHound CLI you will need to run `install.sh`. In a different terminal
 cd PatchHound
 bash install.sh
 ```
+If `secrets.json` with valid secrets are missing the backend will generate valid values which will include an api key which you will need to `change` and `create` token keys.
+Example:
+```
+======================================
+[!] NEW API KEY GENERATED:
+UmA-amMq-FaMnF_aFNegzQ5hozYjOffwy8yJVgIeV18
+======================================
+```
 
 ## Configure the CLI
 After PatchHound CLI is installed you will need to configure it:
@@ -43,8 +51,9 @@ Optionally set `SAST_SCAN`, `TRIVY_SCAN`, or `SCAN_IMAGE` depending on what you 
 ## Create a Token Key
 Create a new token for your organization to authenticate scans:
 ```
-patchhound create --org <organization> --exp 30
+patchhound create --api-key <api_key> --org <organization> --exp 30
 ```
+- Replace `<api_key>` with the api key your backend provided you
 - Replace `<organization>` with your org name
 - `--exp 30` sets the token to expire in 30 days
 - Copy the token output you will need it for scanning

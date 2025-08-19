@@ -36,10 +36,20 @@ Then start the backend:
 bash Start.sh
 ```
 
+If `secrets.json` with valid secrets are missing the backend will generate valid values which will include an api key which you will need to `change` and `create` token keys.
+Example:
+```
+======================================
+[!] NEW API KEY GENERATED:
+UmA-amMq-FaMnF_aFNegzQ5hozYjOffwy8yJVgIeV18
+======================================
+```
+
 This single command will:
 - Install all required scanning tools and dependencies automatically
 - Initialize the database to store token keys and related data (if it doesn't already exist)
 - Start the daily vulnerability scan scheduler to keep everything continuously monitored
+- Verify secret values exist and generate them if needed
 Once running the backend will be managing updates, scans and alerts.
 
 ---
