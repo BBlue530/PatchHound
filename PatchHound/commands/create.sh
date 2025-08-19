@@ -4,8 +4,6 @@ CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
 
-if [[ "$1" != "org" ]]; then usage_create; fi
-
 org=""
 exp_days=""
 

@@ -36,7 +36,7 @@ bash install.sh
 ## Configure the CLI
 After PatchHound CLI is installed you will need to configure it:
 ```
-patchhound config --set BASE_URL=http://localhost:8000 REPO_NAME=test-repo AUTHOR_NAME=Your Name AUTHOR_EMAIL=you@example.com
+patchhound config --set BASE_URL http://localhost:8080 REPO_NAME test-repo AUTHOR_NAME Your-Name AUTHOR_EMAIL you@example.com
 ```
 Optionally set `SAST_SCAN`, `TRIVY_SCAN`, or `SCAN_IMAGE` depending on what you want to test. You can read more about configurations of the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#config)
 
@@ -52,7 +52,7 @@ patchhound create --org <organization> --exp 30
 ## Run a Scan
 By default will PatchHound attempt to scan the current directory which can be changed in the config:
 ```
-patchhound config --set TARGET=<directory/image-you-want-scanned>
+patchhound config --set TARGET <directory-or-image-you-want-scanned>
 ```
 To scan the `TARGET`:
 ```

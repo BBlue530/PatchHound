@@ -5,6 +5,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from flask import abort
 import json
 import os
+from utils.Helpers import safe_text
 from core.Variables import all_repo_scans_folder
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
@@ -38,12 +39,12 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
     for vuln in summary_report.get("vulnerabilities", []):
         vuln_data.append([
-            Paragraph(vuln.get("source", ""), wrap_style),
-            Paragraph(vuln.get("severity", ""), wrap_style),
-            Paragraph(vuln.get("package", ""), wrap_style),
-            Paragraph(vuln.get("version", ""), wrap_style),
-            Paragraph(vuln.get("title", vuln.get("description", "")), wrap_style),
-            Paragraph(vuln.get("link", ""), wrap_style),
+            Paragraph(safe_text(vuln.get("source")), wrap_style),
+            Paragraph(safe_text(vuln.get("severity")), wrap_style),
+            Paragraph(safe_text(vuln.get("package")), wrap_style),
+            Paragraph(safe_text(vuln.get("version")), wrap_style),
+            Paragraph(safe_text(vuln.get("title") or vuln.get("description")), wrap_style),
+            Paragraph(safe_text(vuln.get("link")), wrap_style),
         ])
 
     vuln_table = Table(vuln_data, repeatRows=1)
@@ -62,12 +63,12 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
     for excl in summary_report.get("exclusions", []):
         excl_data.append([
-            Paragraph(excl.get("source", ""), wrap_style),
-            Paragraph(excl.get("severity", ""), wrap_style),
-            Paragraph(excl.get("package", ""), wrap_style),
-            Paragraph(excl.get("version", ""), wrap_style),
-            Paragraph(excl.get("title", excl.get("description", "")), wrap_style),
-            Paragraph(excl.get("comment", ""), wrap_style),
+            Paragraph(safe_text(excl.get("source")), wrap_style),
+            Paragraph(safe_text(excl.get("severity")), wrap_style),
+            Paragraph(safe_text(excl.get("package")), wrap_style),
+            Paragraph(safe_text(excl.get("version")), wrap_style),
+            Paragraph(safe_text(excl.get("title") or excl.get("description")), wrap_style),
+            Paragraph(safe_text(excl.get("comment")), wrap_style),
         ])
 
     excl_table = Table(excl_data, repeatRows=1)
