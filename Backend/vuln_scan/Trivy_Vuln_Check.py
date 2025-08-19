@@ -1,7 +1,6 @@
 import json
 
 def check_vuln_file_trivy(trivy_report_path, exclusions_file_path):
-
     with open(trivy_report_path, "r") as f:
         report = json.load(f)
     

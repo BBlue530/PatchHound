@@ -1,5 +1,4 @@
 def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
-
     summary_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}

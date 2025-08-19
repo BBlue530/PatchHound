@@ -100,6 +100,7 @@ Public images only require `read:packages`.
 
 # Docs
 If PatchHound is something that looks interesting you can learn more about it [here](https://github.com/BBlue530/PatchHound/tree/master/docs).
+You can also test PatchHound by following the [quick-start](https://github.com/BBlue530/PatchHound/blob/master/docs/quick-start.md) documentation.
 
 ---
 

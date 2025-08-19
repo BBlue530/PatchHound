@@ -9,7 +9,6 @@ from logs.Log import log_event
 from utils.Helpers import file_stable_check
 
 def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
-
     with open(alert_path, "w") as f:
         json.dump(alert_system_json, f, indent=4)
     file_stable_check(alert_path)

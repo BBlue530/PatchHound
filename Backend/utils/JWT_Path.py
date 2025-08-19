@@ -1,6 +1,6 @@
 import jwt
 from jwt import InvalidTokenError
-from core.Variables import jwt_secret
+from validation.Secrets_Manager import read_secret
 
 def jwt_path_to_resources(organization ,current_repo, timestamp):
     repo_name = current_repo.replace("/", "_")
@@ -9,11 +9,15 @@ def jwt_path_to_resources(organization ,current_repo, timestamp):
     "current_repo": repo_name,
     "timestamp": timestamp
     }
+    secret_type = "jwt_key"
+    jwt_secret = read_secret(secret_type)
     path_to_resources_token = jwt.encode(payload, jwt_secret, algorithm="HS256")
     return path_to_resources_token
 
 def decode_jwt_path_to_resources(path_to_resources_token, organization):
     try:
+        secret_type = "jwt_key"
+        jwt_secret = read_secret(secret_type)
         decoded_data = jwt.decode(path_to_resources_token, jwt_secret, algorithms=["HS256"])
 
         if decoded_data.get("organization") != organization:

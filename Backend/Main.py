@@ -20,6 +20,7 @@ from database.Key_Status import enable_key, disable_key
 from validation.Check_Format import check_json_format
 from vuln_scan.Kev_Catalog import compare_kev_catalog
 from core.System import install_tools
+from validation.Secrets_Manager import verify_api_key, generate_secrets
 from core.Variables import version
 
 def threading_save_scan_files(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content):
@@ -128,6 +129,13 @@ def scan_sbom():
 @app.route('/v1/create-token-key', methods=['POST'])
 def create_token_key():
 
+    api_key = request.form.get("api_key")
+    if not api_key:
+        return jsonify({"error": "api_key missing"}), 403
+    response, valid = verify_api_key(api_key)
+    if valid == False:
+        return response
+
     organization = request.form.get("organization")
     if not organization:
         return jsonify({"error": "organization missing"}), 400
@@ -139,11 +147,6 @@ def create_token_key():
         expiration_days = int(expiration_days)
     except ValueError:
         return jsonify({"error": "expiration_days must be an integer"}), 400
-    
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
 
     response = create_key(organization, expiration_days)
     return response
@@ -159,10 +162,12 @@ def change_token_key_status():
     if not instructions:
         return jsonify({"error": "instructions missing"}), 400
     
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
+    api_key = request.form.get("api_key")
+    if not api_key:
+        return jsonify({"error": "api_key missing"}), 403
+    response, valid = verify_api_key(api_key)
+    if valid == False:
+        return response
 
     if instructions == "enable":
         response = enable_key(token_key)
@@ -175,10 +180,13 @@ def change_token_key_status():
 @app.route('/v1/health-check', methods=['GET'])
 def health_check():
 
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
+    token_key = request.args.get("token")
+    if not token_key:
+        return jsonify({"error": "Token missing"}), 400
+    
+    response, valid_token = validate_token(token_key)
+    if valid_token == False:
+        return jsonify({"error": f"{response}"}), 404
 
     return jsonify({
         "status": "ok",
@@ -199,11 +207,6 @@ def get_resource():
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 404
     organization = response
-
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
 
     path_to_resources_token = request.args.get("path_to_resources_token")
     if not path_to_resources_token:
@@ -229,11 +232,6 @@ def list_resource():
         return jsonify({"error": f"{response}"}), 404
     organization = response
 
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
-
     path_to_resources_token = request.args.get("path_to_resources_token")
     if not path_to_resources_token:
         return jsonify({"error": "path_to_resources_token missing"}), 400
@@ -257,11 +255,6 @@ def generate_pdf():
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 404
     organization = response
-
-    # i plan to have an api key thing here
-#    api_key = request.form.get("api-key")
-#    if not api_key:
-#        return jsonify({"error": "api_key missing"}), 403
 
     path_to_resources_token = request.args.get("path_to_resources_token")
     if not path_to_resources_token:
@@ -354,6 +347,7 @@ def sign_images():
     return jsonify(result_parsed)
 
 install_tools()
+generate_secrets()
 scheduled_event()
 create_database()
 

@@ -3,7 +3,6 @@ BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
-source "$BASE_DIR/utils/health_check.sh"
 
 IMAGE=""
 TOKEN=""
@@ -45,7 +44,6 @@ echo "          Version: $PATCHHOUND_VERSION"
 echo "==============================================="
 
 source "$BASE_DIR/system/env_variables_scan.sh"
-source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/utils/health_check.sh"
 source "$BASE_DIR/scan/image_verify.sh"
 

@@ -1,17 +1,20 @@
 import os
-from core.Variables import all_repo_scans_folder, cosign_password, local_bin, env
+from core.Variables import all_repo_scans_folder, local_bin, env
 from logs.Log import log_event
 from vuln_scan.Vuln_Check import check_vuln_file
 from vuln_scan.Trivy_Vuln_Check import check_vuln_file_trivy
 from file_system.File_Save import save_files, attest_sbom, sign_attest, key_generating
 from utils.Folder_Lock import repo_lock
 from utils.Helpers import load_json
+from validation.Secrets_Manager import read_secret
 from file_system.Summary_Generator import generate_summary
 
 def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
-    
+    secret_type = "cosign_key"
+    cosign_key = read_secret(secret_type)
+
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
-    env["COSIGN_PASSWORD"] = cosign_password
+    env["COSIGN_PASSWORD"] = cosign_key
 
     repo_name = current_repo.replace("/", "_")
 

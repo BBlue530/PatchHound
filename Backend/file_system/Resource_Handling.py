@@ -1,7 +1,7 @@
 import os
 import io
 import zipfile
-from flask import send_file, abort, jsonify
+from flask import send_file, abort
 from core.Variables import all_repo_scans_folder
 
 def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded):

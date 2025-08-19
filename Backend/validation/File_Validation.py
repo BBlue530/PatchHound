@@ -9,7 +9,6 @@ from logs.Log import log_event
 from utils.Helpers import extract_cve_ids
 
 def sbom_validation():
-
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
 
     if not os.path.isdir(all_repo_scans_folder):

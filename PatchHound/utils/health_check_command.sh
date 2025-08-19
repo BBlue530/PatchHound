@@ -1,3 +1,15 @@
+TOKEN=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --token)
+            TOKEN="$2"
+            shift 2
+            ;;
+        *)
+    esac
+done
+
 if [ -z "$TOKEN" ]; then
     print_message "[!]" "Missing flag" "--token is required"
 fi

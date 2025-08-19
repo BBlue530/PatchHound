@@ -3,7 +3,6 @@ BASE_DIR="$( dirname "$SCRIPT_DIR" )"
 CONFIG_FILE="$SCRIPT_DIR/../scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
-source "$BASE_DIR/utils/health_check.sh"
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
@@ -29,6 +28,8 @@ if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
     print_message "[!]" "Missing flags" "--token and --path-token are required"
     usage_list_resource
 fi
+
+source "$BASE_DIR/utils/health_check.sh"
 
 RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
         -G \

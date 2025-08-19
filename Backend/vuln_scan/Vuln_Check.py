@@ -3,7 +3,6 @@ import os
 import requests
 
 def check_vuln_file(grype_path, alert_path, repo_name, trivy_crit_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
-
     if os.path.isfile(alert_path):
         with open(alert_path, "r") as f:
             alert_system_json = json.load(f)

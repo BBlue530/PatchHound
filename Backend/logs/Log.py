@@ -2,7 +2,6 @@ import os
 import json
 
 def log_event(repo_dir, repo_name, timestamp, event, commit_sha, commit_author):
-    
     log_path = os.path.join(repo_dir, f"{repo_name}_event_log.json")
 
     logs = []

@@ -2,12 +2,15 @@ import os
 import tempfile
 from utils.Helpers import file_stable_check
 from file_system.File_Save import sign_image, verify_image, key_generating
-from core.Variables import all_repo_scans_folder, cosign_password, local_bin, env
+from validation.Secrets_Manager import read_secret
+from core.Variables import all_repo_scans_folder, local_bin, env
 
 def sign_image_digest(image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
+    secret_type = "cosign_key"
+    cosign_key = read_secret(secret_type)
 
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
-    env["COSIGN_PASSWORD"] = cosign_password
+    env["COSIGN_PASSWORD"] = cosign_key
 
     repo_name = current_repo.replace("/", "_")
     scan_dir = os.path.join(all_repo_scans_folder, organization, repo_name, timestamp)
