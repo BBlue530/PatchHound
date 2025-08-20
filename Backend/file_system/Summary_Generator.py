@@ -9,14 +9,22 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
         if e.get("vulnerability")
     }
 
+    exclusion_comments = {
+    e.get("vulnerability"): e.get("comment", "")
+    for e in exclusions_file_json.get("exclusions", [])
+    if e.get("vulnerability")
+    }
+
     def add_vuln(key, data):
         if key in excluded_ids:
+            data["comment"] = exclusion_comments.get(key, "")
             exclusions_dict[key] = data
         else:
             summary_dict[key] = data
 
     def add_vuln_kev(key, data):
         if key in excluded_ids:
+            data["comment"] = exclusion_comments.get(key, "")
             exclusions_dict[key] = data
         else:
             kev_prio_dict[key] = data

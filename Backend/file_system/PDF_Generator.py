@@ -35,51 +35,40 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Vulnerabilities", styles["Heading2"]))
-    vuln_data = [["Source", "Severity", "Package", "Version", "Title/Description", "Link"]]
 
     for vuln in summary_report.get("vulnerabilities", []):
-        vuln_data.append([
-            Paragraph(safe_text(vuln.get("source")), wrap_style),
-            Paragraph(safe_text(vuln.get("severity")), wrap_style),
-            Paragraph(safe_text(vuln.get("package")), wrap_style),
-            Paragraph(safe_text(vuln.get("version")), wrap_style),
-            Paragraph(safe_text(vuln.get("title") or vuln.get("description")), wrap_style),
-            Paragraph(safe_text(vuln.get("link")), wrap_style),
-        ])
+        elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title') or vuln.get('description'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
+        elements.append(Spacer(1, 12))
 
-    vuln_table = Table(vuln_data, repeatRows=1)
-    vuln_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-    ]))
-    elements.append(vuln_table)
-    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("CISA KEV Prioritized Vulnerabilities", styles["Heading2"]))
+    
+    for kev in summary_report.get("kev_vulnerabilities", []):
+        elements.append(Paragraph(f"<b>ID:</b> {safe_text(kev.get('id'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Severity:</b> {safe_text(kev.get('severity'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Title:</b> {safe_text(kev.get('title') or kev.get('description'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Vendor:</b> {safe_text(kev.get('vendor'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Product:</b> {safe_text(kev.get('product'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Required Action:</b> {safe_text(kev.get('required_action'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Added Date:</b> {safe_text(kev.get('kev_added_date'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Due Date:</b> {safe_text(kev.get('kev_due_date'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Link:</b> {safe_text(kev.get('link'))}", wrap_style))
+        elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Exclusions", styles["Heading2"]))
-    excl_data = [["Source", "Severity", "Package", "Version", "Title/Description", "Comment"]]
 
     for excl in summary_report.get("exclusions", []):
-        excl_data.append([
-            Paragraph(safe_text(excl.get("source")), wrap_style),
-            Paragraph(safe_text(excl.get("severity")), wrap_style),
-            Paragraph(safe_text(excl.get("package")), wrap_style),
-            Paragraph(safe_text(excl.get("version")), wrap_style),
-            Paragraph(safe_text(excl.get("title") or excl.get("description")), wrap_style),
-            Paragraph(safe_text(excl.get("comment")), wrap_style),
-        ])
-
-    excl_table = Table(excl_data, repeatRows=1)
-    excl_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-    ]))
-    elements.append(excl_table)
+        elements.append(Paragraph(f"<b>Source:</b> {safe_text(excl.get('source'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Severity:</b> {safe_text(excl.get('severity'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Package:</b> {safe_text(excl.get('package'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Version:</b> {safe_text(excl.get('version'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Title:</b> {safe_text(excl.get('title') or excl.get('description'))}", wrap_style))
+        elements.append(Paragraph(f"<b>Comment:</b> {safe_text(excl.get('comment'))}", wrap_style))
+        elements.append(Spacer(1, 12))
 
     doc.build(elements)
     print(f"PDF report saved as: {pdf_filename_path}")
