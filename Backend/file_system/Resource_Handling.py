@@ -61,3 +61,15 @@ def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded,
     memory_file.seek(0)
     files_to_get_and_return = send_file(memory_file, download_name='resources.zip', as_attachment=True)
     return files_to_get_and_return
+
+def get_latest_workflow_run(organization, current_repo):
+    repo_path = os.path.join(all_repo_scans_folder, organization, current_repo)
+    timestamp_folders = sorted([f for f in os.listdir(repo_path) if os.path.isdir(os.path.join(repo_path, f))],reverse=True)
+
+    if not timestamp_folders:
+        print(f"[!] No scans found for repo: {current_repo}")
+        valid = False
+        return None, valid
+    else:
+        valid = True
+        return timestamp_folders[0], valid

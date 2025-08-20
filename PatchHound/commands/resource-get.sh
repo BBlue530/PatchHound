@@ -6,6 +6,7 @@ source "$BASE_DIR/system/env_system.sh"
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
+LATEST=false
 FILE_NAME=()
 
 while [[ $# -gt 0 ]]; do
@@ -17,6 +18,10 @@ while [[ $# -gt 0 ]]; do
         --path-token)
             PATH_TO_RESOURCES_TOKEN_BASE64="$2"
             shift 2
+            ;;
+        --latest)
+            LATEST=true
+            shift
             ;;
         *)
             FILE_NAME+=("$1")
@@ -39,6 +44,7 @@ if [ "${#FILE_NAME[@]}" -eq 0 ]; then
         -G \
         --data-urlencode "token=$TOKEN" \
         --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
+        --data-urlencode "latest_resource=$LATEST" \
         --output downloaded_resources
 else
     CURL_ARGS_FILE_NAME=()
@@ -51,6 +57,7 @@ else
         --data-urlencode "token=$TOKEN" \
         --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
         "${CURL_ARGS_FILE_NAME[@]}" \
+        --data-urlencode "latest_resource=$LATEST" \
         --output downloaded_resources
 fi
 

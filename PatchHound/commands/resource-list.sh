@@ -6,7 +6,7 @@ source "$BASE_DIR/system/env_system.sh"
 
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
-FILE_NAME=()
+LATEST=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -17,6 +17,10 @@ while [[ $# -gt 0 ]]; do
         --path-token)
             PATH_TO_RESOURCES_TOKEN_BASE64="$2"
             shift 2
+            ;;
+        --latest)
+            LATEST=true
+            shift
             ;;
         *)
     esac
@@ -34,7 +38,8 @@ source "$BASE_DIR/utils/health_check.sh"
 RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
         -G \
         --data-urlencode "token=$TOKEN" \
-        --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN")
+        --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
+        --data-urlencode "latest_resource=$LATEST")
 
 print_message "[+]" "Resources found" "Files in resource directory:"
 mapfile -t FILES < <(echo "$RESPONSE" | grep -oP '"files":\s*\[\K[^\]]+' | tr -d '"' | tr ',' '\n' | sed 's/^\s*//;s/\s*$//')
