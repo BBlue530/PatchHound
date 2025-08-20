@@ -192,6 +192,19 @@ To download specific stored available resources in the directory:
 patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]
 ```
 
+### Latest resources
+To get or list the most recent resources added to a repository use the `--latest` flag with your command:
+#### Get the latest resource:
+```
+patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --latest
+```
+#### List the latest resources:
+```
+patchhound resource list --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --latest
+``` 
+
+---
+
 ### PDF summary report
 You can generate a complete summary report in PDF format using the pdf command:
 ```
@@ -199,7 +212,9 @@ patchhound resource pdf --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>
 ``` 
 Download the PDF report to your local machine and save a copy of the report in the same directory where the summary was extracted.
 
-## Container image signing
+---
+
+## Container image signing and verifying
 Patchhound can sign and verify container images within your workflow to ensure that the image you are using is the exact one that was originally signed.
 
 ### Sign image
