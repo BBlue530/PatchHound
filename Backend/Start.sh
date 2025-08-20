@@ -26,4 +26,4 @@ else
 fi
 
 echo "[i] Starting Gunicorn..."
-"$VENV_DIR/bin/gunicorn" -w 2 --threads 4 -b 0.0.0.0:8080 --preload Main:app
+"$VENV_DIR/bin/gunicorn" -w 2 --threads 4 -b 0.0.0.0:8080 --preload main:app

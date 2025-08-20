@@ -1,13 +1,13 @@
 import os
-from core.Variables import all_repo_scans_folder, local_bin, env
-from logs.Log import log_event
-from vuln_scan.Vuln_Check import check_vuln_file
-from vuln_scan.Trivy_Vuln_Check import check_vuln_file_trivy
-from file_system.File_Save import save_files, attest_sbom, sign_attest, key_generating
-from utils.Folder_Lock import repo_lock
-from utils.Helpers import load_json
-from validation.Secrets_Manager import read_secret
-from file_system.Summary_Generator import generate_summary
+from core.variables import all_repo_scans_folder, local_bin, env
+from logs.log import log_event
+from vuln_scan.vuln_check import check_vuln_file
+from vuln_scan.trivy_vuln_check import check_vuln_file_trivy
+from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
+from utils.folder_lock import repo_lock
+from utils.helpers import load_json
+from validation.secrets_manager import read_secret
+from file_system.summary_generator import generate_summary
 
 def save_scan_files(current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
     secret_type = "cosign_key"

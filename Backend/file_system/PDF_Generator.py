@@ -5,8 +5,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from flask import abort
 import json
 import os
-from utils.Helpers import safe_text
-from core.Variables import all_repo_scans_folder
+from utils.helpers import safe_text
+from core.variables import all_repo_scans_folder
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)

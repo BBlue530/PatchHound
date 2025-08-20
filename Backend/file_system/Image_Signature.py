@@ -1,9 +1,9 @@
 import os
 import tempfile
-from utils.Helpers import file_stable_check
-from file_system.File_Save import sign_image, verify_image, key_generating
-from validation.Secrets_Manager import read_secret
-from core.Variables import all_repo_scans_folder, local_bin, env
+from utils.helpers import file_stable_check
+from file_system.file_save import sign_image, verify_image, key_generating
+from validation.secrets_manager import read_secret
+from core.variables import all_repo_scans_folder, local_bin, env
 
 def sign_image_digest(image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
     print("[~] Signing image...")

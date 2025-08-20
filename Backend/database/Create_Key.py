@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 import uuid
-from core.Variables import db_path
+from core.variables import db_path
 
 def create_key(organization, expiration_days):
     token_key = str(uuid.uuid4())

@@ -1,6 +1,6 @@
 import jwt
 from jwt import InvalidTokenError
-from validation.Secrets_Manager import read_secret
+from validation.secrets_manager import read_secret
 
 def jwt_path_to_resources(organization ,current_repo, timestamp):
     repo_name = current_repo.replace("/", "_")

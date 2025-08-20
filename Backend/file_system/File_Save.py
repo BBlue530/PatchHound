@@ -3,10 +3,10 @@ import json
 import os
 import subprocess
 import json
-from core.Variables import env
-from logs.Alerts import alert_event_system
-from logs.Log import log_event
-from utils.Helpers import file_stable_check
+from core.variables import env
+from logs.alerts import alert_event_system
+from logs.log import log_event
+from utils.helpers import file_stable_check
 
 def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     with open(alert_path, "w") as f:

@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 import urllib.request
-from core.Variables import GRYPE_VERSION, COSIGN_VERSION
+from core.variables import GRYPE_VERSION, COSIGN_VERSION
 
 local_bin = os.path.expanduser("~/.local/bin")
 

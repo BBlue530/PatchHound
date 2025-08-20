@@ -1,5 +1,5 @@
 import sqlite3
-from core.Variables import db_path
+from core.variables import db_path
 
 def create_database():
     conn = sqlite3.connect(db_path)

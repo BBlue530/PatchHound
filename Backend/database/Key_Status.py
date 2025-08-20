@@ -1,5 +1,5 @@
 import sqlite3
-from core.Variables import db_path
+from core.variables import db_path
 
 def disable_key(token_key):
     try:

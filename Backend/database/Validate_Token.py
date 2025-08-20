@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from core.Variables import db_path
+from core.variables import db_path
 
 def validate_token(token_key):
     try:

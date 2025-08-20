@@ -1,4 +1,4 @@
-from core.Variables import secret_storage, length
+from core.variables import secret_storage, length
 import json
 import secrets
 import os
