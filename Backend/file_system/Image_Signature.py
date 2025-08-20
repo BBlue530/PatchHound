@@ -6,6 +6,7 @@ from validation.Secrets_Manager import read_secret
 from core.Variables import all_repo_scans_folder, local_bin, env
 
 def sign_image_digest(image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
+    print("[~] Signing image...")
     secret_type = "cosign_key"
     cosign_key = read_secret(secret_type)
 
@@ -33,6 +34,7 @@ def sign_image_digest(image_digest, organization, current_repo, timestamp, commi
     sign_image(cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
 
 def verify_image_digest(image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
+    print("[~] Verifying image...")
     repo_name = current_repo.replace("/", "_")
     scan_dir = os.path.join(all_repo_scans_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_repo_scans_folder, organization, repo_name)

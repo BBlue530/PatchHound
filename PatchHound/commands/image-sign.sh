@@ -40,5 +40,3 @@ source "$BASE_DIR/system/env_variables_scan.sh"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/utils/health_check.sh"
 source "$BASE_DIR/scan/image_sign.sh"
-
-print_message "[+]" "Signing done" "Signing finished successfully"

@@ -46,5 +46,3 @@ echo "==============================================="
 source "$BASE_DIR/system/env_variables_scan.sh"
 source "$BASE_DIR/utils/health_check.sh"
 source "$BASE_DIR/scan/image_verify.sh"
-
-print_message "[+]" "Verification done" "Verification finished successfully"

@@ -1,10 +1,6 @@
 FAIL="false"
 PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64 -w 0)
 
-echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
-print_message "[+]" "Path token" "Path token to access resources sent to backend: 
-$PATH_TO_RESOURCES_TOKEN_BASE64"
-
 if [ "$FAIL_ON_CRITICAL" = "true" ]; then
 
   if [[ "$FAIL_ON_SEVERITY" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
@@ -47,6 +43,10 @@ if [ "$FAIL_ON_CRITICAL" = "true" ]; then
       fi
       ;;
   esac
+
+echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
+print_message "[+]" "Path token" "Path token to access resources sent to backend: 
+$PATH_TO_RESOURCES_TOKEN_BASE64"
 
   if [ "$FAIL" = "true" ]; then
     exit 1
