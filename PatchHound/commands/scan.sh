@@ -41,6 +41,7 @@ source "$BASE_DIR/scan/sbom_generate.sh"
 source "$BASE_DIR/scan/sbom_upload.sh"
 source "$BASE_DIR/system/vulns_found.sh"
 source "$BASE_DIR/display/scan_results.sh"
+source "$BASE_DIR/system/cleanup.sh"
 source "$BASE_DIR/display/conclusion.sh"
 
 print_message "[+]" "Scan result" "Scan finished successfully"
