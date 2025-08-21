@@ -22,6 +22,10 @@ while [[ $# -gt 0 ]]; do
             LATEST=true
             shift
             ;;
+        --help)
+            usage_list_resource
+            exit 1
+            ;;
         *)
     esac
 done

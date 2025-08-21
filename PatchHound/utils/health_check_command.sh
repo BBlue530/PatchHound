@@ -6,12 +6,18 @@ while [[ $# -gt 0 ]]; do
             TOKEN="$2"
             shift 2
             ;;
+        --help)
+            usage_health
+            exit 1
+            ;;
         *)
     esac
 done
 
 if [ -z "$TOKEN" ]; then
     print_message "[!]" "Missing flag" "--token is required"
+    usage_health
+    exit 1
 fi
 
 health_response=$(curl -sSL "$HEALTH_CHECK_API_URL" \

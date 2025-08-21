@@ -27,6 +27,10 @@ while [[ $# -gt 0 ]]; do
             PAT_TOKEN="$2"
             shift 2
             ;;
+        --help)
+            usage_verify_image
+            exit 1
+            ;;
         *)
     esac
 done

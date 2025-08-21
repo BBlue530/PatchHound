@@ -7,7 +7,6 @@ source "$BASE_DIR/system/env_system.sh"
 TOKEN=""
 API_KEY=""
 INSTRUCTION=""
-INSTRUCTION=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -22,6 +21,10 @@ while [[ $# -gt 0 ]]; do
         --ins)
             INSTRUCTION="$2"
             shift 2 
+            ;;
+        --help)
+            usage_change
+            exit 1
             ;;
         *)
     esac

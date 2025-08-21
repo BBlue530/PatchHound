@@ -71,6 +71,10 @@ case "$1" in
         cat "$CONFIG_FILE"
         cat "$SCAN_PROFILE_CONFIG_FILE"
         ;;
+    --help)
+        usage_config
+        exit 1
+        ;;
     *)
         usage_config
         ;;

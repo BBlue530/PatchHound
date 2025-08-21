@@ -38,6 +38,9 @@ case "$COMMAND" in
             pdf)
                 source "$BASE_DIR/commands/resource-pdf-summary.sh" "$@"
                 ;;
+            --help)
+                usage_cli_resource
+                ;;
             *)
                 usage_cli_resource
                 ;;
@@ -53,10 +56,16 @@ case "$COMMAND" in
             verify)
                 source "$BASE_DIR/commands/image-verify.sh" "$@"
                 ;;
+            --help)
+                usage_cli_image
+                ;;
             *)
                 usage_cli_image
                 ;;
         esac
+        ;;
+    --help)
+        usage_help
         ;;
     *)
         usage_cli

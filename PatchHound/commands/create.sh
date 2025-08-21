@@ -22,6 +22,10 @@ while [[ $# -gt 0 ]]; do
             EXP_DAYS="$2"
             shift 2 
             ;;
+        --help)
+            usage_create
+            exit 1
+            ;;
         *)
     esac
 done

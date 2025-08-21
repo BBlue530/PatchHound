@@ -17,6 +17,10 @@ while [[ $# -gt 0 ]]; do
             PATH_TO_RESOURCES_TOKEN_BASE64="$2"
             shift 2
             ;;
+        --help)
+            usage_pdf_summary
+            exit 1
+            ;;
         *)
     esac
 done
@@ -24,7 +28,7 @@ PATH_TO_RESOURCES_TOKEN=$(echo -n "$PATH_TO_RESOURCES_TOKEN_BASE64" | base64 --d
 
 if [[ -z "$TOKEN" || -z "$PATH_TO_RESOURCES_TOKEN" ]]; then
     print_message "[!]" "Missing flags" "--token and --path-token are required"
-    usage_list_resource
+    usage_pdf_summary
 fi
 
 source "$BASE_DIR/utils/health_check.sh"

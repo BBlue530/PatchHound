@@ -23,6 +23,10 @@ while [[ $# -gt 0 ]]; do
             LATEST=true
             shift
             ;;
+        --help)
+            usage_get_resource
+            exit 1
+            ;;
         *)
             FILE_NAME+=("$1")
             shift

@@ -10,53 +10,114 @@ usage_config() {
 }
 
 usage_change() {
-    echo "Usage: patchhound change --token <TOKEN_KEY> --ins <enable|disable>"
+    echo "Usage:"
+    echo "  patchhound change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>"
     exit 1
 }
 
 usage_create() {
-    echo "Usage: patchhound create --org <organization> --exp <expiration_days>"
+    echo "Usage:"
+    echo "  patchhound create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>"
     exit 1
 }
 
 usage_get_resource() {
-    echo "Usage: patchhound --token <token> --path-token <path_to_resources_token>  [file1 file2 ...]"
+    echo "Usage:"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --latest"
     exit 1
 }
 
 usage_list_resource() {
-    echo "Usage: patchhound --token <token> --path-token <path_to_resources_token> [file1 file2 ...]"
+    echo "Usage:"
+    echo "  patchhound resource list --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --latest"
     exit 1
 }
 
 usage_cli_resource() {
-    echo "Usage: patchhound resource <get|list> [args]"
+    echo "Usage:"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>"
+    echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]"
+    echo "  patchhound resource list --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>"
     exit 1
 }
 
 usage_cli() {
-    echo "Usage: patchhound <config|scan|health|create|change|resource|exclude> [args]"
+    echo "Usage:"
+    echo "  patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>"
+    echo "  patchhound exclude --list"
+    echo "  patchhound exclude --remove <CVE_ID>"
+    exit 1
+}
+
+usage_exclude() {
+    echo "Usage:"
+    echo "  patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>"
+    echo "  patchhound exclude --list"
+    echo "  patchhound exclude --remove <CVE_ID>"
     exit 1
 }
 
 usage_cli_image() {
-    echo "Usage: patchhound scan --image <image_name> --token <token>"
-    echo "Usage: patchhound sign --image <image_name> --token <token>"
-    echo "Usage: patchhound verify --image <image_name> --token <token> --path-token <path_to_resources_token>"
+    echo "Usage:"
+    echo "  patchhound scan --image <image_name> --token <token>"
+    echo "  patchhound sign --image <image_name> --token <token>"
+    echo "  patchhound verify --image <image_name> --token <token> --path-token <path_to_resources_token>"
     exit 1
 }
 
 usage_sign_image() {
-    echo "Usage: patchhound sign --image <image_name> --token <token> --pat <pat_token(needed for private images)>"
+    echo "Usage:"
+    echo "  patchhound sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>"
     exit 1
 }
 
 usage_verify_image() {
-    echo "Usage: patchhound verify --image <image_name> --token <token> --pat <pat_token(needed for private images)> --path-token <path_to_resources_token>"
+    echo "Usage:"
+    echo "  patchhound verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>"
     exit 1
 }
 
 usage_scan() {
-    echo "Usage: patchhound scan --token <token> --pat <pat_token(needed for private images)>"
+    echo "Usage:"
+    echo "  patchhound scan --token <token>"
+    echo "  patchhound scan --token <token> --pat <pat_token(needed for private images)>"
+    exit 1
+}
+
+usage_health() {
+    echo "Usage:"
+    echo "  patchhound health --token <TOKEN_KEY>"
+    exit 1
+}
+
+usage_pdf_summary() {
+    echo "Usage:"
+    echo "  patchhound resource pdf --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> "
+    exit 1
+}
+
+usage_help() {
+    echo "PatchHound CLI"
+    echo ""
+    echo "Usage:"
+    echo "  patchhound <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  config       Manage PatchHound config (set/get/list)"
+    echo "  change       Enable or disable token keys"
+    echo "  create       Create new token keys"
+    echo "  resource     Get or list repository resources"
+    echo "  exclude      Manage vulnerability exclusions (add/list/remove)"
+    echo "  scan         Run a new scan"
+    echo "  sign         Sign container images"
+    echo "  verify       Verify signed container images"
+    echo "  health       Perform health check of the API"
+    echo "  resource pdf Generate PDF summary reports"
+    echo "  --help       Show this help message"
+    echo ""
+    echo "Use 'patchhound <command> --help' for more information on a specific command."
     exit 1
 }

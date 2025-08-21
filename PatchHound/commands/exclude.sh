@@ -24,8 +24,8 @@ while [[ $# -gt 0 ]]; do
         --remove)
             CVE_TO_REMOVE="$2"
             if [[ -z "$CVE_TO_REMOVE" ]]; then
-                print_message "[!]" "Missing flag" "Usage: $0 exclude --remove <CVE-ID>"
-                exit 1
+                print_message "[!]" "Missing flag" ""
+                usage_exclude
             fi
             shift 2
             ensure_exclude_path
@@ -51,6 +51,10 @@ while [[ $# -gt 0 ]]; do
             done
             COMMENT="${COMMENT#"${COMMENT%%[![:space:]]*}"}"
             ;;
+        --help)
+            usage_exclude
+            exit 1
+            ;;
         *)
             shift
             ;;
@@ -59,7 +63,7 @@ done
 
 if [[ -z "$CVE" || -z "$COMMENT" ]]; then
     print_message "[!]" "Missing flag" "Usage: $0 exclude --cve <CVE-ID> --comment <text>"
-    exit 1
+    usage_exclude
 fi
 
 ensure_exclude_path
