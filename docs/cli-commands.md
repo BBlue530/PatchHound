@@ -52,6 +52,7 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
    ALERT_WEBHOOK="https://<your-webhook>"
    SAST_SCAN=true
    TRIVY_SCAN=true
+   CLEANUP=true
    ```
 
    ```bash
@@ -91,6 +92,9 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
 
    - `TRIVY_SCAN` (default: `true`)
       Set to `false` to skip the Trivy scan for vulnerabilities, misconfigurations, and secrets.
+
+   - `CLEANUP` (default: `true`)
+      Set to `false` to skip cleanup of files that get created by the scans.
 
 ### Get a single value
 Retrieve the current value for a specific key:
@@ -230,6 +234,18 @@ To verify an image you will have to provide the same path token you got when sig
 patchhound verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>
 ``` 
 This will validate the image against the previously generated signature ensuring it has not been altered.
+
+---
+
+## Help
+To get a list of the avaliable commands use `--help` flag.
+```
+patchhound --help
+```
+You can also get help on a specific command by using `--help` flag in combination with a command.
+```
+patchhound <COMMAND> --help
+```
 
 ---
 ## Usage in pipeline
