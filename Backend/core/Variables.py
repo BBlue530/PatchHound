@@ -18,7 +18,7 @@ db_path = os.path.normpath(DB_PATH)
 secret_storage = "secrets.json"
 length=32
 
-version = "0.0.6"
+version = "0.1.0"
 
 GRYPE_VERSION = "0.68.0"
 COSIGN_VERSION = "2.5.3"

@@ -110,6 +110,7 @@ This project is licensed under the Apache License 2.0. See the LICENSE file for 
 
 ---
 
-⚠️ **Warning:** Run this workflow on only one main branch to keep runs minimal and avoid GitHub Actions rate limits.
+⚠️ **Warning: PatchHound is currently in development. There is no stable release yet.**  
+Use at your own risk and expect potential breaking changes until a stable version is released.
 
 ---
