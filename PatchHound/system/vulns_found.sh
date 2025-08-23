@@ -40,11 +40,11 @@ else
     SECRET_COUNT_TRIVY=0
 fi
 if [[ -f vulns.cyclonedx.json ]]; then
-    CRIT_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "critical")' "id")
-    HIGH_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "high")' "id")
-    MED_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "medium")' "id")
-    LOW_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "low")' "id")
-    UNKNOWN_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | select((.ratings[]?.severity | ascii_downcase) == "unknown")' "id")
+    CRIT_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities // [] | .[] | select((.ratings // [] | map(.severity // "" | ascii_downcase) | index("critical")) != null)' "id")
+    HIGH_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities // [] | .[] | select((.ratings // [] | map(.severity // "" | ascii_downcase) | index("high")) != null)' "id")
+    MED_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities // [] | .[] | select((.ratings // [] | map(.severity // "" | ascii_downcase) | index("medium")) != null)' "id")
+    LOW_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities // [] | .[] | select((.ratings // [] | map(.severity // "" | ascii_downcase) | index("low")) != null)' "id")
+    UNKNOWN_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities // [] | .[] | select((.ratings // [] | map(.severity // "" | ascii_downcase) | index("unknown")) != null)' "id")
 else
     CRIT_COUNT_GRYPE=0
     HIGH_COUNT_GRYPE=0

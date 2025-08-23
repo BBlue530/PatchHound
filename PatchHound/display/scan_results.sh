@@ -37,7 +37,7 @@ if [ "$CRIT_COUNT_GRYPE" -gt 0 ]; then
 echo "[!] Critical Vulnerabilities Found by Grype"
 jq -r '
   (.vulnerabilities // [])[] 
-  | select((.ratings[]?.severity | ascii_downcase) == "critical") 
+  | select((.ratings // [] | map(.severity // "") | map(ascii_downcase) | index("critical")) != null)
   | .id as $ID
   | (.description // "No description available") as $DESC
   | (
