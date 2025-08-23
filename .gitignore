@@ -1,2 +1,4 @@
 Backend/database/keys_db.sqlite
 Backend/secrets.json
+requirements.txt
+exclusions.json
