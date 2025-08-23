@@ -114,7 +114,7 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
         path = issue.get("path", "unknown_path")
         line = issue.get("start", {}).get("line", "0")
 
-        key = f"{path}:{line}_{rule_id}"
+        key = rule_id
         add_vuln(key, {
             "source": "semgrep",
             "id": rule_id,
