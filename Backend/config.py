@@ -6,3 +6,5 @@ AWS_ACCESS_KEY_ID = "your-access-key-id"
 AWS_SECRET_ACCESS_KEY = "your-secret-access-key"
 
 LOCAL_SECRETS = True
+
+CUSTOM_SECRETS = False

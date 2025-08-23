@@ -5,3 +5,4 @@ gunicorn==21.2.0
 filelock==3.18.0
 PyJWT==2.10.1
 reportlab==4.4.3
+boto3==1.37.21

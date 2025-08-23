@@ -1,9 +1,11 @@
-from core.variables import secret_storage, length
-from config import LOCAL_SECRETS, AWS_SECRETS, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SECRET_NAME
+from core.variables import secret_storage, length, secret_types
+from config import LOCAL_SECRETS, AWS_SECRETS, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SECRET_NAME, CUSTOM_SECRETS
+from custom_secret_manager import read_secret_custom
 import json
 import secrets
 import os
 import boto3
+import sys
     
 def read_secret(secret_type):
     if LOCAL_SECRETS == True:
@@ -11,6 +13,9 @@ def read_secret(secret_type):
         return secret_value
     elif AWS_SECRETS == True:
         secret_value = read_secret_aws(secret_type)
+        return secret_value
+    elif CUSTOM_SECRETS == True:
+        secret_value = read_secret_custom(secret_type)
         return secret_value
 
 def verify_api_key(api_key):
@@ -26,6 +31,8 @@ def verify_api_key(api_key):
         stored_api_key = read_secret_local(secret_type)
     elif AWS_SECRETS == True:
         stored_api_key = read_secret_aws(secret_type)
+    elif CUSTOM_SECRETS == True:
+        stored_api_key = read_secret_custom(secret_type)
 
     if not stored_api_key:
         print("[!] API key not found")
@@ -120,3 +127,23 @@ def generate_secrets():
             secrets_data["jwt_key"] = jwt_key
             with open(secret_storage, "w") as f:
                 json.dump(secrets_data, f, indent=4)
+
+def verify_secrets():
+    if LOCAL_SECRETS == True:
+        for secret_type in secret_types:
+            secret_value = read_secret(secret_type)
+            if not secret_value:
+                sys.exit(1)
+    elif AWS_SECRETS == True:
+        for secret_type in secret_types:
+            secret_value = read_secret(secret_type)
+            if not secret_value:
+                sys.exit(1)
+    elif CUSTOM_SECRETS == True:
+        for secret_type in secret_types:
+            secret_value = read_secret(secret_type)
+            if not secret_value:
+                sys.exit(1)
+    else:
+        print("[!] Secret manager not set")
+        sys.exit(1)
