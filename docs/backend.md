@@ -19,6 +19,7 @@ PatchHound Backend is the heart of the system. It handles ingesting SBOMs, scann
 - Handle multiple requests simultaneously
 - Generate JSON and PDF summary reports for workflows
 - Manage exclusions of vulnerabilities across versions
+- Supports 3rd party secret managers
 
 ---
 
@@ -50,7 +51,15 @@ This single command will:
 - Initialize the database to store token keys and related data (if it doesn't already exist)
 - Start the daily vulnerability scan scheduler to keep everything continuously monitored
 - Verify secret values exist and generate them if needed
-Once running the backend will be managing updates, scans and alerts.
+Once running the backend will be managing updates, scans and alerts. 
+
+### Config
+
+By default PatchHound will generate secrets for you if no external secret manager is configured. 
+
+In the root of the Backend you can find `config.py` where you can customize the backend settings and switch from the default local secret storage to a third party secret manager. 
+
+Currently AWS Secrets Manager is supported and there are plans to add support for additional secret managers in the future. 
 
 ---
 

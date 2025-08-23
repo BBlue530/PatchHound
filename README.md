@@ -115,4 +115,7 @@ This project is licensed under the Apache License 2.0. See the LICENSE file for 
 ⚠️ **Warning: PatchHound is currently in development. There is no stable release yet.**  
 Use at your own risk and expect potential breaking changes until a stable version is released.
 
+⚠️ **Note: The requirements.txt in the root of the repository is intended for testing.** 
+The requirements.txt inside the `Backend` folder is used for running the backend properly. **Do not manually run pip install -r requirements.txt** always use `Start.sh` to ensure the correct environment and dependencies are installed.
+
 ---
