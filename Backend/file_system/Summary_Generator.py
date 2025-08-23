@@ -144,7 +144,13 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
             key = m.get("ID")
             if not key:
                 continue
-            link = m.get("PrimaryURL") or (m.get("References") or ["No link available"])[0]
+            refs = m.get("References", [])
+            links = []
+            for r in refs:
+                if isinstance(r, dict) and r.get("url"):
+                    links.append(r["url"])
+                elif isinstance(r, str):
+                    links.append(r)
             add_vuln(key, {
                 "source": "trivy",
                 "id": key,
@@ -154,7 +160,7 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
                 "resolution": m.get("Resolution", "No fix guidance"),
                 "severity": m.get("Severity"),
                 "file": m.get("Target"),
-                "links": [r.get("url") for r in m.get("References", []) if r.get("url")]
+                "links": links
             })
 
         for s in result.get("Secrets", []):
