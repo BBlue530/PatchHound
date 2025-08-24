@@ -77,7 +77,9 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
 
    - `FAIL_ON_SEVERITY` (default: `CRITICAL`)
       Determines which vulnerability severity will cause the pipeline to fail if detected. 
-      You can use standard severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`) or numeric values corresponding to CVSS scores.
+      You can use standard severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`) or numeric values corresponding to CVSS scores. 
+      
+      ⚠️ **Warning:** While numeric CVSS thresholds are supported use them with caution. Grypes CVSS scoring can sometimes be inconsistent or missing for certain vulnerabilities which may cause unexpected behavior when failing the pipeline based on numeric thresholds.
 
    - `BASE_URL` (**MANDATORY**).
       The base URL of your backend.
