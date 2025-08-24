@@ -10,14 +10,14 @@ else
     ISSUES_COUNT_SAST=0
 fi
 
-if [[ "$FAIL_ON_SEVERITY" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+if echo "$FAIL_ON_SEVERITY" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
     if [[ -f vulns.cyclonedx.json ]]; then
-        CVSS_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json ".vulnerabilities[] | select(.ratings[]?.score? >= $FAIL_ON_SEVERITY)" "id")
+        CVSS_COUNT_GRYPE=$(exclusions_filter vulns.cyclonedx.json '.vulnerabilities[] | (.ratings[]?.score? // 0) as $score | select($score >= '"$FAIL_ON_SEVERITY"')' "id")
     else
         CVSS_COUNT_GRYPE=0
     fi
     if [[ -f trivy_report.json ]]; then
-        CVSS_COUNT_TRIVY=$(exclusions_filter trivy_report.json ".Results[]?.Vulnerabilities[]? | select(.CVSS?.nvd?.V3Score? >= $FAIL_ON_SEVERITY or .CVSS?.redhat?.V3Score? >= $FAIL_ON_SEVERITY)" "VulnerabilityID")
+        CVSS_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Vulnerabilities[]? | (.CVSS.nvd?.V3Score // .CVSS.nvd?.V2Score // .CVSS.redhat?.Score // 0) as $score | select($score >= '"$FAIL_ON_SEVERITY"')' "VulnerabilityID")
     else
         CVSS_COUNT_TRIVY=0
     fi
