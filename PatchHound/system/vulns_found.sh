@@ -3,8 +3,8 @@ source "$BASE_DIR/utils/exclusion_filter.sh"
 EXCLUSIONS_FILE=$(find_exclusions_file) || { echo "exclusions.json not found"; exit 1; }
 
 if [[ -f sast_report.json ]]; then
-    CRITICAL_COUNT_SAST=$(jq '[.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")] | length' sast_report.json)
-    ISSUES_COUNT_SAST=$(jq '.results | length' "sast_report.json")
+    CRITICAL_COUNT_SAST=$(exclusions_filter sast_report.json '.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")' "check_id")
+    ISSUES_COUNT_SAST=$(exclusions_filter sast_report.json '.results[]?' "check_id")
 else
     CRITICAL_COUNT_SAST=0
     ISSUES_COUNT_SAST=0
@@ -28,8 +28,8 @@ if [[ -f trivy_report.json ]]; then
     MED_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")' "VulnerabilityID")
     LOW_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")' "VulnerabilityID")
     UNKNOWN_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Vulnerabilities[]? | select(.Severity == "UNKNOWN")' "VulnerabilityID")
-    MISCONF_COUNT_TRIVY=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy_report.json)
-    SECRET_COUNT_TRIVY=$(jq '[.Results[]?.Secrets[]?] | length' trivy_report.json)
+    MISCONF_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Misconfigurations[]?' "ID")
+    SECRET_COUNT_TRIVY=$(exclusions_filter trivy_report.json '.Results[]?.Secrets[]?' "RuleID")
 else
     CRIT_COUNT_TRIVY=0
     HIGH_COUNT_TRIVY=0
