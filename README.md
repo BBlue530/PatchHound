@@ -21,7 +21,8 @@ PatchHound not only scans for vulnerabilities but also supports **signing and ve
    - Automatic verification of the SBOMs attestation and signing
    - Alerts if verification fails or new vulnerabilities have been found
 - Outputs detailed vulnerability counts by severity
-- Lists top critical vulnerabilities found
+- Lists vulnerabilities found
+- Repository history tracking
 - Alerts on [Discord](https://discord.com/) / [Slack](https://slack.com/) when vulnerabilities are found
 - Configurable via CLI
 - Works on source repos or remote and local container images

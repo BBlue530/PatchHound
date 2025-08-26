@@ -20,6 +20,7 @@ PatchHound Backend is the heart of the system. It handles ingesting SBOMs, scann
 - Generate JSON and PDF summary reports for workflows
 - Manage exclusions of vulnerabilities across versions
 - Supports 3rd party secret managers
+- Repository history tracking
 
 ---
 
@@ -70,11 +71,24 @@ Currently PatchHound is expecting these secrets:
 
 ---
 
-# Workflow Diagram
+## File System
+
+PatchHound organizes all scan results and resources in a token based file system.
+When you run a scan, the backend issues a token JWT that acts as a key to retrieve the full set of files and reports generated for that run.
+
+- **Token based access:** The issued token allows you to securely fetch all artifacts for a given workflow run.
+
+- **Exclusion aware summaries:** PatchHound generates a comprehensive summary report with all vulnerabilties that has been found and automatically respects your configured exclusions and includes any comments and justifications you have for the exclusions.
+
+- **Repository history:** Every scan is preserved enabling PatchHound to produce a full historical report of vulnerabilities over time.
+
+---
+
+## Workflow Diagram
 
 This diagram outlines the detailed structure of the security scanning and vulnerability prioritization workflow. It captures both the pipeline process triggered during code commits and the daily automated cron job that maintains and validates scan data integrity.
 
-## Pipeline Workflow
+### Pipeline Workflow
 
 ```
 CLI Scan
@@ -120,7 +134,7 @@ CLI Scan
    │         organization/repo_name/{repo_name}_event_log.json
    └─ Return JSON response with vulnerability scan, KEV prioritization and jwt for accessing the stored resources.
 ```
-## Daily Cron Job Workflow
+### Daily Cron Job Workflow
 
 ```
 Cron Trigger: scheduled_event()
@@ -173,7 +187,7 @@ Cron Trigger: scheduled_event()
    │         ├─ Trigger alert
    │         └─ Log failure event
 ```
-## Deployment
+### Deployment
 
 ```
 [Deployment / Runtime]
