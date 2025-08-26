@@ -41,7 +41,7 @@ def save_files(grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, aler
         json.dump(exclusions_file_json, f, indent=4)
     file_stable_check(exclusions_file_path)
 
-def attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def attest_sbom(alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
         subprocess.run(
             [
@@ -62,9 +62,10 @@ def attest_sbom(cosign_key_path, sbom_path, sbom_attestation_path, repo_name, al
         alert = "Workflow : Signature Fail"
         print(message)
         alert_event_system(message, alert, alert_path)
+        alerts_list.append(f"{message}")
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
-def sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def sign_attest(alerts_list, cosign_key_path, cosign_pub_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
         subprocess.run(
             [
@@ -83,9 +84,35 @@ def sign_attest(cosign_key_path, att_sig_path, sbom_attestation_path, repo_name,
         alert = "Workflow : Signature Fail"
         print(message)
         alert_event_system(message, alert, alert_path)
+        alerts_list.append(f"{message}")
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
+    
+    try:
+        subprocess.run(
+            [
+                "cosign", "verify-blob",
+                "--key", cosign_pub_path,
+                "--signature", att_sig_path,
+                sbom_attestation_path
+            ],
+            check=True,
+            env=env
+        )
+        attestation_verified = True
+        message = f"[+] Verified Attestation signature for repo: {repo_name}"
+        print(f"{message}")
+        return attestation_verified
+    except subprocess.CalledProcessError:
+        attestation_verified = False
+        message = f"[!] Signature for Attestation failed for repo: {repo_name}!"
+        alert = "Scheduled Event : Signature Fail"
+        print(f"{message}")
+        alert_event_system(message, alert, alert_path)
+        alerts_list.append(f"{message}")
+        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
+        return attestation_verified
 
-def key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def key_generating(alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     print(f"[~] Generating Cosign key for repo: {repo_name}")
     try:
         subprocess.run(
@@ -103,6 +130,7 @@ def key_generating(repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_
         alert = "Workflow : Signature Fail"
         print(message)
         alert_event_system(message, alert, alert_path)
+        alerts_list.append(f"{message}")
         log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
 def sign_image(cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
