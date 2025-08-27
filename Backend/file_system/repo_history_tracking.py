@@ -2,13 +2,14 @@ import json
 import os
 from utils.file_hash import hash_file
 
-def track_repo_history(repo_history_path, timestamp, commit_sha, vulns_found, sbom_attestation_path, sbom_path, attestation_verified, alerts_list):
+def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, sbom_attestation_path, sbom_path, attestation_verified, alerts_list):
     sbom_att_hash = hash_file(sbom_attestation_path)
     sbom_hash = hash_file(sbom_path)
     new_entry = {
         "commit_sha": commit_sha,
         "timestamp": timestamp,
         "sbom_hash": sbom_hash,
+        "audit_trail_hash": audit_trail_hash,
         "vulnerabilities": vulns_found,
         "attestation": {
             "hash": sbom_att_hash,

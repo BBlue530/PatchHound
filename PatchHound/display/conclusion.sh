@@ -5,7 +5,6 @@ FAIL_ON_CRITICAL=$(echo "$FAIL_ON_CRITICAL" | tr -d '\r' | xargs)
 FAIL_ON_SEVERITY=$(echo "$FAIL_ON_SEVERITY" | tr -d '\r' | xargs)
 
 if [ "$FAIL_ON_CRITICAL" = "true" ]; then
-  echo "inside the if true"
   if echo "$FAIL_ON_SEVERITY" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
     if [ "$CVSS_COUNT_GRYPE" -gt 0 ] || [ "$CVSS_COUNT_TRIVY" -gt 0 ]; then
       print_message "[!]" "Failing on CVSS: $FAIL_ON_SEVERITY" "Found $((CVSS_COUNT_GRYPE + CVSS_COUNT_TRIVY)) vulnerabilities above CVSS: $FAIL_ON_SEVERITY"

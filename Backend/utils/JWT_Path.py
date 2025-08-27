@@ -1,8 +1,9 @@
 import jwt
 from jwt import InvalidTokenError
 from validation.secrets_manager import read_secret
+from utils.audit_trail import audit_trail_event
 
-def jwt_path_to_resources(organization ,current_repo, timestamp):
+def jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp):
     repo_name = current_repo.replace("/", "_")
     payload = {
     "organization": organization,
@@ -12,6 +13,9 @@ def jwt_path_to_resources(organization ,current_repo, timestamp):
     secret_type = "jwt_key"
     jwt_secret = read_secret(secret_type)
     path_to_resources_token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+    audit_trail_event(audit_trail, "JWT_TOKEN", {
+        "status": "success"
+    })
     return path_to_resources_token
 
 def decode_jwt_path_to_resources(path_to_resources_token, organization):

@@ -8,15 +8,16 @@ import io
 from datetime import datetime
 from file_system.file_handling import save_scan_files
 from utils.jwt_path import jwt_path_to_resources
+from utils.audit_trail import audit_trail_event
 from database.validate_token import validate_token
 from validation.check_format import check_json_format
 from vuln_scan.kev_catalog import compare_kev_catalog
 
 scan_sbom_bp = Blueprint("scan_sbom", __name__)
 
-def threading_save_scan_files(current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content):
+def threading_save_scan_files(audit_trail, current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content):
     sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
+    save_scan_files(audit_trail, current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
 
 @scan_sbom_bp.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
@@ -25,7 +26,9 @@ def scan_sbom():
     if not token_key:
         return jsonify({"error": "Token missing"}), 401
     
-    response, valid_token = validate_token(token_key)
+    audit_trail = []
+    
+    response, valid_token = validate_token(audit_trail, token_key)
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 401
     organization = response
@@ -58,7 +61,7 @@ def scan_sbom():
     commit_author = request.form.get("commit_author")
     alert_system_webhook = request.form.get("alert_system_webhook")
 
-    is_cyclonedx = check_json_format(sbom_file)
+    is_cyclonedx = check_json_format(audit_trail, sbom_file)
     if is_cyclonedx == False:
         return jsonify({"error": "SBOM file must be valid JSON format CycloneDX 1.6"}), 400
     
@@ -73,6 +76,15 @@ def scan_sbom():
         sbom_file.save(tmp)
         tmp_path = tmp.name
 
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    audit_trail_event(audit_trail, "SCAN_START", {
+        "timestamp_id": timestamp,
+        "repo": current_repo,
+        "commit_sha": commit_sha,
+        "commit_author": commit_author
+    })
+
     try:
         vulns_cyclonedx_json = subprocess.run(
         ["grype", f"sbom:{tmp_path}", "-o", "cyclonedx-json"],
@@ -80,6 +92,10 @@ def scan_sbom():
         text=True,
         check=True
         )
+        audit_trail_event(audit_trail, "GRYPE_SCAN", {
+            "status": "success",
+            "output_format": "cyclonedx"
+        })
 
     except subprocess.CalledProcessError as e:
         return jsonify({"error": "Grype scan failed", "details": e.stderr}), 500
@@ -87,10 +103,9 @@ def scan_sbom():
         os.unlink(tmp_path)
     
     vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
-    prio_vuln_data = compare_kev_catalog(vulns_cyclonedx_json_data)
+    prio_vuln_data = compare_kev_catalog(audit_trail, vulns_cyclonedx_json_data)
 
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    path_to_resources_token = jwt_path_to_resources(organization ,current_repo, timestamp)
+    path_to_resources_token = jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp)
 
     result_parsed = {
     "vulns_cyclonedx_json": vulns_cyclonedx_json_data,
@@ -107,8 +122,13 @@ def scan_sbom():
     exclusions_file.seek(0)
     exclusions_file_content = exclusions_file.read()
 
+    audit_trail_event(audit_trail, "RETURN_FILE_TO_CLIENT", {
+        "returned": ["vulns_cyclonedx_json", "prio_vulns", "path_to_resources_token"],
+        "client": request.remote_addr
+    })
+
     threading.Thread(
         target=threading_save_scan_files,
-        args=(current_repo, sbom_content, sast_report_content, trivy_report_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
+        args=(audit_trail, current_repo, sbom_content, sast_report_content, trivy_report_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
     ).start()
     return jsonify(result_parsed)

@@ -12,7 +12,9 @@ def generate_pdf():
     if not token_key:
         return jsonify({"error": "Token missing"}), 401
     
-    response, valid_token = validate_token(token_key)
+    audit_trail = False
+
+    response, valid_token = validate_token(audit_trail, token_key)
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 401
     organization = response

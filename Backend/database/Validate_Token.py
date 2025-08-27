@@ -1,8 +1,9 @@
 import sqlite3
 from datetime import datetime
+from utils.audit_trail import audit_trail_event
 from core.variables import db_path
 
-def validate_token(token_key):
+def validate_token(audit_trail, token_key):
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -26,6 +27,12 @@ def validate_token(token_key):
 
         if datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now():
             return "Token validation: TokenKey Expired", False
+        if audit_trail is not False:
+            audit_trail_event(audit_trail, "TOKEN_VALIDATION", {
+                "status": "valid",
+                "expiration_date": expiration_date,
+                "organization": organization
+            })
 
         return organization, True
 

@@ -1,8 +1,9 @@
 import json
 import os
 import requests
+from utils.audit_trail import audit_trail_event
 
-def check_vuln_file(alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
+def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
     if os.path.isfile(alert_path):
         with open(alert_path, "r") as f:
             alert_system_json = json.load(f)
@@ -62,13 +63,29 @@ def check_vuln_file(alerts_list, grype_path, alert_path, repo_name, trivy_crit_c
             data=json.dumps(message),
             headers={"Content-Type": "application/json"}
         )
+        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "discord",
+            "message": "vulnerability severity report summary"
+        })
         if response.status_code not in [200, 204]:
             alert_status = f"Failed to send {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
             print(f"[!] {alert_status}")
+            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "discord",
+            "message": "vulnerability severity report summary"
+        })
             alerts_list.append(f"{alert_status}")
         else:
             alert_status = f"Alert sent {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
             print(f"[!] {alert_status}")
+            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "discord",
+            "message": "vulnerability severity report summary",
+            "status_code": response.status_code
+        })
             alerts_list.append(f"{alert_status}")
 
     elif (crit_count > 0 or trivy_crit_count > 0) and "slack" in alert_system_webhook:
@@ -108,17 +125,37 @@ def check_vuln_file(alerts_list, grype_path, alert_path, repo_name, trivy_crit_c
             data=json.dumps(message),
             headers={"Content-Type": "application/json"}
         )
+        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "slack",
+            "message": "vulnerability severity report summary",
+        })
         if response.status_code not in [200, 204]:
             alert_status = f"Failed to send {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
             print(f"[!] {alert_status}")
+            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "slack",
+            "message": "vulnerability severity report summary",
+        })
             alerts_list.append(f"{alert_status}")
         else:
             alert_status = f"Alert sent {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
             print(f"[!] {alert_status}")
+            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status_code": response.status_code,
+            "webhook": "slack",
+            "message": "vulnerability severity report summary",
+        })
             alerts_list.append(f"{alert_status}")
     
     else:
         alert_status = f"Failed to send alert for {repo_name}. Alert webhook not set"
+        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+            "status": "fail",
+            "webhook": "not found",
+            "message": "vulnerability severity report summary",
+        })
         alerts_list.append(f"{alert_status}")
     
     grype_critical_count = severity_counts['critical']

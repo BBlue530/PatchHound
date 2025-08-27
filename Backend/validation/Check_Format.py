@@ -1,6 +1,7 @@
 import json
+from utils.audit_trail import audit_trail_event
 
-def check_json_format(file_obj):
+def check_json_format(audit_trail, file_obj):
     try:
         file_obj.seek(0)
         data = json.load(file_obj)
@@ -13,6 +14,9 @@ def check_json_format(file_obj):
             return False
         if "components" not in data or not isinstance(data["components"], list):
             return False
+        audit_trail_event(audit_trail, "SBOM_FORMAT", {
+            "sbom_format": "cyclonedx"
+        })
         return True
     except Exception:
         return False

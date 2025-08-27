@@ -1,4 +1,6 @@
-def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
+from utils.audit_trail import audit_trail_event
+
+def generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
     summary_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}
@@ -183,5 +185,9 @@ def generate_summary(vulns_cyclonedx_json, prio_vuln_data, sast_report_json, tri
         "kev_vulnerabilities": list(kev_prio_dict.values()),
         "exclusions": list(exclusions_dict.values())
     }
+
+    audit_trail_event(audit_trail, "SUMMARY_GENERATION", {
+            "status": "success"
+        })
 
     return summary_report

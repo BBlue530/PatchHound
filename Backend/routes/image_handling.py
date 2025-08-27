@@ -13,7 +13,9 @@ def verify_image():
     if not token_key:
         return jsonify({"error": "Token missing"}), 401
     
-    response, valid_token = validate_token(token_key)
+    audit_trail = []
+
+    response, valid_token = validate_token(audit_trail, token_key)
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 401
     organization = response
@@ -41,7 +43,7 @@ def verify_image():
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
     
     if valid == True:
-        verify_image_status = verify_image_digest(image_digest, organization_decoded, current_repo_decoded, timestamp_decoded, commit_sha, commit_author)
+        verify_image_status = verify_image_digest(audit_trail, image_digest, organization_decoded, current_repo_decoded, timestamp_decoded, commit_sha, commit_author)
         return verify_image_status
     else:
         return jsonify({"error": "invalid jwt token"}), 404
@@ -53,7 +55,9 @@ def sign_images():
     if not token_key:
         return jsonify({"error": "Token missing"}), 401
     
-    response, valid_token = validate_token(token_key)
+    audit_trail = []
+
+    response, valid_token = validate_token(audit_trail, token_key)
     if valid_token == False:
         return jsonify({"error": f"{response}"}), 401
     organization = response
@@ -77,10 +81,10 @@ def sign_images():
     commit_author = request.form.get("commit_author")
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    path_to_resources_token = jwt_path_to_resources(organization ,current_repo, timestamp)
+    path_to_resources_token = jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp)
 
     result_parsed = {
     "path_to_resources_token": path_to_resources_token
     }
-    sign_image_digest(image_digest, organization, current_repo, timestamp, commit_sha, commit_author)
+    sign_image_digest(audit_trail, image_digest, organization, current_repo, timestamp, commit_sha, commit_author)
     return jsonify(result_parsed)
