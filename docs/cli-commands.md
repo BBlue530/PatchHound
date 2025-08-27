@@ -236,14 +236,14 @@ Patchhound can sign and verify container images within your workflow to ensure t
 ### Sign image
 You can sign an image using the CLI. This generates a signature for the pulled image which can later be used to verify its integrity.
 ```
-patchhound sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>
+patchhound image sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>
 ``` 
 This command outputs a path token which you will need for image verification.
 
 ### Verify image
 To verify an image you will have to provide the same path token you got when signing the image.
 ```
-patchhound verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>
+patchhound image verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>
 ``` 
 This will validate the image against the previously generated signature ensuring it has not been altered.
 

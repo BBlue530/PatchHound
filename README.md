@@ -31,6 +31,7 @@ PatchHound not only scans for vulnerabilities but also supports **signing and ve
 - Exclusion of vulnerabilities in workflow that carry across versions
 - PDF summary report of the workflow
 - Signing and verifying of container images
+- Audit trail
 
 ---
 

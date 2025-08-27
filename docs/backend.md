@@ -21,6 +21,7 @@ PatchHound Backend is the heart of the system. It handles ingesting SBOMs, scann
 - Manage exclusions of vulnerabilities across versions
 - Supports 3rd party secret managers
 - Repository history tracking
+- Audit trail
 
 ---
 
@@ -81,6 +82,22 @@ When you run a scan, the backend issues a token JWT that acts as a key to retrie
 - **Exclusion aware summaries:** PatchHound generates a comprehensive summary report with all vulnerabilties that has been found and automatically respects your configured exclusions and includes any comments and justifications you have for the exclusions.
 
 - **Repository history:** Every scan is preserved enabling PatchHound to produce a full historical report of vulnerabilities over time.
+
+---
+
+## Audit track
+
+Throughout the entire PatchHound workflow every significant action is tracked and recorded in a structured audit log. This includes:
+
+- SBOM, attestation and signature
+- Vulnerability scans
+- KEV catalog checks and prioritized vulnerabilities
+- Signature and attestation verification
+- Alerts triggered
+
+Each audit log entry includes a timestamp, action type, relevant details and any alerts generated. 
+
+Once the audit log is complete a SHA-256 hash of the log is stored. This hash is linked to the repositorys history file providing a tamper evident record of the workflow run and enabling traceability for compliance audits. 
 
 ---
 
