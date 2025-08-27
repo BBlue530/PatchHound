@@ -198,6 +198,16 @@ To download specific stored available resources in the directory:
 patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> [file1 file2 ...]
 ```
 
+### Repo wide resources
+
+If you want to `list` or `get` resources across the entire repository (not tied to a specific scan run), add the `--repo-resources` flag:
+```
+patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --repo-resources
+```
+```
+patchhound resource list --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN> --repo-resources
+```
+
 ### Latest resources
 To get or list the most recent resources added to a repository use the `--latest` flag with your command:
 #### Get the latest resource:
