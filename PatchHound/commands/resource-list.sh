@@ -7,6 +7,7 @@ source "$BASE_DIR/system/env_system.sh"
 TOKEN=""
 PATH_TO_RESOURCES_TOKEN_BASE64=""
 LATEST=false
+REPO_RESOURCES=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --latest)
             LATEST=true
+            shift
+            ;;
+        --repo-resources)
+            REPO_RESOURCES=true
             shift
             ;;
         --help)
@@ -43,6 +48,7 @@ RESPONSE=$(curl -sSL "$LIST_RESOURCES_API_URL" \
         -G \
         --data-urlencode "token=$TOKEN" \
         --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
+        --data-urlencode "repo_resources=$REPO_RESOURCES" \
         --data-urlencode "latest_resource=$LATEST")
 
 print_message "[+]" "Resources found" "Files in resource directory:"

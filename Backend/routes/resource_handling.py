@@ -27,12 +27,19 @@ def get_resource():
     if not latest_resource:
         return jsonify({"error": "Latest resource declaration missing"}), 400
     
+    repo_resources = request.args.get("repo_resources")
+    if not repo_resources:
+        return jsonify({"error": "Repo resource declaration missing"}), 400
+    
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
 
     if latest_resource.lower() == "true":
         timestamp_decoded, valid = get_latest_workflow_run(organization_decoded, current_repo_decoded)
         if valid == False:
             return jsonify({"error": "No scans found for repo"}), 404
+        
+    if repo_resources.lower() == "true":
+        timestamp_decoded = ""
 
     if valid == True:
         files_to_get_and_return = get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_name)
@@ -60,12 +67,19 @@ def list_resource():
     if not latest_resource:
         return jsonify({"error": "Latest resource declaration missing"}), 400
     
+    repo_resources = request.args.get("repo_resources")
+    if not repo_resources:
+        return jsonify({"error": "Repo resource declaration missing"}), 400
+    
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
 
     if latest_resource.lower() == "true":
         timestamp_decoded, valid = get_latest_workflow_run(organization_decoded, current_repo_decoded)
         if valid == False:
             return jsonify({"error": "No scans found for repo"}), 404
+
+    if repo_resources.lower() == "true":
+        timestamp_decoded = ""
 
     if valid == True:
         files_to_return_json = list_resources(organization_decoded, current_repo_decoded, timestamp_decoded)

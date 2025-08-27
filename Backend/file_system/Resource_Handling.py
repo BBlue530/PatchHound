@@ -42,6 +42,8 @@ def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded,
 
         files_to_return = []
         for fname in file_names:
+            if os.path.isdir(fname):
+                continue
             full_path = os.path.join(base_dir, fname)
             if os.path.isfile(full_path):
                 files_to_return.append(full_path)
