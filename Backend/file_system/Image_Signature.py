@@ -4,7 +4,7 @@ from utils.helpers import file_stable_check
 from file_system.file_save import sign_image, verify_image, key_generating
 from validation.secrets_manager import read_secret
 from utils.audit_trail import save_audit_trail, append_audit_trail
-from core.variables import all_repo_scans_folder, local_bin, env
+from core.variables import all_image_signature_folder, local_bin, env, all_resources_folder
 
 def sign_image_digest(audit_trail, image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
     print("[~] Signing image...")
@@ -15,8 +15,8 @@ def sign_image_digest(audit_trail, image_digest, organization, current_repo, tim
     env["COSIGN_PASSWORD"] = cosign_key
 
     repo_name = current_repo.replace("/", "_")
-    scan_dir = os.path.join(all_repo_scans_folder, organization, repo_name, timestamp)
-    repo_dir = os.path.join(all_repo_scans_folder, organization, repo_name)
+    scan_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name, timestamp)
+    repo_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name)
     image_digest_path = os.path.join(scan_dir, f"{repo_name}_image_digest.txt")
     alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
     cosign_key_path = os.path.join(scan_dir, f"{repo_name}.key")
@@ -41,8 +41,8 @@ def sign_image_digest(audit_trail, image_digest, organization, current_repo, tim
 def verify_image_digest(audit_trail, image_digest, organization, current_repo, timestamp, commit_sha, commit_author):
     print("[~] Verifying image...")
     repo_name = current_repo.replace("/", "_")
-    scan_dir = os.path.join(all_repo_scans_folder, organization, repo_name, timestamp)
-    repo_dir = os.path.join(all_repo_scans_folder, organization, repo_name)
+    scan_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name, timestamp)
+    repo_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name)
     alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
     cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
     image_sig_path = os.path.join(scan_dir, f"{repo_name}_image.sig")

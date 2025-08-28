@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 import subprocess
-from core.variables import all_repo_scans_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
+from core.variables import all_resources_folder, all_repo_scans_folder, all_image_signature_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
 from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
 from logs.log import log_event
@@ -13,13 +13,21 @@ def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
 
     audit_trail = []
-    if not os.path.isdir(all_repo_scans_folder):
-        print(f"[~] Creating missing scans folder: {all_repo_scans_folder}")
-        os.makedirs(all_repo_scans_folder, exist_ok=True)
+
+    repo_scans_dir = os.path.join(all_resources_folder, all_repo_scans_folder)
+    image_sign_dir = os.path.join(all_resources_folder, all_image_signature_folder)
+
+    if not os.path.isdir(repo_scans_dir):
+        print(f"[~] Creating missing scans folder: {repo_scans_dir}")
+        os.makedirs(repo_scans_dir, exist_ok=True)
+
+    if not os.path.isdir(image_sign_dir):
+        print(f"[~] Creating missing scans folder: {image_sign_dir}")
+        os.makedirs(image_sign_dir, exist_ok=True)
     
-    # List all directories inside all_repo_scans_folder aka the token keys
-    for organization in os.listdir(all_repo_scans_folder):
-        token_path = os.path.join(all_repo_scans_folder, organization)
+    # List all directories inside repo_scans_dir aka the token keys
+    for organization in os.listdir(repo_scans_dir):
+        token_path = os.path.join(repo_scans_dir, organization)
         if not os.path.isdir(token_path):
             continue
         print(f"[~] Scanning for token key: {organization}")
@@ -40,7 +48,7 @@ def sbom_validation():
                 continue
             
             # Create the full path for the latest scan inside the repo
-            # all_repo_scans_folder, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
+            # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
             latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
 
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")

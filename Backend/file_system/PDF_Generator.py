@@ -6,10 +6,10 @@ from flask import abort
 import json
 import os
 from utils.helpers import safe_text
-from core.variables import all_repo_scans_folder
+from core.variables import all_repo_scans_folder, all_resources_folder
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
-    base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+    base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
     if not os.path.isdir(base_dir):
         abort(404, description=f"Directory not found: {base_dir}")

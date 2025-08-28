@@ -1,5 +1,5 @@
 import os
-from core.variables import all_repo_scans_folder, local_bin, env
+from core.variables import all_repo_scans_folder, local_bin, env, all_resources_folder
 from logs.log import log_event
 from vuln_scan.vuln_check import check_vuln_file
 from vuln_scan.trivy_vuln_check import check_vuln_file_trivy
@@ -21,8 +21,8 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
 
     repo_name = current_repo.replace("/", "_")
 
-    scan_dir = os.path.join(all_repo_scans_folder, organization, repo_name, timestamp)
-    repo_dir = os.path.join(all_repo_scans_folder, organization, repo_name)
+    scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp)
+    repo_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name)
 
     sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     sast_report_path = os.path.join(scan_dir, f"{repo_name}_sast_report.json")

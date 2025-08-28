@@ -2,10 +2,10 @@ import os
 import io
 import zipfile
 from flask import send_file, abort
-from core.variables import all_repo_scans_folder
+from core.variables import all_repo_scans_folder, all_resources_folder
 
 def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded):
-    base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+    base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
     if not os.path.isdir(base_dir):
         abort(404, description=f"Directory not found: {base_dir}")
@@ -25,7 +25,7 @@ def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded
     return files_to_return_json
 
 def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_names):
-    base_dir = os.path.join(all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+    base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
     if not os.path.isdir(base_dir):
         abort(404, description=f"Directory not found: {base_dir}")
@@ -65,7 +65,7 @@ def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded,
     return files_to_get_and_return
 
 def get_latest_workflow_run(organization, current_repo):
-    repo_path = os.path.join(all_repo_scans_folder, organization, current_repo)
+    repo_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, current_repo)
     timestamp_folders = sorted([f for f in os.listdir(repo_path) if os.path.isdir(os.path.join(repo_path, f))],reverse=True)
 
     if not timestamp_folders:
