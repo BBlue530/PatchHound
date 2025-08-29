@@ -6,6 +6,7 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
     sbom_att_hash = hash_file(sbom_attestation_path)
     sbom_hash = hash_file(sbom_path)
     new_entry = {
+        str(timestamp): {
         "commit_sha": commit_sha,
         "timestamp": timestamp,
         "sbom_hash": sbom_hash,
@@ -16,6 +17,7 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
             "signature_valid": attestation_verified
         },
         "alerts": alerts_list
+        }
     }
 
     if not os.path.exists(repo_history_path):

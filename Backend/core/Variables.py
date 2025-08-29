@@ -22,7 +22,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-version = "0.1.6"
+version = "0.1.7"
 
 GRYPE_VERSION = "0.68.0"
 COSIGN_VERSION = "2.5.3"

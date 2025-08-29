@@ -8,6 +8,7 @@ from logs.alerts import alert_event_system
 from logs.log import log_event
 from utils.helpers import extract_cve_ids
 from utils.audit_trail import save_audit_trail, audit_trail_event
+from validation.hash_verify import verify_sha
 
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -47,9 +48,11 @@ def sbom_validation():
                 print(f"[!] No scans found for repo: {repo_name}")
                 continue
             
+            timestamp_folder = timestamp_folders[0]
+            
             # Create the full path for the latest scan inside the repo
             # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
-            latest_scan_dir = os.path.join(repo_path, timestamp_folders[0])
+            latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
             sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
@@ -145,6 +148,9 @@ def sbom_validation():
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
                 log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
+
+            print(f"[~] Verifying file hash for repo: {repo_name}")
+            verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path)
 
             print(f"[~] Scanning latest SBOM for repo: {repo_name}")
             try:
