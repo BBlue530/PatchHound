@@ -1,6 +1,5 @@
 import os
 from core.variables import all_repo_scans_folder, local_bin, env, all_resources_folder
-from logs.log import log_event
 from vuln_scan.vuln_check import check_vuln_file
 from vuln_scan.trivy_vuln_check import check_vuln_file_trivy
 from vuln_scan.get_vulns_count import vuln_count
@@ -72,6 +71,3 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
         track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, sbom_attestation_path, sbom_path, attestation_verified, alerts_list)
 
     repo_lock(repo_dir, repo_files)
-    
-    message = f"[+] Scan of '{repo_name}_sbom_cyclonedx.json' Completed"
-    log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)

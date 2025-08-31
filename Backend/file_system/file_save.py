@@ -5,7 +5,6 @@ import subprocess
 import json
 from core.variables import env
 from logs.alerts import alert_event_system
-from logs.log import log_event
 from utils.helpers import file_stable_check
 from utils.audit_trail import audit_trail_event
 
@@ -74,7 +73,6 @@ def attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attes
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
 def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
@@ -102,7 +100,6 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
     
     try:
         subprocess.run(
@@ -132,7 +129,6 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
         return attestation_verified
 
 def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author):
@@ -161,7 +157,6 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
         alert_event_system(audit_trail, message, alert, alert_path)
         if alerts_list is not False:
             alerts_list.append(f"{message}")
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
 def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
@@ -188,7 +183,6 @@ def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, 
         })
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
 
 def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path_verify, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
@@ -216,6 +210,5 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
         })
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
-        log_event(repo_dir, repo_name, timestamp, message, commit_sha, commit_author)
         verify_image_status = jsonify({"verify_image_status": "image verification mismatch and is not trusted"}), 422
         return verify_image_status

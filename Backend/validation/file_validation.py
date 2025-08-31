@@ -5,7 +5,6 @@ import subprocess
 from core.variables import all_resources_folder, all_repo_scans_folder, all_image_signature_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
 from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
-from logs.log import log_event
 from utils.helpers import extract_cve_ids
 from utils.audit_trail import save_audit_trail, audit_trail_event
 from validation.hash_verify import verify_sha
@@ -74,7 +73,6 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
             if not os.path.exists(sbom_att_path):
                 daily_scan = False
@@ -86,7 +84,6 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
             if not os.path.exists(att_sig_path):
                 daily_scan = False
@@ -98,7 +95,6 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
             try:
                 subprocess.run(
@@ -123,7 +119,6 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
             try:
                 subprocess.run(
@@ -147,7 +142,6 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
             print(f"[~] Verifying file hash for repo: {repo_name}")
             verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path)
@@ -200,7 +194,6 @@ def sbom_validation():
                     alert = "Scheduled Event : New Vulnerabilities Detected"
                     print(message)
                     alert_event_system(audit_trail, message, alert, alert_path)
-                    log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
 
                 with open(vulns_output_path, "w") as f:
                     f.write(vulns_cyclonedx_json.stdout)
@@ -221,4 +214,3 @@ def sbom_validation():
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
-                log_event(repo_path, repo_name, timestamp, message, scheduled_event_commit_sha, scheduled_event_commit_author)
