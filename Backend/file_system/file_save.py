@@ -6,7 +6,7 @@ import json
 from core.variables import env
 from logs.alerts import alert_event_system
 from utils.helpers import file_stable_check
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 
 def save_files(audit_trail, grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     with open(alert_path, "w") as f:
@@ -131,7 +131,7 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         alerts_list.append(f"{message}")
         return attestation_verified
 
-def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path):
     print(f"[~] Generating Cosign key for repo: {repo_name}")
     try:
         subprocess.run(
@@ -158,7 +158,7 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
         if alerts_list is not False:
             alerts_list.append(f"{message}")
 
-def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path):
     try:
         subprocess.run(
             [
@@ -175,6 +175,9 @@ def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, 
         audit_trail_event(audit_trail, "IMAGE_SIGNING", {
             "status": "success"
         })
+        result = "image signed"
+        status_code = 200
+        return result, status_code
     except subprocess.CalledProcessError as e:
         message = f"[!] Failed to sign image for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
@@ -183,8 +186,11 @@ def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, 
         })
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
+        result = "image signing failed"
+        status_code = 500
+        return result, status_code
 
-def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path_verify, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path_verify, repo_name, alert_path):
     try:
         subprocess.run(
             [

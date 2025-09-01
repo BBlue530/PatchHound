@@ -1,4 +1,4 @@
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 
 def vuln_count(audit_trail, sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
     sast_issue_count = 0

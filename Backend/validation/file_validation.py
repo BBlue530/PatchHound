@@ -6,7 +6,7 @@ from core.variables import all_resources_folder, all_repo_scans_folder, all_imag
 from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
 from utils.helpers import extract_cve_ids
-from utils.audit_trail import save_audit_trail, audit_trail_event
+from logs.audit_trail import save_audit_trail, audit_trail_event
 from validation.hash_verify import verify_sha
 
 def sbom_validation():

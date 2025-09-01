@@ -35,9 +35,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "token=$TOKEN" \
   -F "current_repo=$REPO_NAME" \
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
-  -F "commit_sha=$COMMIT_SHA" \
-  -F "commit_author=$COMMIT_AUTHOR" \
-  -F "image=$IMAGE_DIGEST" \
+  -F "image_digest=$IMAGE_DIGEST" \
   "$IMAGE_SIGN_API_URL")
 
 curl_exit_code=$?
@@ -45,8 +43,9 @@ http_status=$(echo "$response_and_status" | tail -n1)
 response_body=$(echo "$response_and_status" | head -n -1)
 
 if [[ "$http_status" -ne 200 ]]; then
+  message=$(echo "$response_body" | jq -r '.message')
   print_message "[!]" "Backend error" "Status Code: $http_status
-  $response_body"
+  $message"
   exit 1
 fi
 

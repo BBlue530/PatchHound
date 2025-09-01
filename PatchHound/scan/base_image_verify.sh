@@ -33,8 +33,8 @@ IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE")
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "token=$TOKEN" \
   -F "image_digest=$IMAGE_DIGEST" \
-  -F "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
-  "$IMAGE_VERIFY_API_URL")
+  -F "image_name=$IMAGE" \
+  "$BASE_IMAGE_VERIFY_API_URL")
 
 curl_exit_code=$?
 http_status=$(echo "$response_and_status" | tail -n1)
@@ -52,5 +52,3 @@ if [ $curl_exit_code -ne 0 ]; then
 fi
 
 print_message "[+]" "Verification finished" "Verification of image with backend finished successfully"
-
-PATH_TO_RESOURCES_TOKEN=$(echo "$response_body" | jq -r '.path_to_resources_token')

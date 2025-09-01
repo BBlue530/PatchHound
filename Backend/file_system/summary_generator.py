@@ -1,4 +1,4 @@
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 
 def generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
     summary_dict = {}

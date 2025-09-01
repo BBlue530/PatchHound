@@ -9,7 +9,7 @@ from utils.helpers import load_json
 from validation.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
-from utils.audit_trail import save_audit_trail
+from logs.audit_trail import save_audit_trail
 
 def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
     secret_type = "cosign_key"
@@ -59,7 +59,7 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
 
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
-            key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+            key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
         summary_report = generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json)
         save_files(audit_trail, grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
         attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

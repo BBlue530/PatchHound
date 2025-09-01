@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 
 def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
     if os.path.isfile(alert_path):

@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 from core.variables import db_path
 
 def validate_token(audit_trail, token_key):

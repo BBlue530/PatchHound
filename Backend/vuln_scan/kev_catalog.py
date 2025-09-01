@@ -1,5 +1,5 @@
 import json
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 from core.variables import kev_catalog
 
 def compare_kev_catalog(audit_trail, cyclonedx_data):

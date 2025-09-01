@@ -44,14 +44,6 @@ usage_cli_resource() {
     exit 1
 }
 
-usage_cli() {
-    echo "Usage:"
-    echo "  patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>"
-    echo "  patchhound exclude --list"
-    echo "  patchhound exclude --remove <CVE_ID>"
-    exit 1
-}
-
 usage_exclude() {
     echo "Usage:"
     echo "  patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>"
@@ -62,21 +54,33 @@ usage_exclude() {
 
 usage_cli_image() {
     echo "Usage:"
-    echo "  patchhound scan --image <image_name> --token <token>"
-    echo "  patchhound sign --image <image_name> --token <token>"
-    echo "  patchhound verify --image <image_name> --token <token> --path-token <path_to_resources_token>"
+    echo "  patchhound image sign --image <image_name> --token <token>"
+    echo "  patchhound image verify --image <image_name> --token <token> --path-token <path_to_resources_token>"
+    exit 1
+}
+
+usage_cli_base_image() {
+    echo "Usage:"
+    echo "  patchhound base-image sign --image <image_name> --token <token>"
+    echo "  patchhound base-image verify --image <image_name> --token <token>"
     exit 1
 }
 
 usage_sign_image() {
     echo "Usage:"
-    echo "  patchhound sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>"
+    echo "  patchhound image sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>"
+    exit 1
+}
+
+usage_sign_base_image() {
+    echo "Usage:"
+    echo "  patchhound base-image sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>"
     exit 1
 }
 
 usage_verify_image() {
     echo "Usage:"
-    echo "  patchhound verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>"
+    echo "  patchhound image verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)> --path-token <PATH_TO_RESOURCES_TOKEN>"
     exit 1
 }
 

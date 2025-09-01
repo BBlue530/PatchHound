@@ -64,10 +64,28 @@ case "$COMMAND" in
                 ;;
         esac
         ;;
+    base-image)
+        SUBCOMMAND="$1"
+        shift || true
+        case "$SUBCOMMAND" in
+            sign)
+                source "$BASE_DIR/commands/base-image-sign.sh" "$@"
+                ;;
+            verify)
+                source "$BASE_DIR/commands/base-image-verify.sh" "$@"
+                ;;
+            --help)
+                usage_cli_base_image
+                ;;
+            *)
+                usage_cli_base_image
+                ;;
+        esac
+        ;;
     --help)
         usage_help
         ;;
     *)
-        usage_cli
+        usage_help
         ;;
 esac

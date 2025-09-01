@@ -1,5 +1,5 @@
 import json
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 
 def check_json_format(audit_trail, file_obj):
     try:

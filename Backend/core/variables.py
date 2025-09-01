@@ -7,6 +7,7 @@ kev_catalog = "kev_catalog.json"
 all_resources_folder = "resources"
 all_repo_scans_folder = "all_scans"
 all_image_signature_folder = "all_image_signature"
+all_base_image_signature_folder = "all_base_image_signature"
 
 scheduled_event_commit_sha = "Null"
 scheduled_event_commit_author = "Daily Scan"
@@ -22,7 +23,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-version = "0.1.7"
+version = "0.1.8"
 
 GRYPE_VERSION = "0.68.0"
 COSIGN_VERSION = "2.5.3"

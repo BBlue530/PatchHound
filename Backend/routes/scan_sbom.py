@@ -8,7 +8,7 @@ import io
 from datetime import datetime
 from file_system.file_handling import save_scan_files
 from utils.jwt_path import jwt_path_to_resources
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 from database.validate_token import validate_token
 from validation.check_format import check_json_format
 from vuln_scan.kev_catalog import compare_kev_catalog

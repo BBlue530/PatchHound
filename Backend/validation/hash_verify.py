@@ -1,7 +1,7 @@
 import os
 import json
 from utils.file_hash import hash_file
-from utils.audit_trail import audit_trail_event
+from logs.audit_trail import audit_trail_event
 from logs.alerts import alert_event_system
 
 def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
