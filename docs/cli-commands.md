@@ -247,6 +247,21 @@ patchhound image verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(ne
 ``` 
 This will validate the image against the previously generated signature ensuring it has not been altered.
 
+### Trust vault
+PatchHound can sign and store image signatures in a trust vault allowing you to verify that an image matches the one you originally signed. 
+#### Sign image
+Sign an Image to the trust vault: 
+```
+patchhound base-image sign --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>
+``` 
+> If you sign the same image multiple times the previous signature will be overwritten with the new one.
+
+#### Verify image
+Verify an Image from the trust vault: 
+```
+patchhound base-image verify --image <IMAGE_NAME> --token <TOKEN> --pat <PAT_TOKEN(needed for private images)>
+``` 
+
 ---
 
 ## Help
