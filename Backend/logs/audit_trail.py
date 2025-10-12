@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 import json
 import os
 from utils.helpers import file_stable_check
@@ -6,7 +6,7 @@ from utils.file_hash import hash_file
 
 def audit_trail_event(audit_trail, action, details=""):
     event = {
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "action": action,
         "details": details
     }
