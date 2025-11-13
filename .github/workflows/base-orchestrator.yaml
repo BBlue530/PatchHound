@@ -1,0 +1,13 @@
+name: Base Orchestrator Pipeline
+
+on:
+  push:
+
+jobs:  trigger-patchhound-scan:
+    if: always()
+    uses: ./.github/workflows/patchhound-scan.yaml
+    secrets:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+      TOKEN: ${{ secrets.TOKEN }}
+      # PatchHound secrets
