@@ -9,3 +9,10 @@ jobs:  verify-rebase:
     secrets:
       GH_TOKEN: ${{ secrets.GH_REPO_PAT }}
       # rebase verify secrets
+      
+jobs:  verify-gitignore:
+    if: always()
+    uses: ./.github/workflows/verify-gitignore.yaml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_REPO_PAT }}
+      # gitignore verify secrets
