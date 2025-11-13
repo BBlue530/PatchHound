@@ -1,0 +1,11 @@
+name: Base Orchestrator Pipeline
+
+on:
+  push:
+
+jobs:  verify-rebase:
+    if: always()
+    uses: ./.github/workflows/verify-rebase.yaml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_REPO_PAT }}
+      # rebase verify secrets
