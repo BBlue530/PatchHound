@@ -1,0 +1,52 @@
+name: PatchHound Pipeline
+
+on:
+  workflow_call:
+    secrets:
+      BASE_URL:
+        required: true
+      ALERT_WEBHOOK:
+        required: true
+      TOKEN:
+        required: true
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+      TOKEN: ${{ secrets.TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install PatchHound
+        run: |
+          mkdir -p patchhound_cli
+          curl -L https://github.com/BBlue530/PatchHound/archive/refs/tags/v0.1.7.tar.gz \
+            | tar -xz -C patchhound_cli --strip-components=2 PatchHound-0.1.7/PatchHound
+          cd patchhound_cli
+          chmod +x install.sh
+          ./install.sh
+
+      - name: Configure PatchHound
+        run: |
+          patchhound config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK"
+
+      - name: Run PatchHound scan
+        run: |
+          patchhound scan --token "$TOKEN"
+
+      - name: Upload vulnerability summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-summary
+          path: |
+            summary.md
+            sbom.cyclonedx.json
+            vulns.cyclonedx.json
+            prio_vulns.json
+            sast_report.json
+            trivy_report.json
+            path_to_resources_token.txt
