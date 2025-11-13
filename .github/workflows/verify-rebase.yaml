@@ -1,0 +1,83 @@
+name: Verify Rebase
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
+
+jobs:
+  rebase-check:
+    runs-on: ubuntu-latest
+    
+    env:
+      CURRENT_BRANCH: ${{ github.ref_name }}
+
+    outputs:
+      rebase_status: ${{ steps.verify.outputs.rebase_status }}
+      current_branch: ${{ env.CURRENT_BRANCH }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Verify rebase
+        working-directory: ${{ github.workspace }}
+        id: verify
+        shell: bash
+        run: |
+          git fetch origin main
+
+          if git rebase origin/main; then
+            echo "rebase_status=true" >> $GITHUB_OUTPUT
+            echo "[+] rebase verified"
+          else
+            echo "rebase_status=false" >> $GITHUB_OUTPUT
+            echo "[!] rebase failed. Attempting to resolve..."
+          fi
+
+  auto-fix-rebase:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CURRENT_BRANCH: ${{ needs.rebase-check.outputs.current_branch }}
+
+    needs: rebase-check
+    if: needs.rebase-check.outputs.rebase_status == 'false'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Resolve rebase conflict
+        run: |
+          git fetch origin main || exit 1
+          git rebase --abort || true
+          git reset --hard origin/main
+          git merge --strategy-option theirs HEAD || true
+          echo "[+] Auto resolved rebase conflict"
+
+      - name: Stage and push changes
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "[+] Starting stage and push of changes"
+          git config user.name "Alejandro[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b bot/fix_rebase_auto/$CURRENT_BRANCH
+          git add .
+          git commit -m "bot: auto fix rebase conflict"
+          git push origin bot/fix_rebase_auto/$CURRENT_BRANCH --force
+          echo "[+] Push and stage of changes done"
+
+      - name: Create PR
+        run: |
+          gh pr create \
+            --repo "${{ github.repository }}" \
+            --title "bot: auto fix rebase conflict" \
+            --body "Automated fix for rebase conflict detected in template sync" \
+            --base "$CURRENT_BRANCH" \
+            --head "bot/fix_rebase_auto/$CURRENT_BRANCH"
