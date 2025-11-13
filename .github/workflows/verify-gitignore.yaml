@@ -1,0 +1,123 @@
+name: Verify Git Ignore
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
+
+jobs:
+  gitignore-check:
+    runs-on: ubuntu-latest
+
+    env:
+      CURRENT_BRANCH: ${{ github.ref_name }}
+
+    outputs:
+      violation_status: ${{ steps.verify.outputs.violation_status }}
+      current_branch: ${{ env.CURRENT_BRANCH }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Ensure .gitignore exists
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [ ! -f .gitignore ]; then
+            echo "[!] .gitignore missing"
+            exit 1
+          fi
+          echo "[+] .gitignore exists"
+
+      - name: Verify .gitignore
+        working-directory: ${{ github.workspace }}
+        id: verify
+        shell: bash
+        run: |
+          : > violations.txt
+          while IFS= read -r pattern || [ -n "$pattern" ]; do
+            pattern=$(echo "$pattern" | tr -d "\r")
+
+            if [ -z "$pattern" ] || echo "$pattern" | grep -q "^#"; then
+              continue
+            fi
+
+            matches=$(git ls-files --cached -i --exclude-standard -- "$pattern")
+
+            if [ -n "$matches" ]; then
+              echo "$matches" >> violations.txt
+              echo "[!] Violation found for file: $matches"
+            fi
+          done < .gitignore
+
+          if [ -s violations.txt ]; then
+            echo "violation_status=true" >> $GITHUB_OUTPUT
+            echo "[!] .gitignore verification failed"
+          else
+            echo "violation_status=false" >> $GITHUB_OUTPUT
+            echo "[+] .gitignore verified"
+          fi
+
+      - name: Upload violations file
+        uses: actions/upload-artifact@v4
+        with:
+          name: violations
+          path: violations.txt
+
+  auto-fix-gitignore:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CURRENT_BRANCH: ${{ needs.rebase-check.outputs.current_branch }}
+
+    needs: gitignore-check
+    if: needs.gitignore-check.outputs.violation_status == 'true'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download violations file
+        uses: actions/download-artifact@v4
+        with:
+          name: violations
+          path: .
+
+      - name: Remove tracked ignore violations
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [ -f violations.txt ]; then
+            while read -r file; do
+              git rm --cached "$file" || true
+              echo "[i] Removed tracking of file: $file"
+            done < violations.txt
+          else
+            echo "[!] No violations file found."
+          fi
+          rm violations.txt
+
+      - name: Stage and push changes
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "[+] Starting stage and push of changes"
+          git config user.name "Alejandro[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b bot/fix_gitignore_auto/$CURRENT_BRANCH
+          git add .
+          git commit -m "bot: auto fix .gitignore violations"
+          git push origin bot/fix_gitignore_auto/$CURRENT_BRANCH --force
+          echo "[+] Push and stage of changes done"
+    
+      - name: Create PR
+        run: |
+          gh pr create \
+            --repo "${{ github.repository }}" \
+            --title "bot: auto fix gitignore violations" \
+            --body "Automated fix for gitignore violations detected in template sync" \
+            --base "$CURRENT_BRANCH" \
+            --head "bot/fix_gitignore_auto/$CURRENT_BRANCH"
