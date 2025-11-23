@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y curl unzip git build-essential libssl-d
 
 WORKDIR /app/Backend
 
-COPY Backend/requirements.txt .
+COPY src/Backend/requirements.txt .
 
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
@@ -15,8 +15,8 @@ RUN curl -L -o /usr/local/bin/cosign "https://github.com/sigstore/cosign/release
 ENV GRYPE_VERSION=0.68.0
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/v${GRYPE_VERSION}/install.sh | sh -s -- -b /usr/local/bin v${GRYPE_VERSION}
 
-COPY . .
+COPY src/Backend/ .
 
 EXPOSE 8080
 
-CMD ["gunicorn", "-w", "2", "--threads", "4", "-b", "0.0.0.0:8080", "--preload", "Main:app"]
+CMD ["gunicorn", "-w", "2", "--threads", "4", "-b", "0.0.0.0:8080", "--preload", "app:app"]
