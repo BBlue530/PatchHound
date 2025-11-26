@@ -1,8 +1,13 @@
 print_message "[~]" "Installing dependencies..." ""
 
-sudo apt-get update && sudo apt-get install -y jq curl
+SYFT_VERSION="1.38.0"
 
-curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+if ! check_command syft; then
+  print_message "[~]" "Installing syft $SYFT_VERSION..." ""
+  sudo apt-get update && sudo apt-get install -y jq curl
+
+  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin "v$SYFT_VERSION"
+fi
 
 if ! command -v trivy &> /dev/null; then
   if [ "$TRIVY_SCAN" = "true" ]; then

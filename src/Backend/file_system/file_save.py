@@ -8,14 +8,14 @@ from logs.alerts import alert_event_system
 from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
 
-def save_files(audit_trail, grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
+def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     with open(alert_path, "w") as f:
         json.dump(alert_system_json, f, indent=4)
     file_stable_check(alert_path)
 
-    with open(sbom_path, "w") as f:
-        json.dump(sbom_json, f, indent=4)
-    file_stable_check(sbom_path)
+    with open(syft_sbom_path, "w") as f:
+        json.dump(syft_sbom_json, f, indent=4)
+    file_stable_check(syft_sbom_path)
 
     with open(sast_report_path, "w") as f:
         json.dump(sast_report_json, f, indent=4)
@@ -26,7 +26,7 @@ def save_files(audit_trail, grype_path, vulns_cyclonedx_json, prio_path, prio_vu
     file_stable_check(trivy_report_path)
 
     with open(grype_path, "w") as f:
-        json.dump(vulns_cyclonedx_json, f, indent=4)
+        json.dump(grype_vulns_cyclonedx_json_data, f, indent=4)
     file_stable_check(grype_path)
 
     with open(prio_path, "w") as f:
@@ -112,15 +112,15 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
             check=True,
             env=env
         )
-        attestation_verified = True
+        syft_attestation_verified = True
         message = f"[+] Verified Attestation signature for repo: {repo_name}"
         audit_trail_event(audit_trail, "VERIFY_SIGNATURE_ATTESTATION", {
             "status": "success"
         })
         print(f"{message}")
-        return attestation_verified
+        return syft_attestation_verified
     except subprocess.CalledProcessError:
-        attestation_verified = False
+        syft_attestation_verified = False
         message = f"[!] Signature for Attestation failed for repo: {repo_name}!"
         alert = "Scheduled Event : Signature Fail"
         audit_trail_event(audit_trail, "VERIFY_SIGNATURE_ATTESTATION", {
@@ -129,7 +129,7 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
-        return attestation_verified
+        return syft_attestation_verified
 
 def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path):
     print(f"[~] Generating Cosign key for repo: {repo_name}")

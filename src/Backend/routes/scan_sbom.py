@@ -15,9 +15,9 @@ from vuln_scan.kev_catalog import compare_kev_catalog
 
 scan_sbom_bp = Blueprint("scan_sbom", __name__)
 
-def threading_save_scan_files(audit_trail, current_repo, sbom_content, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content):
-    sbom_file_obj = io.BytesIO(sbom_content)
-    save_scan_files(audit_trail, current_repo, sbom_file_obj, sast_report, trivy_report, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
+def threading_save_scan_files(audit_trail, current_repo, syft_sbom_content, sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content):
+    syft_sbom_file_obj = io.BytesIO(syft_sbom_content)
+    save_scan_files(audit_trail, current_repo, syft_sbom_file_obj, sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
 
 @scan_sbom_bp.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
@@ -52,7 +52,7 @@ def scan_sbom():
     if missing_fields:
         return jsonify({"error": f"Missing: {', '.join(missing_fields)}"}), 400
 
-    sbom_file = request.files['sbom']
+    syft_sbom_file = request.files['sbom']
     sast_report = request.files['sast_report']
     trivy_report = request.files['trivy_report']
     exclusions_file = request.files['exclusions']
@@ -60,20 +60,16 @@ def scan_sbom():
     commit_sha = request.form.get("commit_sha")
     commit_author = request.form.get("commit_author")
     alert_system_webhook = request.form.get("alert_system_webhook")
-
-    is_cyclonedx = check_json_format(audit_trail, sbom_file)
-    if is_cyclonedx == False:
-        return jsonify({"error": "SBOM file must be valid JSON format CycloneDX 1.6"}), 400
     
     try:
-        sbom_file.seek(0)
-        json.load(sbom_file)
-        sbom_file.seek(0)
+        syft_sbom_file.seek(0)
+        json.load(syft_sbom_file)
+        syft_sbom_file.seek(0)
     except json.JSONDecodeError:
         return jsonify({"error": "SBOM file must be valid JSON"}), 400
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-        sbom_file.save(tmp)
+        syft_sbom_file.save(tmp)
         tmp_path = tmp.name
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
@@ -86,7 +82,7 @@ def scan_sbom():
     })
 
     try:
-        vulns_cyclonedx_json = subprocess.run(
+        grype_vulns_cyclonedx_json = subprocess.run(
         ["grype", f"sbom:{tmp_path}", "-o", "cyclonedx-json"],
         capture_output=True,
         text=True,
@@ -98,23 +94,23 @@ def scan_sbom():
         })
 
     except subprocess.CalledProcessError as e:
-        return jsonify({"error": "Grype scan failed", "details": e.stderr}), 500
+        return jsonify({"error": "Grype scan failed", "stderr": e.stderr, "stdout": e.stdout, "return_code": e.returncode, "cmd": e.cmd}), 500
     finally:
         os.unlink(tmp_path)
     
-    vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
-    prio_vuln_data = compare_kev_catalog(audit_trail, vulns_cyclonedx_json_data)
+    grype_vulns_cyclonedx_json_data = json.loads(grype_vulns_cyclonedx_json.stdout)
+    prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data)
 
     path_to_resources_token = jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp)
 
     result_parsed = {
-    "vulns_cyclonedx_json": vulns_cyclonedx_json_data,
+    "vulns_cyclonedx_json": grype_vulns_cyclonedx_json_data,
     "prio_vulns": prio_vuln_data,
     "path_to_resources_token": path_to_resources_token
     }
 
-    sbom_file.seek(0)
-    sbom_content = sbom_file.read()
+    syft_sbom_file.seek(0)
+    syft_sbom_content = syft_sbom_file.read()
     sast_report.seek(0)
     sast_report_content = sast_report.read()
     trivy_report.seek(0)
@@ -129,6 +125,6 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(audit_trail, current_repo, sbom_content, sast_report_content, trivy_report_content, vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
+        args=(audit_trail, current_repo, syft_sbom_content, sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file_content)
     ).start()
     return jsonify(result_parsed)

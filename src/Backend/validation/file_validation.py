@@ -53,45 +53,53 @@ def sbom_validation():
             # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
             latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
-            sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
             alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
+
+            syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
+            syft_att_sig_path = f"{syft_sbom_path}_att.sig"
+            syft_sbom_att_path = f"{syft_sbom_path}.att"
+
+            trivy_report_path = os.path.join(latest_scan_dir, f"{repo_name}_trivy_report.json")
+            trivy_att_sig_path = f"{trivy_report_path}_att.sig"
+            trivy_sbom_att_path = f"{trivy_report_path}.att"
+
             exclusions_file_path = os.path.join(repo_path, f"{repo_name}_exclusions_file.json")
-            att_sig_path = f"{sbom_path}_att.sig"
-            sbom_att_path = f"{sbom_path}.att"
+
             cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}.pub")
 
             vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_vulns_cyclonedx.json")
             prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
 
-            if not os.path.exists(sbom_path):
+            # Syft checks
+            if not os.path.exists(syft_sbom_path):
                 daily_scan = False
-                audit_trail_event(audit_trail, "SBOM_EXISTS", {
+                audit_trail_event(audit_trail, "SYFT_SBOM_EXISTS", {
                 "status": "fail",
                 })
-                message = f"[!] SBOM missing for repo: {repo_name}"
-                alert = "Scheduled Event : SBOM Missing"
+                message = f"[!] SYFT_SBOM missing for repo: {repo_name}"
+                alert = "Scheduled Event : SYFT_SBOM Missing"
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
 
-            if not os.path.exists(sbom_att_path):
+            if not os.path.exists(syft_sbom_att_path):
                 daily_scan = False
-                audit_trail_event(audit_trail, "ATTESTATION_EXISTS", {
+                audit_trail_event(audit_trail, "SYFT_ATTESTATION_EXISTS", {
                 "status": "fail",
                 })
-                message = f"[!] Attestation missing for SBOM in repo: {repo_name}"
-                alert = "Scheduled Event : Attestation Missing"
+                message = f"[!] SYFT_Attestation missing for SBOM in repo: {repo_name}"
+                alert = "Scheduled Event : SYFT_Attestation Missing"
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
 
-            if not os.path.exists(att_sig_path):
+            if not os.path.exists(syft_att_sig_path):
                 daily_scan = False
-                audit_trail_event(audit_trail, "SIGNATURE_EXISTS", {
+                audit_trail_event(audit_trail, "SYFT_SIGNATURE_EXISTS", {
                 "status": "fail",
                 })
-                message = f"[!] Signature missing for Attestation in repo: {repo_name}"
-                alert = "Scheduled Event : Signature Missing"
+                message = f"[!] SYFT_Signature missing for SYFT_Attestation in repo: {repo_name}"
+                alert = "Scheduled Event : SYFT_Signature Missing"
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
@@ -101,21 +109,21 @@ def sbom_validation():
                     [
                         "cosign", "verify-blob-attestation",
                         "--key", cosign_pub_path,
-                        "--signature", sbom_att_path,
+                        "--signature", syft_sbom_att_path,
                         "--type", "cyclonedx",
-                        sbom_path
+                        syft_sbom_path
                     ],
                     check=True,
                     env=env
                 )
-                print(f"[+] Verified SBOM attestation for repo: {repo_name}")
+                print(f"[+] Verified SYFT_SBOM attestation for repo: {repo_name}")
             except subprocess.CalledProcessError:
                 daily_scan = False
-                audit_trail_event(audit_trail, "VERIFY_ATTESTATION", {
+                audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION", {
                 "status": "fail",
                 })
-                message = f"[!] Attestation verification failed for repo: {repo_name}!"
-                alert = "Scheduled Event : Attestation Fail"
+                message = f"[!] SYFT_Attestation verification failed for repo: {repo_name}!"
+                alert = "Scheduled Event : SYFT_Attestation Fail"
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
@@ -125,37 +133,120 @@ def sbom_validation():
                     [
                         "cosign", "verify-blob",
                         "--key", cosign_pub_path,
-                        "--signature", att_sig_path,
-                        sbom_att_path
+                        "--signature", syft_att_sig_path,
+                        syft_sbom_att_path
                     ],
                     check=True,
                     env=env
                 )
-                print(f"[+] Verified Attestation signature for repo: {repo_name}")
+                print(f"[+] Verified SYFT_Attestation signature for repo: {repo_name}")
             except subprocess.CalledProcessError:
                 daily_scan = False
-                audit_trail_event(audit_trail, "VERIFY_ATTESTATION_SIGNATURE", {
+                audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION_SIGNATURE", {
                 "status": "fail",
                 })
-                message = f"[!] Signature for Attestation failed for repo: {repo_name}!"
-                alert = "Scheduled Event : Signature Fail"
+                message = f"[!] SYFT_Signature for SYFT_Attestation failed for repo: {repo_name}!"
+                alert = "Scheduled Event : SYFT_Signature Fail"
                 timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 print(f"{message}")
                 alert_event_system(audit_trail, message, alert, alert_path)
 
+            # Trivy checks
+            if not os.path.exists(trivy_report_path):
+                daily_scan = False
+                audit_trail_event(audit_trail, "TRVIY_SBOM_EXISTS", {
+                "status": "fail",
+                })
+                message = f"[!] TRVIY_SBOM missing for repo: {repo_name}"
+                alert = "Scheduled Event : TRVIY_SBOM Missing"
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                print(f"{message}")
+                alert_event_system(audit_trail, message, alert, alert_path)
+
+            if not os.path.exists(trivy_att_sig_path):
+                daily_scan = False
+                audit_trail_event(audit_trail, "TRVIY_ATTESTATION_EXISTS", {
+                "status": "fail",
+                })
+                message = f"[!] TRVIY_Attestation missing for SBOM in repo: {repo_name}"
+                alert = "Scheduled Event : TRVIY_Attestation Missing"
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                print(f"{message}")
+                alert_event_system(audit_trail, message, alert, alert_path)
+
+            if not os.path.exists(trivy_sbom_att_path):
+                daily_scan = False
+                audit_trail_event(audit_trail, "TRVIY_SIGNATURE_EXISTS", {
+                "status": "fail",
+                })
+                message = f"[!] TRVIY_Signature missing for TRVIY_Attestation in repo: {repo_name}"
+                alert = "Scheduled Event : TRVIY_Signature Missing"
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                print(f"{message}")
+                alert_event_system(audit_trail, message, alert, alert_path)
+            
+            try:
+                subprocess.run(
+                    [
+                        "cosign", "verify-blob-attestation",
+                        "--key", cosign_pub_path,
+                        "--signature", trivy_sbom_att_path,
+                        "--type", "cyclonedx",
+                        trivy_report_path
+                    ],
+                    check=True,
+                    env=env
+                )
+                print(f"[+] Verified TRVIY_SBOM attestation for repo: {repo_name}")
+            except subprocess.CalledProcessError:
+                daily_scan = False
+                audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION", {
+                "status": "fail",
+                })
+                message = f"[!] TRVIY_Attestation verification failed for repo: {repo_name}!"
+                alert = "Scheduled Event : TRVIY_Attestation Fail"
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                print(f"{message}")
+                alert_event_system(audit_trail, message, alert, alert_path)
+
+            try:
+                subprocess.run(
+                    [
+                        "cosign", "verify-blob",
+                        "--key", cosign_pub_path,
+                        "--signature", trivy_att_sig_path,
+                        trivy_sbom_att_path
+                    ],
+                    check=True,
+                    env=env
+                )
+                print(f"[+] Verified TRVIY_Attestation signature for repo: {repo_name}")
+            except subprocess.CalledProcessError:
+                daily_scan = False
+                audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION_SIGNATURE", {
+                "status": "fail",
+                })
+                message = f"[!] TRVIY_Signature for TRVIY_Attestation failed for repo: {repo_name}!"
+                alert = "Scheduled Event : TRVIY_Signature Fail"
+                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                print(f"{message}")
+                alert_event_system(audit_trail, message, alert, alert_path)
+
+            # Verify the hash for the files to prevent tampering
             print(f"[~] Verifying file hash for repo: {repo_name}")
             verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path)
-
-            print(f"[~] Scanning latest SBOM for repo: {repo_name}")
+            
+            # Checks for if new vulnerabilities have been found in the packages
+            print(f"[~] Scanning latest SYFT_SBOM for repo: {repo_name}")
             try:
-                vulns_cyclonedx_json = subprocess.run(
-                    ["grype", sbom_path, "-o", "cyclonedx-json"],
+                grype_vulns_cyclonedx_json_data = subprocess.run(
+                    ["grype", syft_sbom_path, "-o", "cyclonedx-json"],
                     capture_output=True,
                     text=True,
                     check=True
                 )
 
-                vulns_cyclonedx_json_data = json.loads(vulns_cyclonedx_json.stdout)
+                grype_vulns_cyclonedx_json_data = json.loads(grype_vulns_cyclonedx_json_data.stdout)
 
                 previous_vulns_data = None
                 
@@ -170,7 +261,7 @@ def sbom_validation():
                     exclusions_data = json.load(f)
                 excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
 
-                current_cve_ids = extract_cve_ids(vulns_cyclonedx_json_data)
+                current_cve_ids = extract_cve_ids(grype_vulns_cyclonedx_json_data)
                 previous_cve_ids = extract_cve_ids(previous_vulns_data) if previous_vulns_data else set()
 
                 new_cves = current_cve_ids - previous_cve_ids
@@ -196,9 +287,9 @@ def sbom_validation():
                     alert_event_system(audit_trail, message, alert, alert_path)
 
                 with open(vulns_output_path, "w") as f:
-                    f.write(vulns_cyclonedx_json.stdout)
+                    f.write(grype_vulns_cyclonedx_json_data.stdout)
 
-                prio_vuln_data = compare_kev_catalog(audit_trail, vulns_cyclonedx_json_data)
+                prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data)
                 with open(prio_output_path, "w") as f:
                     json.dump(prio_vuln_data, f, indent=4)
 

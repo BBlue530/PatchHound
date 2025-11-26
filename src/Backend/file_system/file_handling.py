@@ -11,7 +11,7 @@ from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
 
-def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_report, vulns_cyclonedx_json, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
+def save_scan_files(audit_trail, current_repo, syft_sbom_file, sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, timestamp, exclusions_file):
     secret_type = "cosign_key"
     cosign_key = read_secret(secret_type)
 
@@ -23,7 +23,7 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
     scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name)
 
-    sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
     sast_report_path = os.path.join(scan_dir, f"{repo_name}_sast_report.json")
     trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
     grype_path = os.path.join(scan_dir, f"{repo_name}_vulns_cyclonedx.json")
@@ -34,8 +34,11 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
     exclusions_file_path = os.path.join(repo_dir, f"{repo_name}_exclusions_file.json")
     repo_history_path = os.path.join(repo_dir, f"{repo_name}_repo_history.json")
 
-    att_sig_path = f"{sbom_path}_att.sig"
-    sbom_attestation_path = f"{sbom_path}.att"
+    syft_att_sig_path = f"{syft_sbom_path}_att.sig"
+    syft_sbom_attestation_path = f"{syft_sbom_path}.att"
+
+    trivy_att_sig_path = f"{trivy_report_path}_att.sig"
+    trivy_sbom_attestation_path = f"{trivy_report_path}.att"
 
     cosign_key_path = os.path.join(scan_dir, f"{repo_name}.key")
     cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
@@ -52,7 +55,7 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
 
     alerts_list = []
     
-    sbom_json = load_json(sbom_file)
+    syft_sbom_json = load_json(syft_sbom_file)
     sast_report_json = load_json(sast_report)
     trivy_report_json = load_json(trivy_report)
     exclusions_file_json = load_json(exclusions_file)
@@ -60,14 +63,25 @@ def save_scan_files(audit_trail, current_repo, sbom_file, sast_report, trivy_rep
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
-        summary_report = generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json)
-        save_files(audit_trail, grype_path, vulns_cyclonedx_json, prio_path, prio_vuln_data, alert_path, alert_system_json, sbom_path, sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
-        attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
-        attestation_verified = sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+        
+        summary_report = generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json)
+        save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
+        
+        # Handles attestation of syft and trivy SBOMs
+        syft_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, syft_sbom_path, syft_sbom_attestation_path, syft_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+        trivy_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, trivy_report_path, trivy_sbom_attestation_path, trivy_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+
+        # Handles counting vulnerabilities and exclusions
         trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count = check_vuln_file_trivy(trivy_report_path, exclusions_file_path)
         grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count = check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path)
         vulns_found = vuln_count(audit_trail, sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count)
+        
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
-        track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, sbom_attestation_path, sbom_path, attestation_verified, alerts_list)
+        track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, alerts_list)
 
     repo_lock(repo_dir, repo_files)
+
+def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
+    attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+    attestation_verified = sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_sig_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
+    return attestation_verified

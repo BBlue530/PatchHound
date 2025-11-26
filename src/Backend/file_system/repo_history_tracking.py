@@ -2,19 +2,26 @@ import json
 import os
 from utils.file_hash import hash_file
 
-def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, sbom_attestation_path, sbom_path, attestation_verified, alerts_list):
-    sbom_att_hash = hash_file(sbom_attestation_path)
-    sbom_hash = hash_file(sbom_path)
+def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, alerts_list):
+    syft_sbom_att_hash = hash_file(syft_sbom_attestation_path)
+    syft_sbom_hash = hash_file(syft_sbom_path)
+
+    trivy_sbom_att_hash = hash_file(trivy_sbom_attestation_path)
+    trivy_sbom_hash = hash_file(trivy_report_path)
+
     new_entry = {
         str(timestamp): {
         "commit_sha": commit_sha,
         "timestamp": timestamp,
-        "sbom_hash": sbom_hash,
+        "syft_sbom_hash": syft_sbom_hash,
+        "trivy_sbom_hash": trivy_sbom_hash,
         "audit_trail_hash": audit_trail_hash,
         "vulnerabilities": vulns_found,
         "attestation": {
-            "hash": sbom_att_hash,
-            "signature_valid": attestation_verified
+            "syft_sbom_att_hash": syft_sbom_att_hash,
+            "syft_attestation_verified": syft_attestation_verified,
+            "trivy_sbom_att_hash": trivy_sbom_att_hash,
+            "trivy_attestation_verified": trivy_attestation_verified
         },
         "alerts": alerts_list
         }

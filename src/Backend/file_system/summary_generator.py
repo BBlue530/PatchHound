@@ -1,6 +1,6 @@
 from logs.audit_trail import audit_trail_event
 
-def generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
+def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
     summary_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}
@@ -44,7 +44,7 @@ def generate_summary(audit_trail, vulns_cyclonedx_json, prio_vuln_data, sast_rep
             "reason": "TRIVY_SCAN=false"
         }
 
-    for vuln in vulns_cyclonedx_json.get("vulnerabilities", []):
+    for vuln in grype_vulns_cyclonedx_json_data.get("vulnerabilities", []):
         key = vuln.get("id")
         if not key:
             continue

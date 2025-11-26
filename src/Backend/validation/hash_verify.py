@@ -8,12 +8,20 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     scan_dir = os.path.join(repo_path, timestamp_folder)
 
     repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
-    sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
-    sbom_attestation_path = f"{sbom_path}.att"
     audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
 
-    sbom_att_hash_new = hash_file(sbom_attestation_path)
-    sbom_hash_new = hash_file(sbom_path)
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_sbom_cyclonedx.json")
+    syft_sbom_attestation_path = f"{syft_sbom_path}.att"
+
+    trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
+    trivy_sbom_attestation_path = f"{trivy_report_path}.att"
+
+    syft_sbom_att_hash_new = hash_file(syft_sbom_attestation_path)
+    syft_sbom_hash_new = hash_file(syft_sbom_path)
+
+    trivy_sbom_att_hash_new = hash_file(trivy_sbom_attestation_path)
+    trivy_sbom_hash_new = hash_file(trivy_report_path)
+
     audit_trail_hash_new = hash_file(audit_trail_path)
 
     with open(repo_history_path, "r") as f:
@@ -37,29 +45,56 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
         alert_event_system(audit_trail, message, alert, alert_path)
         return
 
-    sbom_att_hash_old = old_entry["attestation"]["hash"]
-    sbom_hash_old = old_entry["sbom_hash"]
+    syft_sbom_att_hash_old = old_entry["attestation"]["syft_sbom_att_hash"]
+    syft_sbom_hash_old = old_entry["syft_sbom_hash"]
+
+    trivy_sbom_att_hash_old = old_entry["attestation"]["trivy_sbom_att_hash"]
+    trivy_sbom_hash_old = old_entry["trivy_sbom_hash"]
+
     audit_trail_hash_old = old_entry["audit_trail_hash"]
 
-    if sbom_att_hash_new != sbom_att_hash_old:
-        audit_trail_event(audit_trail, "HASH_VERIFY", {
+    # Syft checks
+    if syft_sbom_att_hash_new != syft_sbom_att_hash_old:
+        audit_trail_event(audit_trail, "SYFT_HASH_VERIFY", {
         "status": "fail",
         "reason": f"attestation hash mismatch for: {timestamp_folder}"
         })
-        message = f"[!] Attestation hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        message = f"[!] SYFT_Attestation hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
         alert = "Scheduled Event : Tampering Detected"
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
-    elif sbom_hash_new != sbom_hash_old:
-        audit_trail_event(audit_trail, "HASH_VERIFY", {
+    if syft_sbom_hash_new != syft_sbom_hash_old:
+        audit_trail_event(audit_trail, "SYFT_HASH_VERIFY", {
         "status": "fail",
         "reason": f"sbom hash mismatch for: {timestamp_folder}"
         })
-        message = f"[!] SBOM hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        message = f"[!] SYFT_SBOM hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
         alert = "Scheduled Event : Tampering Detected"
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
-    elif audit_trail_hash_new != audit_trail_hash_old:
+    
+    # Trivy checks
+    if trivy_sbom_att_hash_new != trivy_sbom_att_hash_old:
+        audit_trail_event(audit_trail, "TRIVY_HASH_VERIFY", {
+        "status": "fail",
+        "reason": f"attestation hash mismatch for: {timestamp_folder}"
+        })
+        message = f"[!] TRIVY_Attestation hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        alert = "Scheduled Event : Tampering Detected"
+        print(f"{message}")
+        alert_event_system(audit_trail, message, alert, alert_path)
+    if trivy_sbom_hash_new != trivy_sbom_hash_old:
+        audit_trail_event(audit_trail, "TRIVY_HASH_VERIFY", {
+        "status": "fail",
+        "reason": f"sbom hash mismatch for: {timestamp_folder}"
+        })
+        message = f"[!] TRIVY_SBOM hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        alert = "Scheduled Event : Tampering Detected"
+        print(f"{message}")
+        alert_event_system(audit_trail, message, alert, alert_path)
+
+    # Audit trail check
+    if audit_trail_hash_new != audit_trail_hash_old:
         audit_trail_event(audit_trail, "HASH_VERIFY", {
         "status": "fail",
         "reason": f"audit_trail hash mismatch for: {timestamp_folder}"
