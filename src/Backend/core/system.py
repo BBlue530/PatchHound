@@ -51,6 +51,7 @@ def install_cosign():
 def version_check(tool, version_arg, env=None):
     result = subprocess.run([tool, version_arg], capture_output=True, text=True, env=env)
     print(result.stdout)
+    return result.stdout
 
 def install_tools():
     make_local_bin()
@@ -60,17 +61,46 @@ def install_tools():
 
     if not tool_exists("grype"):
         install_grype()
-        version_check("grype", "--version")
+        installed_grype_version_output = version_check(os.path.join(local_bin, "grype"), "--version")
+        if GRYPE_VERSION not in installed_grype_version_output:
+            print("[!] Grype version mismatch")
+            print(f"[!] Current grype version: {installed_grype_version_output}")
+            print(f"[!] Needed grype version: {GRYPE_VERSION}")
+            sys.exit(1)
     else:
-        version_check("grype", "--version")
-        print("[+] Grype is installed")
+        installed_grype_version_output = version_check(os.path.join(local_bin, "grype"), "--version")
+        if GRYPE_VERSION not in installed_grype_version_output:
+            install_grype()
+            installed_grype_version_output = version_check(os.path.join(local_bin, "grype"), "--version")
+            if GRYPE_VERSION not in installed_grype_version_output:
+                print("[!] Grype version mismatch")
+                print(f"[!] Current grype version: {installed_grype_version_output}")
+                print(f"[!] Needed grype version: {GRYPE_VERSION}")
+                sys.exit(1)
+    print(f"[+] Grype is installed version: {GRYPE_VERSION}")
 
     if not tool_exists("cosign"):
         install_cosign()
-        version_check("cosign", "version", env)
+        installed_cosign_version_output = version_check(os.path.join(local_bin, "cosign"), "version")
+        if COSIGN_VERSION not in installed_cosign_version_output:
+            print("[!] Cosign version mismatch")
+            print(f"[!] Current cosign version: {installed_cosign_version_output}")
+            print(f"[!] Needed cosign version: {COSIGN_VERSION}")
+            sys.exit(1)
     else:
-        version_check("cosign", "version", env)
-        print("[+] Cosign is installed")
+        installed_cosign_version_output = version_check(os.path.join(local_bin, "cosign"), "version")
+        if COSIGN_VERSION not in installed_cosign_version_output:
+            install_cosign()
+            installed_cosign_version_output = version_check(os.path.join(local_bin, "cosign"), "version")
+            if COSIGN_VERSION not in installed_cosign_version_output:
+                print("[!] Cosign version mismatch")
+                print(f"[!] Current cosign version: {installed_cosign_version_output}")
+                print(f"[!] Needed cosign version: {COSIGN_VERSION}")
+                sys.exit(1)
+    print("[+] Cosign is installed")
 
 def tool_exists(tool_name):
-    return shutil.which(tool_name) is not None
+    return (
+        shutil.which(tool_name) is not None
+        or os.path.isfile(os.path.join(local_bin, tool_name))
+    )
