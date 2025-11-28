@@ -3,6 +3,10 @@ name: Base Orchestrator Pipeline
 on:
   push:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
 
   check-backend-changes:
@@ -17,7 +21,7 @@ jobs:
       - name: Check if Backend changed
         id: check
         run: |
-          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^Backend/' || true)
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^src/Backend/' || true)
           if [ -z "$CHANGED" ]; then
             echo "[+] Backend not changed"
             echo "backend_changed=false" >> $GITHUB_OUTPUT
@@ -26,10 +30,14 @@ jobs:
             echo "backend_changed=true" >> $GITHUB_OUTPUT
           fi
 
-  trigger-docker-build:
+  trigger-docker-build-backend:
     needs: check-backend-changes
     if: needs.check-backend-changes.outputs.backend_changed == 'true'
     uses: ./.github/workflows/docker-builder.yml
+    with:
+      WORK_DIR: "./src/Backend"
+      IMAGE_NAME: "ghcr.io/bblue530/patchhound_backend"
+      IMAGE_TAG: "latest"
 
   trigger-patchhound-scan:
     if: always()

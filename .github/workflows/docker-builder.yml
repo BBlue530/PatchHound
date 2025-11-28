@@ -2,23 +2,49 @@ name: Docker Build
 
 on:
   workflow_call:
+    inputs:
+      WORK_DIR:
+        required: true
+        type: string
+      IMAGE_NAME:
+        required: true
+        type: string
+      IMAGE_TAG:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   docker-build:
     runs-on: ubuntu-latest
+    env:
+      WORK_DIR: ${{ inputs.WORK_DIR }}
+      IMAGE_NAME: ${{ inputs.IMAGE_NAME }}
+      IMAGE_TAG: ${{ inputs.IMAGE_TAG }}
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORK_DIR }}
+
     steps:
 
       - uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image
-        run: docker build -t patchhound-test .
-
-      - name: Test Docker image
-        run: docker run --rm patchhound-test sh -c "gunicorn --version && grype --version && cosign version && python3 --version && python3 -c 'import flask; print(flask.__version__)'"
+        run: docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
       
-      - name: Cleanup Docker image
-        if: always()
-        run: docker rmi patchhound-test || true
+      - name: Push Docker image to GHCR
+        run: docker push "$IMAGE_NAME:$IMAGE_TAG"

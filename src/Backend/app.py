@@ -14,8 +14,6 @@ from routes.scan_sbom import scan_sbom_bp
 from routes.token_key_handling import token_key_bp
 
 app = Flask(__name__)
-# Dont think i need this anymore but scared to remove it for now since its working like it should
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 app.register_blueprint(pdf_bp)
 app.register_blueprint(health_bp)
@@ -24,12 +22,14 @@ app.register_blueprint(resource_bp)
 app.register_blueprint(scan_sbom_bp)
 app.register_blueprint(token_key_bp)
 
-install_tools()
-generate_secrets()
-verify_secrets()
-scheduled_event()
-create_database()
+if __name__ == "__main__":
+    install_tools()
+    generate_secrets()
+    verify_secrets()
+    scheduled_event()
+    create_database()
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
-scheduler.start()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
+    scheduler.start()
+    app.run(host="0.0.0.0", port=8080, debug=True)

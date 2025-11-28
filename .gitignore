@@ -1,2 +1,3 @@
 src/Backend/database/keys_db.sqlite
 src/Backend/secrets.json
+src/Backend/find_deps.sh

@@ -25,5 +25,5 @@ else
   echo "[!] $REQUIREMENTS_FILE not found."
 fi
 
-echo "[i] Starting Gunicorn..."
-"$VENV_DIR/bin/gunicorn" -w 2 --threads 4 -b 0.0.0.0:8080 --preload --capture-output --log-level debug app:app
+echo "[+] Starting..."
+python3 app.py
