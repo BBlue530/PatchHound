@@ -11,7 +11,13 @@ ENV SYFT_VERSION=1.38.0
 ENV TRIVY_VERSION=0.56.2
 ENV SEMGREP_VERSION=1.95.0
 
+ENV PATH="/cli_image/PatchHound_CLI:$PATH"
 ENV BASE_DIR_BIN="/usr/local/bin"
+
+ENV PH_CONFIG_DIR="/cli_image/config"
+RUN mkdir -p $PH_CONFIG_DIR
+
+VOLUME ["/cli_image/config"]
 
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
     | sh -s -- -b "$BASE_DIR_BIN" "v$SYFT_VERSION"
@@ -23,9 +29,8 @@ RUN wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VER
 
 RUN PIPX_BIN_DIR=/usr/local/bin pipx install "semgrep==${SEMGREP_VERSION}"
 
-COPY ./PatchHound_CLI ./PatchHound_CLI
+COPY ./PatchHound_CLI /cli_image/PatchHound_CLI
 
-RUN chmod +x PatchHound_CLI/patchhound.sh && \
-    ln -sf /cli_image/PatchHound_CLI/patchhound.sh /usr/local/bin/patchhound
+RUN bash /cli_image/PatchHound_CLI/install.sh
 
 COPY . .

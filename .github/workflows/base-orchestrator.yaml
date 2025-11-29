@@ -75,7 +75,7 @@ jobs:
       WORK_DIR: "./cli_image"
       IMAGE_NAME: "ghcr.io/bblue530/patchhound_cli"
       IMAGE_TAG: "latest"
-      WILDCARD_COMMAND: "rsync -a ./src/PatchHound_CLI/ ./cli_image/PatchHound_CLI"
+      WILDCARD_COMMAND: "rsync -a ./src/PatchHound_CLI/ ./cli_image/PatchHound_CLI && chmod +x ./cli_image/PatchHound_CLI/patchhound.sh"
 
   trigger-patchhound-scan:
     if: always()
