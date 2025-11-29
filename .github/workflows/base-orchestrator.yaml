@@ -9,17 +9,19 @@ permissions:
 
 jobs:
 
-  check-backend-changes:
+  check-changes:
     runs-on: ubuntu-latest
     outputs:
-      backend_changed: ${{ steps.check.outputs.backend_changed }}
+      backend_changed: ${{ steps.check_backend.outputs.backend_changed }}
+      cli_changed: ${{ steps.check_cli.outputs.cli_changed }}
+      cli_image_changed: ${{ steps.check_cli_image.outputs.cli_image_changed }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Check if Backend changed
-        id: check
+        id: check_backend
         run: |
           CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^src/Backend/' || true)
           if [ -z "$CHANGED" ]; then
@@ -30,14 +32,50 @@ jobs:
             echo "backend_changed=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check if cli changed
+        id: check_cli
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^src/PatchHound_CLI' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "[+] CLI not changed"
+            echo "cli_changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "[+] CLI changed"
+            echo "cli_changed=true" >> $GITHUB_OUTPUT
+            rsync -a src/PatchHound_CLI/ cli_image/
+          fi
+      
+      - name: Check if cli image changed
+        id: check_cli_image
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD | grep '^cli_image/' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "[+] CLI image not changed"
+            echo "cli_image_changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "[+] CLI image changed"
+            echo "cli_image_changed=true" >> $GITHUB_OUTPUT
+          fi
+
   trigger-docker-build-backend:
-    needs: check-backend-changes
-    if: needs.check-backend-changes.outputs.backend_changed == 'true'
+    needs: check-changes
+    if: needs.check-changes.outputs.backend_changed == 'true'
     uses: ./.github/workflows/docker-builder.yml
     with:
       WORK_DIR: "./src/Backend"
       IMAGE_NAME: "ghcr.io/bblue530/patchhound_backend"
       IMAGE_TAG: "latest"
+      WILDCARD_COMMAND: ""
+
+  trigger-docker-cli-image:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.cli_changed == 'true' || needs.check-changes.outputs.cli_image_changed == 'true' }}
+    uses: ./.github/workflows/docker-builder.yml
+    with:
+      WORK_DIR: "./cli_image"
+      IMAGE_NAME: "ghcr.io/bblue530/patchhound_cli"
+      IMAGE_TAG: "latest"
+      WILDCARD_COMMAND: "rsync -a ./src/PatchHound_CLI/ ./cli_image/PatchHound_CLI"
 
   trigger-patchhound-scan:
     if: always()
