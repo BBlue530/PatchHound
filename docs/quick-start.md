@@ -122,3 +122,10 @@ For more in-depth information:
 - Learn more about the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound)
 
 ---
+
+# Dev quick start
+If you want to quickly start PatchHound for development or testing, you can use the `dev_test.sh` script located in the `dev` directory. 
+
+This script automates setting up the backend, installing the CLI, generating an API key, creating a token, and running a scan.
+
+---

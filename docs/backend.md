@@ -16,7 +16,6 @@ PatchHound Backend is the heart of the system. It handles ingesting SBOMs, scann
 - Send alerts using webhooks
 - Log all backend events
 - Automatically update vulnerability databases and rescan for new issues
-- Handle multiple requests simultaneously
 - Generate JSON and PDF summary reports for workflows
 - Manage exclusions of vulnerabilities across versions
 - Supports 3rd party secret managers
@@ -151,22 +150,6 @@ Cron Trigger: scheduled_event()
    ├─ Compare with previous results
    ├─ Trigger alerts if new vulns found
    └─ Save updated reports + logs
-```
-### Deployment
-
-```
-[Deployment / Runtime]
-
-└─ Start.sh (Bash script):
-     ├─ Setup Python virtual environment
-     ├─ Install dependencies
-     └─ Launch Gunicorn server
-
-↓
-
-[Gunicorn WSGI Server]
-   ├─ Worker 1 (multi threaded)
-   └─ Worker 2 (multi threaded)
 ```
 
 ---

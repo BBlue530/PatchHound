@@ -39,6 +39,18 @@ For installation, setup, and detailed API documentation, see the [Backend README
 ### CLI
 The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound).
 
+### Container images
+Container images are available for both the backend and the CLI. These images include everything you need to get started quickly.
+
+#### [Backend container image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_backend):
+```
+docker pull ghcr.io/bblue530/patchhound_backend:latest
+```
+#### [CLI image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_cli):
+```
+docker pull ghcr.io/bblue530/patchhound_cli:latest
+```
+
 ---
 
 ## Notes
@@ -75,10 +87,5 @@ Public images only require `read:packages`.
 ## License
 
 This project is licensed under the Apache License 2.0. See the LICENSE file for details.
-
----
-
-⚠️ **Warning: PatchHound is currently in development. There is no stable release yet.**  
-Use at your own risk and expect potential breaking changes until a stable version is released.
 
 ---
