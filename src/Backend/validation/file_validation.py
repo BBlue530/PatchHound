@@ -287,7 +287,7 @@ def sbom_validation():
                     alert_event_system(audit_trail, message, alert, alert_path)
 
                 with open(vulns_output_path, "w") as f:
-                    f.write(grype_vulns_cyclonedx_json_data.stdout)
+                    json.dump(grype_vulns_cyclonedx_json_data, f, indent=2)
 
                 prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data)
                 with open(prio_output_path, "w") as f:

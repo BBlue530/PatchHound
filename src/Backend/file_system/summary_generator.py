@@ -1,7 +1,8 @@
 from logs.audit_trail import audit_trail_event
 
-def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
+def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
     summary_dict = {}
+    packages_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}
 
@@ -43,6 +44,47 @@ def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_dat
             "status": "scan skipped",
             "reason": "TRIVY_SCAN=false"
         }
+
+    for comp in syft_sbom_json.get("components", []):
+        name = comp.get("name")
+        version = comp.get("version")
+        if not name or not version:
+            continue
+
+        purl = comp.get("purl")
+        cpe = comp.get("cpe")
+
+        props = {p["name"]: p["value"] for p in comp.get("properties", []) if "name" in p and "value" in p}
+
+        found_by = props.get("syft:package:foundBy")
+        language = props.get("syft:package:language")
+        package_type = props.get("syft:package:type")
+        metadata_type = props.get("syft:package:metadataType")
+
+        locations = [
+            v for k, v in props.items()
+            if k.startswith("syft:location") and k.endswith(":path")
+        ]
+
+        dedupe_key = f"{name}|{version}|{purl or cpe or ''}"
+
+        if dedupe_key not in packages_dict:
+            packages_dict[dedupe_key] = {
+                "id": comp.get("bom-ref"),
+                "name": name,
+                "version": version,
+                "type": comp.get("type"),
+                "purl": purl,
+                "cpe": cpe,
+                "package_type": package_type,
+                "language": language,
+                "metadata_type": metadata_type,
+                "found_by": found_by,
+                "locations": list(set(locations))
+            }
+        else:
+            packages_dict[dedupe_key]["locations"].extend(locations)
+            packages_dict[dedupe_key]["locations"] = list(set(packages_dict[dedupe_key]["locations"]))
 
     for vuln in grype_vulns_cyclonedx_json_data.get("vulnerabilities", []):
         key = vuln.get("id")
@@ -132,7 +174,7 @@ def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_dat
             if not key:
                 continue
             add_vuln(key, {
-                "source": "trivy",
+                "source": "trivy_vulnerability",
                 "id": key,
                 "type": "vuln",
                 "package": v.get("PkgName"),
@@ -154,7 +196,7 @@ def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_dat
                 elif isinstance(r, str):
                     links.append(r)
             add_vuln(key, {
-                "source": "trivy",
+                "source": "trivy_misconfiguration",
                 "id": key,
                 "type": "misconfiguration",
                 "title": m.get("Title") or m.get("Description") or "No description",
@@ -170,7 +212,7 @@ def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_dat
             if not key:
                 continue
             add_vuln(key, {
-                "source": "trivy",
+                "source": "trivy_secret",
                 "id": key,
                 "type": "secret",
                 "title": s.get("Title") or "No title",
@@ -181,6 +223,7 @@ def generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_dat
             })
 
     summary_report = {
+        "packages": list(packages_dict.values()),
         "vulnerabilities": list(summary_dict.values()),
         "kev_vulnerabilities": list(kev_prio_dict.values()),
         "exclusions": list(exclusions_dict.values())
