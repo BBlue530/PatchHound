@@ -34,7 +34,8 @@ patchhound config --set BASE_URL http://localhost:8080 \
     REPO_NAME test-repo \
     AUTHOR_NAME "dev_test" \
     AUTHOR_EMAIL "dev_test@example.com" \
-    TRIVY_SCAN false \
+    TRIVY_SCAN true \
+    SAST_SCAN true \
     TARGET "$BASE_DIR/src"
 
 echo "[~] Waiting for backend to start..."
@@ -42,7 +43,7 @@ while ! curl -s http://localhost:8080/v1/health-check >/dev/null; do
     echo "[~] Backend not ready, retrying..."
     sleep 10
 done
-sleep 10
+sleep 30
 
 echo "[~] Creating new token..."
 patchhound create --api-key "$API_KEY" --org test_org --exp 30 | tee "$BACKEND_LOG"
@@ -50,4 +51,4 @@ patchhound create --api-key "$API_KEY" --org test_org --exp 30 | tee "$BACKEND_L
 TOKEN_KEY=$(grep -A1 "Token Key Created" "$BACKEND_LOG" | tail -n1 | awk '{print $1}' | tr -d '\r')
 echo "[+] Token: $TOKEN_KEY"
 
-patchhound scan --token "$TOKEN_KEY"
+sudo patchhound scan --token "$TOKEN_KEY"

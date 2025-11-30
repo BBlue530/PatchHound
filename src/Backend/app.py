@@ -32,4 +32,4 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
     scheduler.start()
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False, use_reloader=False)

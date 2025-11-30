@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import html
 
 def file_stable_check(file_path, timeout=10):
     prev_size = -1
@@ -34,4 +35,4 @@ def load_json(file):
 def safe_text(value):
     if value is None:
         return ""
-    return str(value)
+    return html.escape(str(value))

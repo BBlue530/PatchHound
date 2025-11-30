@@ -12,12 +12,6 @@ SYFT_OUTPUT=$("$BASE_DIR_BIN/syft" version 2>/dev/null | tr -d 'v' || echo "")
 TRIVY_OUTPUT=$("$BASE_DIR_BIN/trivy" version 2>/dev/null | awk '{print $2}' || echo "")
 SEMGREP_OUTPUT=$(semgrep --version 2>/dev/null | awk '{print $2}' || echo "")
 
-echo "SEMGREP_OUTPUT"
-echo "$SEMGREP_OUTPUT"
-
-echo "TRIVY_OUTPUT"
-echo "$TRIVY_OUTPUT"
-
 sudo mkdir -p "$BASE_DIR_BIN"
 sudo mkdir -p "$BASE_DIR_VENV"
 

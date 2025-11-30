@@ -64,7 +64,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, sast_report, triv
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
         
-        summary_report = generate_summary(audit_trail, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json)
+        summary_report = generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json)
         save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
         
         # Handles attestation of syft and trivy SBOMs
