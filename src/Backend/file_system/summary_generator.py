@@ -12,23 +12,17 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
         if e.get("vulnerability")
     }
 
-    exclusion_comments = {
-    e.get("vulnerability"): e.get("comment", "")
-    for e in exclusions_file_json.get("exclusions", [])
-    if e.get("vulnerability")
-    }
-
     def add_vuln(key, data):
         if key in excluded_ids:
-            data["comment"] = exclusion_comments.get(key, "")
-            exclusions_dict[key] = data
+            exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
+            exclusions_dict[key] = exclusion_data
         else:
             summary_dict[key] = data
 
     def add_vuln_kev(key, data):
         if key in excluded_ids:
-            data["comment"] = exclusion_comments.get(key, "")
-            exclusions_dict[key] = data
+            exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
+            exclusions_dict[key] = exclusion_data
         else:
             kev_prio_dict[key] = data
     
@@ -70,6 +64,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
 
         if dedupe_key not in packages_dict:
             packages_dict[dedupe_key] = {
+                "source": "syft",
                 "id": comp.get("bom-ref"),
                 "name": name,
                 "version": version,
@@ -107,20 +102,16 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             except ValueError:
                 pass
 
-        if key.startswith("GHSA"):
-            link = f"https://github.com/advisories/{key}"
-        elif key.startswith("CVE"):
-            link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={key}"
-        else:
-            link = vuln.get("references", [{}])[0].get("url", "No link available")
+        link = get_vulnerability_link(key, vuln, "url")
 
         add_vuln(key, {
             "source": "grype",
             "id": key,
+            "type": "vulnerability",
+            "description": vuln.get("description")  or "No description available",
             "severity": severity,
             "package": pkg_name,
             "version": pkg_version,
-            "description": vuln.get("description", "No description available"),
             "link": link,
         })
 
@@ -139,33 +130,29 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             add_vuln_kev(key, {
                 "source": "kev",
                 "id": key,
-                "kev_priority": "CISA_KEV",
+                "type": "kev",
+                "description": vuln.get("shortDescription")  or "No description available",
                 "severity": vuln.get("severity", "Unknown"),
-                "description": vuln.get("shortDescription", ""),
-                "title": vuln.get("vulnerabilityName", ""),
-                "vendor": vuln.get("vendorProject", ""),
-                "product": vuln.get("product", ""),
-                "required_action": vuln.get("requiredAction", ""),
+                "link": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                "kev_priority": "CISA_KEV",
+                "title": vuln.get("vulnerabilityName") or "No title available",
+                "vendor": vuln.get("vendorProject") or "No vendor available",
+                "product": vuln.get("product") or "No product data available",
+                "required_action": vuln.get("requiredAction") or "No required action available",
                 "kev_added_date": vuln.get("dateAdded"),
-                "kev_due_date": vuln.get("dueDate"),
-                "link": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+                "kev_due_date": vuln.get("dueDate")
             })
 
     for issue in sast_report_json.get("results", []):
-        rule_id = issue.get("check_id", "unknown_rule")
-        severity = issue.get("extra", {}).get("severity", "Unknown")
-        message = issue.get("extra", {}).get("message", "")
-        path = issue.get("path", "unknown_path")
-        line = issue.get("start", {}).get("line", "0")
-
-        key = rule_id
+        key = issue.get("check_id", "unknown_rule")
         add_vuln(key, {
             "source": "semgrep",
-            "id": rule_id,
-            "path": path,
-            "line": line,
-            "message": message,
-            "severity": severity,
+            "id": key,
+            "type": "vulnerability",
+            "description": issue.get("extra", {}).get("message")  or "No description available",
+            "severity": issue.get("extra", {}).get("severity", "Unknown"),
+            "path": issue.get("path", "unknown_path"),
+            "line": issue.get("start", {}).get("line", "0")
         })
 
     for result in trivy_report_json.get("Results", []):
@@ -173,15 +160,18 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             key = v.get("VulnerabilityID")
             if not key:
                 continue
+
+            link = get_vulnerability_link(key, v, "PrimaryURL")
+
             add_vuln(key, {
                 "source": "trivy_vulnerability",
                 "id": key,
                 "type": "vuln",
+                "description": v.get("Title") or v.get("Description") or "No description available",
+                "severity": v.get("Severity"),
                 "package": v.get("PkgName"),
                 "version": v.get("InstalledVersion"),
-                "severity": v.get("Severity"),
-                "title": v.get("Title") or v.get("Description") or "No description available",
-                "link": v.get("PrimaryURL", "No link available"),
+                "link": link,
             })
 
         for m in result.get("Misconfigurations", []):
@@ -199,12 +189,12 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
                 "source": "trivy_misconfiguration",
                 "id": key,
                 "type": "misconfiguration",
-                "title": m.get("Title") or m.get("Description") or "No description",
-                "description": m.get("Description"),
-                "resolution": m.get("Resolution", "No fix guidance"),
+                "description": m.get("Description") or "No description available",
                 "severity": m.get("Severity"),
-                "file": m.get("Target"),
-                "links": links
+                "links": links,
+                "title": m.get("Title") or "No title available",
+                "resolution": m.get("Resolution") or "No fix guidance available",
+                "file": m.get("Target")
             })
 
         for s in result.get("Secrets", []):
@@ -215,9 +205,9 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
                 "source": "trivy_secret",
                 "id": key,
                 "type": "secret",
-                "title": s.get("Title") or "No title",
-                "description": s.get("Description"),
+                "description": s.get("Description") or "No description available",
                 "severity": s.get("Severity", "HIGH"),
+                "title": s.get("Title") or "No title available",
                 "file": s.get("Target"),
                 "message": s.get("Message"),
             })
@@ -234,3 +224,45 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
         })
 
     return summary_report
+
+def get_vulnerability_link(key, vuln, vuln_url_key):
+    if key.startswith("GHSA"):
+        link = f"https://github.com/advisories/{key}"
+    elif key.startswith("CVE"):
+        link = f"https://nvd.nist.gov/vuln/detail/{key}"
+    elif key.startswith("PYSEC"):
+        link = f"https://python-security.readthedocs.io/vuln/{key}"
+    elif key.startswith("RUSTSEC"):
+        link = f"https://rustsec.org/advisories/{key}.html"
+    elif key.startswith("OSV"):
+        link = f"https://osv.dev/vulnerability/{key}"
+    elif key.startswith("GO"):
+        link = f"https://pkg.go.dev/vuln/{key}"
+    else:
+        link = vuln.get("references", [{}])[0].get(f"{vuln_url_key}", "No link available")
+    return link
+
+def exclusion_lookup(exclusions_file_json, key, data):
+    for e in exclusions_file_json.get("exclusions", []):
+        if e.get("vulnerability") == key:
+            exclusion_data = {
+                "id": key,
+                "scope": e.get("scope"),
+                "public_comment": e.get("public_comment"),
+                "internal_comment": e.get("internal_comment"),
+
+                # These are shared across all data
+                "source": data.get("source"),
+                "type": data.get("type"),
+                "description": data.get("description"),
+                "severity": data.get("severity")
+            }
+            # These are shared with some of the data
+            if data.get("package"):
+                exclusion_data["package"] = data.get("package")
+            if data.get("version"):
+                exclusion_data["version"] = data.get("version")
+            if data.get("link"):
+                exclusion_data["link"] = data.get("link")
+            return exclusion_data
+    return data

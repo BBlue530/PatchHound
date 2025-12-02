@@ -42,14 +42,32 @@ while [[ $# -gt 0 ]]; do
             CVE="$2"
             shift 2
             ;;
-        --comment)
+        --scope)
             shift
-            COMMENT=""
+            SCOPE=""
             while [[ $# -gt 0 ]] && [[ "$1" != --* ]]; do
-                COMMENT="$COMMENT $1"
+                SCOPE="$SCOPE $1"
                 shift
             done
-            COMMENT="${COMMENT#"${COMMENT%%[![:space:]]*}"}"
+            SCOPE="${SCOPE#"${SCOPE%%[![:space:]]*}"}"
+            ;;
+        --public-comment)
+            shift
+            PUBLIC_COMMENT=""
+            while [[ $# -gt 0 ]] && [[ "$1" != --* ]]; do
+                PUBLIC_COMMENT="$PUBLIC_COMMENT $1"
+                shift
+            done
+            PUBLIC_COMMENT="${PUBLIC_COMMENT#"${PUBLIC_COMMENT%%[![:space:]]*}"}"
+            ;;
+        --internal-comment)
+            shift
+            INTERNAL_COMMENT=""
+            while [[ $# -gt 0 ]] && [[ "$1" != --* ]]; do
+                INTERNAL_COMMENT="$INTERNAL_COMMENT $1"
+                shift
+            done
+            INTERNAL_COMMENT="${INTERNAL_COMMENT#"${INTERNAL_COMMENT%%[![:space:]]*}"}"
             ;;
         --help)
             usage_exclude
@@ -61,8 +79,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -z "$CVE" || -z "$COMMENT" ]]; then
-    print_message "[!]" "Missing flag" "Usage: $0 exclude --cve <CVE-ID> --comment <text>"
+if [[ -z "$CVE" || -z "$SCOPE" || -z "$PUBLIC_COMMENT" || -z "$INTERNAL_COMMENT" ]]; then
+    print_message "[!]" "Missing flag" "Usage: $0 exclude --cve <CVE-ID> --scope <scope-of-cve> --public-comment <text> --internal-comment <text>"
     usage_exclude
 fi
 
@@ -73,8 +91,8 @@ if jq -e --arg cve "$CVE" '.exclusions[] | select(.vulnerability==$cve)' "$EXCLU
     exit 0
 fi
 
-jq --arg cve "$CVE" --arg comment "$COMMENT" \
-   '.exclusions += [{"vulnerability": $cve, "comment": $comment}]' \
+jq --arg cve "$CVE" --arg scope "$SCOPE" --arg public_comment "$PUBLIC_COMMENT" --arg internal_comment "$INTERNAL_COMMENT" \
+   '.exclusions += [{"vulnerability": $cve, "scope": $scope, "public_comment": $public_comment, "internal_comment": $internal_comment}]' \
    "$EXCLUDE_PATH" > "${EXCLUDE_PATH}.tmp" && mv "${EXCLUDE_PATH}.tmp" "$EXCLUDE_PATH"
 
 print_message "[i]" "Exclusion added" "Added CVE $CVE to $EXCLUDE_PATH"

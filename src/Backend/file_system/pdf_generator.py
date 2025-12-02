@@ -2,6 +2,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from datetime import datetime
 from flask import abort
 import json
 import os
@@ -19,6 +20,11 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
     with open(summary_report_path, "r") as f:
         summary_report = json.load(f)
+    
+    current_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    report_generated_date = datetime.strptime(current_timestamp, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d")
+    scan_generated_date = datetime.strptime(timestamp_decoded, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d")
 
     styles = getSampleStyleSheet()
     wrap_style = ParagraphStyle(
@@ -32,103 +38,150 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements = []
 
     elements.append(Paragraph("Security Scan Summary", styles["Title"]))
+    elements.append(Paragraph(f"<b>Scan date:</b> {scan_generated_date}", wrap_style))
+    elements.append(Paragraph(f"<b>Report generated date:</b> {report_generated_date}", wrap_style))
     elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Exclusions", styles["Heading2"]))
 
-    for excl in summary_report.get("exclusions", []):
-        elements.append(Paragraph(f"<b>Source:</b> {safe_text(excl.get('source'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Severity:</b> {safe_text(excl.get('severity'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Package:</b> {safe_text(excl.get('package'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Version:</b> {safe_text(excl.get('version'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Title:</b> {safe_text(excl.get('title') or excl.get('description'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Comment:</b> {safe_text(excl.get('comment'))}", wrap_style))
-        elements.append(Spacer(1, 12))
+    exclusions = summary_report.get("exclusions")
+
+    if not exclusions:
+        elements.append(Paragraph("<b>No exclusions found</b>", wrap_style))
+    else:
+        for excl in summary_report.get("exclusions", []):
+            if excl:
+                elements.append(Paragraph(f"<b>ID:</b> {safe_text(excl.get('id'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Scope:</b> {safe_text(excl.get('scope'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Comment:</b> {safe_text(excl.get('public_comment'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Source:</b> {safe_text(excl.get('source'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Type:</b> {safe_text(excl.get('type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Description:</b> {safe_text(excl.get('description'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Severity:</b> {safe_text(excl.get('severity'))}", wrap_style))
+                if excl.get('package'):
+                    elements.append(Paragraph(f"<b>Package:</b> {safe_text(excl.get('package'))}", wrap_style))
+                if excl.get('version'):
+                    elements.append(Paragraph(f"<b>Version:</b> {safe_text(excl.get('version'))}", wrap_style))
+                if excl.get('link'):
+                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(excl.get('link'))}", wrap_style))
+                elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("CISA KEV Prioritized Vulnerabilities", styles["Heading2"]))
-    
-    for kev in summary_report.get("kev_vulnerabilities", []):
-        elements.append(Paragraph(f"<b>ID:</b> {safe_text(kev.get('id'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Severity:</b> {safe_text(kev.get('severity'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Title:</b> {safe_text(kev.get('title') or kev.get('description'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Vendor:</b> {safe_text(kev.get('vendor'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Product:</b> {safe_text(kev.get('product'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Required Action:</b> {safe_text(kev.get('required_action'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Added Date:</b> {safe_text(kev.get('kev_added_date'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Due Date:</b> {safe_text(kev.get('kev_due_date'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Link:</b> {safe_text(kev.get('link'))}", wrap_style))
-        elements.append(Spacer(1, 12))
+
+    kev_vulnerabilities = summary_report.get("kev_vulnerabilities")
+
+    if not kev_vulnerabilities:
+        elements.append(Paragraph(f"<b>No kev vulnerabilities found</b>", wrap_style))
+    else:
+        for kev_vuln in summary_report.get("kev_vulnerabilities", []):
+            if kev_vuln:
+                elements.append(Paragraph(f"<b>ID:</b> {safe_text(kev_vuln.get('id'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Severity:</b> {safe_text(kev_vuln.get('severity'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Source:</b> {safe_text(kev_vuln.get('source'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Type:</b> {safe_text(kev_vuln.get('type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Description:</b> {safe_text(kev_vuln.get('description'))}", wrap_style))
+
+                elements.append(Paragraph(f"<b>Priority:</b> {safe_text(kev_vuln.get('kev_priority'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Title:</b> {safe_text(kev_vuln.get('title'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Vendor:</b> {safe_text(kev_vuln.get('vendor'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Product:</b> {safe_text(kev_vuln.get('product'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Required action:</b> {safe_text(kev_vuln.get('required_action'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Added date:</b> {safe_text(kev_vuln.get('kev_added_date'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Due date:</b> {safe_text(kev_vuln.get('kev_due_date'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Link:</b> {safe_text(kev_vuln.get('link'))}", wrap_style))
+                elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Vulnerabilities", styles["Heading2"]))
 
-    for vuln in summary_report.get("vulnerabilities", []):
-        if vuln.get('source') == "grype":
-            elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
-            elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
-            elements.append(Spacer(1, 12))
+    vulnerabilities = summary_report.get("vulnerabilities")
 
-        elif vuln.get('source') == "semgrep":
-            elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
-            elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Path:</b> {safe_text(vuln.get('path'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Line:</b> {safe_text(vuln.get('line'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Message:</b> {safe_text(vuln.get('message'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
-            elements.append(Spacer(1, 12))
-            
-        elif vuln.get('source') == "trivy_vulnerability":
-            elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
-            elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
-            elements.append(Spacer(1, 12))
+    if not vulnerabilities:
+        elements.append(Paragraph(f"<b>No vulnerabilities found</b>", wrap_style))
+    else:
+        for vuln in summary_report.get("vulnerabilities", []):
+            if vuln:
+                if vuln.get('source') == "grype":
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
 
-        elif vuln.get('source') == "trivy_misconfiguration":
-            elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
-            elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Resolution:</b> {safe_text(vuln.get('resolution'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
-            elements.append(Paragraph(f"<b>File:</b> {safe_text(vuln.get('file'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Links:</b> {safe_text(vuln.get('links'))}", wrap_style))
-            elements.append(Spacer(1, 12))
+                    elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
+                    elements.append(Spacer(1, 12))
 
-        elif vuln.get('source') == "trivy_secret":
-            elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
-            elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
-            elements.append(Paragraph(f"<b>File:</b> {safe_text(vuln.get('file'))}", wrap_style))
-            elements.append(Paragraph(f"<b>Message:</b> {safe_text(vuln.get('message'))}", wrap_style))
-            elements.append(Spacer(1, 12))
+                elif vuln.get('source') == "semgrep":
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
+
+                    elements.append(Paragraph(f"<b>Path:</b> {safe_text(vuln.get('path'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Line:</b> {safe_text(vuln.get('line'))}", wrap_style))
+                    elements.append(Spacer(1, 12))
+                    
+                elif vuln.get('source') == "trivy_vulnerability":
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
+
+                    elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
+                    elements.append(Spacer(1, 12))
+
+                elif vuln.get('source') == "trivy_misconfiguration":
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
+
+                    elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Resolution:</b> {safe_text(vuln.get('resolution'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>File:</b> {safe_text(vuln.get('file'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Links:</b> {safe_text(vuln.get('links'))}", wrap_style))
+                    elements.append(Spacer(1, 12))
+
+                elif vuln.get('source') == "trivy_secret":
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Source:</b> {safe_text(vuln.get('source'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Description:</b> {safe_text(vuln.get('description'))}", wrap_style))
+
+                    elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>File:</b> {safe_text(vuln.get('file'))}", wrap_style))
+                    elements.append(Paragraph(f"<b>Message:</b> {safe_text(vuln.get('message'))}", wrap_style))
+                    elements.append(Spacer(1, 12))
     
     elements.append(Paragraph("Packages", styles["Heading2"]))
 
-    for vuln in summary_report.get("packages", []):
-        elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Name:</b> {safe_text(vuln.get('name'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Type:</b> {safe_text(vuln.get('type'))}", wrap_style))
-        elements.append(Paragraph(f"<b>PURL:</b> {safe_text(vuln.get('purl'))}", wrap_style))
-        elements.append(Paragraph(f"<b>CPE:</b> {safe_text(vuln.get('cpe'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Package type:</b> {safe_text(vuln.get('package_type'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Language:</b> {safe_text(vuln.get('language'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Metadata type:</b> {safe_text(vuln.get('metadata_type'))}", wrap_style))
-        elements.append(Paragraph(f"<b>Found by:</b> {safe_text(vuln.get('found_by'))}", wrap_style))
-        elements.append(Spacer(1, 12))
+    packages = summary_report.get("packages")
+
+    if not packages:
+        elements.append(Paragraph(f"<b>No packages found</b>", wrap_style))
+    else:
+        for package in summary_report.get("packages", []):
+            if package:
+                elements.append(Paragraph(f"<b>ID:</b> {safe_text(package.get('id'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Source:</b> {safe_text(package.get('source'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Name:</b> {safe_text(package.get('name'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Version:</b> {safe_text(package.get('version'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Type:</b> {safe_text(package.get('type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>PURL:</b> {safe_text(package.get('purl'))}", wrap_style))
+                elements.append(Paragraph(f"<b>CPE:</b> {safe_text(package.get('cpe'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Package type:</b> {safe_text(package.get('package_type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Language:</b> {safe_text(package.get('language'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Metadata type:</b> {safe_text(package.get('metadata_type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Found by:</b> {safe_text(package.get('found_by'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Locations:</b> {safe_text(package.get('locations'))}", wrap_style))
+                elements.append(Spacer(1, 12))
 
     doc.build(elements)
     print(f"[+] PDF report saved as: {pdf_filename_path}")

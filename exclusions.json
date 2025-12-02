@@ -1,20 +1,28 @@
 {
   "exclusions": [
     {
-    "vulnerability": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
-    "comment": "Subprocess shell=True used with trusted internal variables, safe in context."
+      "vulnerability": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+      "scope": "Trusted source",
+      "public_comment": "Subprocess shell=True used with trusted internal variables, safe in context.",
+      "internal_comment": "Its fine"
     },
     {
       "vulnerability": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
-      "comment": "Downloading Cosign from a fixed, trusted URL."
+      "scope": "Trusted source",
+      "public_comment": "Downloading Cosign from a fixed, trusted URL.",
+      "internal_comment": "Its fine"
     },
     {
       "vulnerability": "DS026",
-      "comment": "No HEALTHCHECK instruction. not critical."
+      "scope": "Not needed",
+      "public_comment": "No HEALTHCHECK instruction. not critical.",
+      "internal_comment": "Its fine"
     },
     {
       "vulnerability": "DS029",
-      "comment": "apt-get missing --no-install-recommends. not a security risk."
+      "scope": "Not a risk",
+      "public_comment": "apt-get missing --no-install-recommends. not a security risk.",
+      "internal_comment": "Its fine"
     }
   ]
 }
