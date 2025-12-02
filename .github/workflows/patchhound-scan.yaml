@@ -13,6 +13,8 @@ on:
 jobs:
   security-check:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/bblue530/patchhound_cli:latest
     env:
       BASE_URL: ${{ secrets.BASE_URL }}
       ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
@@ -21,22 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install PatchHound
+      - name: PatchHound scan
         run: |
-          mkdir -p patchhound_cli
-          curl -L https://github.com/BBlue530/PatchHound/archive/refs/tags/v0.1.7.tar.gz \
-            | tar -xz -C patchhound_cli --strip-components=2 PatchHound-0.1.7/PatchHound
-          cd patchhound_cli
-          chmod +x install.sh
-          ./install.sh
-
-      - name: Configure PatchHound
-        run: |
-          patchhound config --set-secret BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK"
-
-      - name: Run PatchHound scan
-        run: |
-          patchhound scan --token "$TOKEN"
+          patchhound scan --token "$TOKEN" --set-config BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK"
 
       - name: Upload vulnerability summary
         uses: actions/upload-artifact@v4

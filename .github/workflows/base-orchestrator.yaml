@@ -77,6 +77,8 @@ jobs:
       IMAGE_TAG: "latest"
       WILDCARD_COMMAND: "rsync -a ./src/PatchHound_CLI/ ./cli_image/PatchHound_CLI && chmod +x ./cli_image/PatchHound_CLI/patchhound.sh"
 
+
+
   trigger-patchhound-scan:
     if: always()
     uses: ./.github/workflows/patchhound-scan.yaml
