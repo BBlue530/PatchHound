@@ -26,11 +26,11 @@ while [[ $# -gt 0 ]]; do
                 KEY="$1"
                 VALUE="$2"
                 if grep -q "^${KEY}=" "$CONFIG_FILE"; then
-                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=$VALUE"
+                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=***"
                     export "$KEY=$VALUE"
                     
                 elif grep -q "^${KEY}=" "$SCAN_PROFILE_CONFIG_FILE"; then
-                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=$VALUE"
+                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=***"
                     export "$KEY=$VALUE"
 
                 else
