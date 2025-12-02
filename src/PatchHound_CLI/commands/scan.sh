@@ -17,6 +17,28 @@ while [[ $# -gt 0 ]]; do
             PAT_TOKEN="$2"
             shift 2
             ;;
+        --set-config)
+            if (( $# < 3 )) || (( ($# - 1) % 2 != 0 )); then
+                usage_config
+            fi
+            shift
+            while (( $# > 0 )) && [[ "$1" != --* ]]; do
+                KEY="$1"
+                VALUE="$2"
+                if grep -q "^${KEY}=" "$CONFIG_FILE"; then
+                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=$VALUE"
+                    export "$KEY=$VALUE"
+                    
+                elif grep -q "^${KEY}=" "$SCAN_PROFILE_CONFIG_FILE"; then
+                    print_message "[+]" "Config Value Changed For Environment" "Set $KEY=$VALUE"
+                    export "$KEY=$VALUE"
+
+                else
+                    print_message "[!]" "Key not found" "${KEY} does not exist in config"
+                fi
+                shift 2
+            done
+            ;;
         *)
     esac
 done
@@ -32,7 +54,6 @@ echo "          Version: $PATCHHOUND_VERSION"
 echo "==============================================="
 
 source "$BASE_DIR/system/env_variables_scan.sh"
-source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/utils/health_check.sh"
 source "$BASE_DIR/system/deps.sh"
 source "$BASE_DIR/scan/sast_scan.sh"
