@@ -122,6 +122,19 @@ If your scanning a private image you will need to pass a `PAT_TOKEN` for your re
 patchhound scan --token <TOKEN> --pat <PAT_TOKEN>
 ```
 
+### Ephemeral environment variables
+If you want to set configuration values only for a specific scan you can use the `--set-config` flag. 
+
+Values passed with this flag:
+- Take priority over all other sources of environment variables
+- Are available only for the duration of the scan
+- Do not persist after the scan is complete
+
+Usage:
+```
+patchhound scan --token <TOKEN> --set-config <KEY1> <VALUE1> <KEY2> <VALUE2>
+```
+
 ---
 
 ## Health
@@ -277,6 +290,6 @@ patchhound <COMMAND> --help
 ---
 ## Usage in pipeline
 
-For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-pipeline.yml)
+For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-scan.yml)
 
 ---
