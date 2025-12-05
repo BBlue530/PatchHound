@@ -120,10 +120,30 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             continue
 
         severity = None
+        score = None
+        vector = None
+
         for rating in vuln.get("ratings", []):
-            if rating.get("severity"):
-                severity = rating["severity"]
+
+            if "CVSSv3" in (rating.get("method") or ""):
+                severity = rating.get("severity") or severity
+                score = rating.get("score")
+                vector = rating.get("vector")
                 break
+
+            if severity is None and rating.get("severity"):
+                severity = rating.get("severity")
+
+            if score is None and rating.get("score") is not None:
+                score = rating.get("score")
+
+            if vector is None and rating.get("vector"):
+                vector = rating.get("vector")
+
+        try:
+            score = float(score) if score is not None else None
+        except (TypeError, ValueError):
+            score = None
 
         pkg_ref = vuln.get("affects", [{}])[0].get("ref") or ""
         pkg_name, pkg_version = "unknown", "unknown"
@@ -143,6 +163,8 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             "type": "vulnerability",
             "description": vuln.get("description")  or "No description available",
             "severity": severity,
+            "score": score,
+            "cvss_vector": vector,
             "package": pkg_name,
             "version": pkg_version,
             "link": link,
@@ -190,6 +212,23 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
 
     for result in trivy_report_json.get("Results", []):
         for v in result.get("Vulnerabilities", []):
+
+            score = None
+            vector = None
+
+            cvss = v.get("CVSS", {})
+
+            if "nvd" in cvss:
+                score = cvss["nvd"].get("V3Score") or cvss["nvd"].get("V2Score")
+                vector = cvss["nvd"].get("V3Vector") or cvss["nvd"].get("V2Vector")
+            elif "redhat" in cvss:
+                score = cvss["redhat"].get("V3Score") or cvss["redhat"].get("V2Score")
+                vector = cvss["redhat"].get("V3Vector") or cvss["redhat"].get("V2Vector")
+
+            try:
+                score = float(score) if score is not None else None
+            except (TypeError, ValueError):
+                score = None
             key = v.get("VulnerabilityID")
             if not key:
                 continue
@@ -202,6 +241,8 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
                 "type": "vuln",
                 "description": v.get("Title") or v.get("Description") or "No description available",
                 "severity": v.get("Severity"),
+                "score": score,
+                "cvss_vector": vector,
                 "package": v.get("PkgName"),
                 "version": v.get("InstalledVersion"),
                 "link": link,
