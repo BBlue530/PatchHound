@@ -42,6 +42,24 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(Paragraph(f"<b>Report generated date:</b> {report_generated_date}", wrap_style))
     elements.append(Spacer(1, 12))
 
+    counters = summary_report.get("counters")
+
+    elements.append(Paragraph("Stats", styles["Heading2"]))
+    elements.append(Paragraph(f"<b>package_counter:</b> {counters.get('package_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>kev_vuln_counter:</b> {counters.get('kev_vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>excluded_kev_vuln_counter:</b> {counters.get('excluded_kev_vuln_counter')}", wrap_style))
+
+    elements.append(Paragraph(f"<b>excluded_vuln_counter:</b> {counters.get('excluded_vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>vuln_counter:</b> {counters.get('vuln_counter')}", wrap_style))
+
+    elements.append(Paragraph(f"<b>excluded_misconf_counter:</b> {counters.get('excluded_misconf_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>misconf_counter:</b> {counters.get('misconf_counter')}", wrap_style))
+
+    elements.append(Paragraph(f"<b>excluded_exposed_secret_counter:</b> {counters.get('excluded_exposed_secret_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>exposed_secret_counter:</b> {counters.get('exposed_secret_counter')}", wrap_style))
+
+    elements.append(Spacer(1, 12))
+
     elements.append(Paragraph("Exclusions", styles["Heading2"]))
 
     exclusions = summary_report.get("exclusions")

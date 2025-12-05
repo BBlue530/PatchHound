@@ -6,6 +6,19 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
     kev_prio_dict = {}
     exclusions_dict = {}
 
+    package_counter = 0
+
+    kev_vuln_counter = 0
+    excluded_kev_vuln_counter = 0
+
+    excluded_vuln_counter = 0
+    excluded_misconf_counter = 0
+    excluded_exposed_secret_counter = 0
+
+    vuln_counter = 0
+    misconf_counter = 0
+    exposed_secret_counter = 0
+
     excluded_ids = {
         e.get("vulnerability")
         for e in exclusions_file_json.get("exclusions", [])
@@ -13,17 +26,36 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
     }
 
     def add_vuln(key, data):
+        nonlocal excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter
+
         if key in excluded_ids:
+            if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
+                excluded_vuln_counter += 1
+            elif data.get("source") == "trivy_misconfiguration":
+                excluded_misconf_counter += 1
+            elif data.get("source") == "trivy_secret":
+                excluded_exposed_secret_counter += 1
             exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
             exclusions_dict[key] = exclusion_data
         else:
+            if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
+                vuln_counter += 1
+            elif data.get("source") == "trivy_misconfiguration":
+                misconf_counter += 1
+            elif data.get("source") == "trivy_secret":
+                exposed_secret_counter += 1
             summary_dict[key] = data
 
     def add_vuln_kev(key, data):
+        nonlocal excluded_kev_vuln_counter, kev_vuln_counter
+
         if key in excluded_ids:
+            excluded_kev_vuln_counter += 1
+
             exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
             exclusions_dict[key] = exclusion_data
         else:
+            kev_vuln_counter += 1
             kev_prio_dict[key] = data
     
     if sast_report_json.get("SAST_SCAN") is False:
@@ -77,6 +109,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
                 "found_by": found_by,
                 "locations": list(set(locations))
             }
+            package_counter += 1
         else:
             packages_dict[dedupe_key]["locations"].extend(locations)
             packages_dict[dedupe_key]["locations"] = list(set(packages_dict[dedupe_key]["locations"]))
@@ -216,7 +249,19 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
         "packages": list(packages_dict.values()),
         "vulnerabilities": list(summary_dict.values()),
         "kev_vulnerabilities": list(kev_prio_dict.values()),
-        "exclusions": list(exclusions_dict.values())
+        "exclusions": list(exclusions_dict.values()),
+        "counters": {
+            "package_counter": package_counter,
+            "kev_vuln_counter": kev_vuln_counter,
+            "excluded_kev_vuln_counter": excluded_kev_vuln_counter,
+            "excluded_vuln_counter": excluded_vuln_counter,
+            "excluded_misconf_counter": excluded_misconf_counter,
+            "excluded_exposed_secret_counter": excluded_exposed_secret_counter,
+            "vuln_counter": vuln_counter,
+            "misconf_counter": misconf_counter,
+            "exposed_secret_counter": exposed_secret_counter
+
+        }
     }
 
     audit_trail_event(audit_trail, "SUMMARY_GENERATION", {
