@@ -33,9 +33,7 @@ fi
 
 source "$BASE_DIR/utils/health_check.sh"
 
-RESPONSE=$(curl -sSL "$PDF_SUMMARY_API_URL" \
-        -G \
-        --data-urlencode "token=$TOKEN" \
-        --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \
-        --output vulnerability_report_summary.pdf
-        )
+curl -sSL -OJ "$PDF_SUMMARY_API_URL" \
+    -G \
+    --data-urlencode "token=$TOKEN" \
+    --data-urlencode "path_to_resources_token=$PATH_TO_RESOURCES_TOKEN" \

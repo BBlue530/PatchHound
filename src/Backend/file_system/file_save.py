@@ -218,3 +218,37 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
         alert_event_system(audit_trail, message, alert, alert_path)
         verify_image_status = jsonify({"verify_image_status": "image verification mismatch and is not trusted"}), 422
         return verify_image_status
+    
+def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_path, repo_name):
+    try:
+        subprocess.run(
+            [
+                "cosign", "sign-blob",
+                "-y",
+                "--key", cosign_key_path,
+                "--output-signature", file_sig_path,
+                file_filename_path
+            ],
+            check=True,
+            env=env
+        )
+        print(f"[+] File signed: {file_sig_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Failed to sign file for repo: {repo_name} {e.stderr}!")
+    
+    try:
+        subprocess.run(
+            [
+                "cosign", "verify-blob",
+                "--key", cosign_pub_path,
+                "--signature", file_sig_path,
+                file_filename_path
+            ],
+            check=True,
+            env=env
+        )
+        print(f"[+] Verified file signature for repo: {repo_name}")
+        return 
+    except subprocess.CalledProcessError:
+        print(f"[!] Signature for file failed for repo: {repo_name}!")
+        return

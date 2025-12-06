@@ -2,7 +2,7 @@
 
 set -e
 
-VENV_DIR="./sbom_backend_venv"
+VENV_DIR="./venv"
 REQUIREMENTS_FILE="requirements.txt"
 
 if ! command -v python3 &>/dev/null; then

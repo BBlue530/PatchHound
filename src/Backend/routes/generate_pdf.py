@@ -1,7 +1,15 @@
 from flask import request, jsonify, send_file, Blueprint
+import os
+import io
+import zipfile
+import time
 from file_system.pdf_generator import summary_to_pdf
 from utils.jwt_path import decode_jwt_path_to_resources
 from database.validate_token import validate_token
+from utils.file_hash import hash_file
+from file_system.file_save import sign_file
+from file_system.resource_handling import get_resources
+from core.variables import all_repo_scans_folder, all_resources_folder
 
 pdf_bp = Blueprint("pdf", __name__)
 
@@ -25,7 +33,33 @@ def generate_pdf():
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
     
     if valid == True:
+        scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+
+        cosign_key_path = os.path.join(scan_dir, f"{current_repo_decoded}.key")
+        cosign_pub_path = os.path.join(scan_dir, f"{current_repo_decoded}.pub")
+        
         pdf_filename_path = summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded)
-        return send_file(pdf_filename_path, mimetype="application/pdf", as_attachment=True) 
+
+        pdf_sig_path = f"{pdf_filename_path}.sig"
+
+        sign_file(cosign_key_path, cosign_pub_path, pdf_sig_path, pdf_filename_path, current_repo_decoded)
+
+        pdf_report_hash = hash_file(pdf_filename_path)
+
+        for f in [pdf_filename_path, pdf_sig_path, cosign_pub_path]:
+            if not os.path.isfile(f):
+                time.sleep(0.1)
+            if not os.path.isfile(f):
+                print(f"[!] {f} does not exist")
+
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, 'w') as zf:
+            zf.write(pdf_sig_path, arcname=os.path.basename(pdf_sig_path))
+            zf.write(cosign_pub_path, arcname=os.path.basename(cosign_pub_path))
+            zf.write(pdf_filename_path, arcname=os.path.basename(pdf_filename_path))
+            zf.writestr(f"{current_repo_decoded}_pdf_hash.txt", f"SHA256: {pdf_report_hash}")
+        memory_file.seek(0)
+
+        return send_file(memory_file, download_name='pdf_report_bundle.zip', as_attachment=True)
     else:
         return jsonify({"error": "invalid jwt token"}), 404
