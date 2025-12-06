@@ -69,7 +69,15 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     else:
         for excl in summary_report.get("exclusions", []):
             if excl:
-                elements.append(Paragraph(f"<b>ID:</b> {safe_text(excl.get('id'))}", wrap_style))
+                excl_link = None
+                if excl.get('link'):
+                    excl_link = safe_text(excl.get('link'))
+                
+                if excl_link:
+                    elements.append(Paragraph(f'<b>ID:</b> <link href="{excl_link}">{safe_text(excl.get("id"))}</link>', wrap_style))
+                else:
+                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(excl.get('id'))}", wrap_style))
+
                 if excl.get('score'):
                     elements.append(Paragraph(f"<b>Score:</b> {safe_text(vuln.get('score'))}", wrap_style))
                     elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(vuln.get('cvss_vector'))}", wrap_style))
@@ -83,8 +91,8 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     elements.append(Paragraph(f"<b>Package:</b> {safe_text(excl.get('package'))}", wrap_style))
                 if excl.get('version'):
                     elements.append(Paragraph(f"<b>Version:</b> {safe_text(excl.get('version'))}", wrap_style))
-                if excl.get('link'):
-                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(excl.get('link'))}", wrap_style))
+                if excl_link:
+                    elements.append(Paragraph(f'<b>Link:</b> <link href="{excl_link}">{excl_link}</link>', wrap_style))
 
                 elements.append(Paragraph(f"<b>Scope:</b> {safe_text(excl.get('scope'))}", wrap_style))
                 elements.append(Paragraph(f"<b>Comment:</b> {safe_text(excl.get('public_comment'))}", wrap_style))
@@ -99,7 +107,10 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     else:
         for kev_vuln in summary_report.get("kev_vulnerabilities", []):
             if kev_vuln:
-                elements.append(Paragraph(f"<b>ID:</b> {safe_text(kev_vuln.get('id'))}", wrap_style))
+                kev_link = None
+                kev_link = safe_text(kev_vuln.get('link'))
+
+                elements.append(Paragraph(f'<b>ID:</b> <link href="{kev_link}">{safe_text(kev_vuln.get("id"))}</link>', wrap_style))
                 elements.append(Paragraph(f"<b>Severity:</b> {safe_text(kev_vuln.get('severity'))}", wrap_style))
                 
                 elements.append(Paragraph(f"<b>Source:</b> {safe_text(kev_vuln.get('source'))}", wrap_style))
@@ -114,7 +125,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                 elements.append(Paragraph(f"<b>Required action:</b> {safe_text(kev_vuln.get('required_action'))}", wrap_style))
                 elements.append(Paragraph(f"<b>Added date:</b> {safe_text(kev_vuln.get('kev_added_date'))}", wrap_style))
                 elements.append(Paragraph(f"<b>Due date:</b> {safe_text(kev_vuln.get('kev_due_date'))}", wrap_style))
-                elements.append(Paragraph(f"<b>Link:</b> {safe_text(kev_vuln.get('link'))}", wrap_style))
+                elements.append(Paragraph(f'<b>Link:</b> <link href="{kev_link}">{kev_link}</link>', wrap_style))
                 elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Vulnerabilities", styles["Heading2"]))
@@ -126,8 +137,12 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     else:
         for vuln in summary_report.get("vulnerabilities", []):
             if vuln:
+
                 if vuln.get('source') == "grype":
-                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    grype_link = None
+                    grype_link = safe_text(kev_vuln.get('link'))
+
+                    elements.append(Paragraph(f'<b>ID:</b> <link href="{grype_link}">{safe_text(kev_vuln.get("id"))}</link>', wrap_style))
                     elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Score:</b> {safe_text(vuln.get('score'))}", wrap_style))
                     elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(vuln.get('cvss_vector'))}", wrap_style))
@@ -138,7 +153,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
                     elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
-                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
+                    elements.append(Paragraph(f'<b>Link:</b> <link href="{grype_link}">{grype_link}</link>', wrap_style))
                     elements.append(Spacer(1, 12))
 
                 elif vuln.get('source') == "semgrep":
@@ -154,7 +169,10 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     elements.append(Spacer(1, 12))
                     
                 elif vuln.get('source') == "trivy_vulnerability":
-                    elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))
+                    trivy_link = None
+                    trivy_link = safe_text(vuln.get('link'))
+
+                    elements.append(Paragraph(f'<b>ID:</b> <link href="{trivy_link}">{safe_text(kev_vuln.get("id"))}</link>', wrap_style))
                     elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Score:</b> {safe_text(vuln.get('score'))}", wrap_style))
                     elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(vuln.get('cvss_vector'))}", wrap_style))
@@ -166,7 +184,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
                     elements.append(Paragraph(f"<b>Package:</b> {safe_text(vuln.get('package'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Version:</b> {safe_text(vuln.get('version'))}", wrap_style))
-                    elements.append(Paragraph(f"<b>Link:</b> {safe_text(vuln.get('link'))}", wrap_style))
+                    elements.append(Paragraph(f'<b>Link:</b> <link href="{trivy_link}">{trivy_link}</link>', wrap_style))
                     elements.append(Spacer(1, 12))
 
                 elif vuln.get('source') == "trivy_misconfiguration":
@@ -181,8 +199,14 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     elements.append(Paragraph(f"<b>Title:</b> {safe_text(vuln.get('title'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Resolution:</b> {safe_text(vuln.get('resolution'))}", wrap_style))
                     elements.append(Paragraph(f"<b>File:</b> {safe_text(vuln.get('file'))}", wrap_style))
-                    elements.append(Paragraph(f"<b>Links:</b> {safe_text(vuln.get('links'))}", wrap_style))
-                    elements.append(Spacer(1, 12))
+                    
+                    links = vuln.get('links', [])
+                    if links:
+                        elements.append(Paragraph("<b>Links:</b>", wrap_style))
+
+                        for i, link in enumerate(links, 1):
+                            safe_link = safe_text(link)
+                            elements.append(Paragraph(f'{i}. <link href="{safe_link}">{safe_link}</link>', wrap_style))
 
                 elif vuln.get('source') == "trivy_secret":
                     elements.append(Paragraph(f"<b>ID:</b> {safe_text(vuln.get('id'))}", wrap_style))

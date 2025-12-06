@@ -35,4 +35,4 @@ def load_json(file):
 def safe_text(value):
     if value is None:
         return ""
-    return html.escape(str(value))
+    return html.escape(str(value), quote=False)
