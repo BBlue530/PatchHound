@@ -59,22 +59,22 @@ jobs:
 
   trigger-docker-build-backend:
     needs: check-changes
-    if: always()
+    if: needs.check-changes.outputs.backend_changed == 'true'
     uses: ./.github/workflows/docker-builder.yml
     with:
       WORK_DIR: "./src/Backend"
       IMAGE_NAME: "ghcr.io/bblue530/patchhound_backend"
-      IMAGE_TAG: "0.1.14"
+      IMAGE_TAG: "latest"
       WILDCARD_COMMAND: ""
 
   trigger-docker-cli-image:
     needs: check-changes
-    if: always()
+    if: ${{ needs.check-changes.outputs.cli_changed == 'true' || needs.check-changes.outputs.cli_image_changed == 'true' }}
     uses: ./.github/workflows/docker-builder.yml
     with:
       WORK_DIR: "./cli_image"
       IMAGE_NAME: "ghcr.io/bblue530/patchhound_cli"
-      IMAGE_TAG: "0.1.14"
+      IMAGE_TAG: "latest"
       WILDCARD_COMMAND: "rsync -a ./src/PatchHound_CLI/ ./cli_image/PatchHound_CLI && chmod +x ./cli_image/PatchHound_CLI/patchhound.sh"
 
   trigger-patchhound-scan:
