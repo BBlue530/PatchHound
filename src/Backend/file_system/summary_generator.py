@@ -1,6 +1,7 @@
 from logs.audit_trail import audit_trail_event
+from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 
-def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, sast_report_json, trivy_report_json, exclusions_file_json):
+def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
@@ -58,7 +59,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             kev_vuln_counter += 1
             kev_prio_dict[key] = data
     
-    if sast_report_json.get("SAST_SCAN") is False:
+    if semgrep_sast_report_json.get("SAST_SCAN") is False:
         summary_dict["SAST_SCAN_SKIPPED"] = {
             "source": "semgrep",
             "status": "scan skipped",
@@ -214,7 +215,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
         prioritized_vulns_organizer(vuln, "trivy")
 
 
-    for issue in sast_report_json.get("results", []):
+    for issue in semgrep_sast_report_json.get("results", []):
         key = issue.get("check_id", "unknown_rule")
         add_vuln(key, {
             "source": "semgrep",
@@ -318,6 +319,14 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             "misconf_counter": misconf_counter,
             "exposed_secret_counter": exposed_secret_counter
 
+        },
+        "tool_version": {
+            "syft_version": tool_versions.get("syft_version"),
+            "semgrep_version": tool_versions.get("semgrep_version"),
+            "trivy_version": tool_versions.get("trivy_version"),
+            "grype_version": GRYPE_VERSION,
+            "cosign_version": COSIGN_VERSION,
+            "patchhound_version": patchhound_version
         }
     }
 

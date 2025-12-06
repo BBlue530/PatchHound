@@ -27,6 +27,12 @@ if [ -z "$COMMIT_SHA" ]; then
     COMMIT_SHA="Null"
 fi
 
+tool_versions_json=$(jq -n \
+  --arg syft "$SYFT_VERSION" \
+  --arg trivy "$TRIVY_VERSION" \
+  --arg semgrep "$SEMGREP_VERSION" \
+  '{syft_version: $syft, trivy_version: $trivy, semgrep_version: $semgrep}')
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
@@ -37,6 +43,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "alert_system_webhook=$ALERT_WEBHOOK" \
   -F "commit_sha=$COMMIT_SHA" \
   -F "commit_author=$COMMIT_AUTHOR" \
+  -F "tool_versions=$tool_versions_json" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?

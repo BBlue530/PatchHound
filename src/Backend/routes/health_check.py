@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 from database.validate_token import validate_token
-from core.variables import version
+from core.variables import patchhound_version
 
 health_bp = Blueprint("health", __name__)
 
@@ -20,5 +20,5 @@ def health_check():
     return jsonify({
         "status": "ok",
         "message": "Backend is alive",
-        "version": version
+        "version": patchhound_version
     }), 200

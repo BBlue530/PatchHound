@@ -50,12 +50,12 @@ def sbom_validation():
             timestamp_folder = timestamp_folders[0]
             
             # Create the full path for the latest scan inside the repo
-            # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}_sbom_cyclonedx.json
+            # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}syft__sbom_cyclonedx.json
             latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
             alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
 
-            syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_sbom_cyclonedx.json")
+            syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}syft__sbom_cyclonedx.json")
             syft_att_sig_path = f"{syft_sbom_path}_att.sig"
             syft_sbom_att_path = f"{syft_sbom_path}.att"
 
@@ -67,7 +67,7 @@ def sbom_validation():
 
             cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}.pub")
 
-            grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_vulns_cyclonedx.json")
+            grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_grype_vulns_cyclonedx.json")
             prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
 
             # Syft checks

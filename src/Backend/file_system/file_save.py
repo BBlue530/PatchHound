@@ -8,7 +8,7 @@ from logs.alerts import alert_event_system
 from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
 
-def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, sast_report_path, sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
+def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     with open(alert_path, "w") as f:
         json.dump(alert_system_json, f, indent=4)
     file_stable_check(alert_path)
@@ -17,9 +17,9 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         json.dump(syft_sbom_json, f, indent=4)
     file_stable_check(syft_sbom_path)
 
-    with open(sast_report_path, "w") as f:
-        json.dump(sast_report_json, f, indent=4)
-    file_stable_check(sast_report_path)
+    with open(semgrep_sast_report_path, "w") as f:
+        json.dump(semgrep_sast_report_json, f, indent=4)
+    file_stable_check(semgrep_sast_report_path)
 
     with open(trivy_report_path, "w") as f:
         json.dump(trivy_report_json, f, indent=4)

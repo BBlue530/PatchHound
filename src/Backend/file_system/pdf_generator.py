@@ -45,19 +45,29 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     counters = summary_report.get("counters")
 
     elements.append(Paragraph("Stats", styles["Heading2"]))
-    elements.append(Paragraph(f"<b>package_counter:</b> {counters.get('package_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>kev_vuln_counter:</b> {counters.get('kev_vuln_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>excluded_kev_vuln_counter:</b> {counters.get('excluded_kev_vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Packages found:</b> {counters.get('package_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>KEV vulnerabilities found:</b> {counters.get('kev_vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Excluded vulnerabilities found:</b> {counters.get('excluded_kev_vuln_counter')}", wrap_style))
 
-    elements.append(Paragraph(f"<b>excluded_vuln_counter:</b> {counters.get('excluded_vuln_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>vuln_counter:</b> {counters.get('vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Excluded vulnerabilities found:</b> {counters.get('excluded_vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Vulnerabilities found:</b> {counters.get('vuln_counter')}", wrap_style))
 
-    elements.append(Paragraph(f"<b>excluded_misconf_counter:</b> {counters.get('excluded_misconf_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>misconf_counter:</b> {counters.get('misconf_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Excluded misconfigurations found:</b> {counters.get('excluded_misconf_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Misconfigurations found:</b> {counters.get('misconf_counter')}", wrap_style))
 
-    elements.append(Paragraph(f"<b>excluded_exposed_secret_counter:</b> {counters.get('excluded_exposed_secret_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>exposed_secret_counter:</b> {counters.get('exposed_secret_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Excluded exposed secrets found:</b> {counters.get('excluded_exposed_secret_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Exposed secrets found:</b> {counters.get('exposed_secret_counter')}", wrap_style))
+    elements.append(Spacer(1, 12))
 
+    tool_version = summary_report.get("tool_version")
+
+    elements.append(Paragraph("Tool versions", styles["Heading2"]))
+    elements.append(Paragraph(f"<b>Syft:</b> {tool_version.get('syft_version')}", wrap_style))
+    elements.append(Paragraph(f"<b>Semgrep:</b> {tool_version.get('semgrep_version')}", wrap_style))
+    elements.append(Paragraph(f"<b>Trivy:</b> {tool_version.get('trivy_version')}", wrap_style))
+    elements.append(Paragraph(f"<b>Grype:</b> {tool_version.get('grype_version')}", wrap_style))
+    elements.append(Paragraph(f"<b>Cosign:</b> {tool_version.get('cosign_version')}", wrap_style))
+    elements.append(Paragraph(f"<b>PatchHound:</b> {tool_version.get('patchhound_version')}", wrap_style))
     elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Exclusions", styles["Heading2"]))

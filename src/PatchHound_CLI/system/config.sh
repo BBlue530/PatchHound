@@ -10,7 +10,7 @@ if [ -z "$BASE_URL" ]; then
   exit 1
 fi
 
-PATCHHOUND_VERSION="0.1.12"
+PATCHHOUND_VERSION="0.1.14"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"

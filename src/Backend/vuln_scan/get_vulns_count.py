@@ -1,6 +1,6 @@
 from logs.audit_trail import audit_trail_event
 
-def vuln_count(audit_trail, sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
+def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
     sast_issue_count = 0
     excluded_ids = {
         e.get("vulnerability")
@@ -13,8 +13,8 @@ def vuln_count(audit_trail, sast_report_json, trivy_report_json, exclusions_file
             return sast_issue_count
         return sast_issue_count + 1
 
-    if sast_report_json.get("SAST_SCAN") is not False:
-        for issue in sast_report_json.get("results", []):
+    if semgrep_sast_report_json.get("SAST_SCAN") is not False:
+        for issue in semgrep_sast_report_json.get("results", []):
             rule_id = issue.get("check_id", "unknown_rule")
             sast_issue_count = add_vuln(rule_id, sast_issue_count)
 
@@ -38,7 +38,7 @@ def vuln_count(audit_trail, sast_report_json, trivy_report_json, exclusions_file
             "vulnerabilities_count": vulns_found
         })
 
-    if sast_report_json.get("SAST_SCAN") is False:
+    if semgrep_sast_report_json.get("SAST_SCAN") is False:
         audit_trail_event(audit_trail, "SAST_SCAN", {
             "status": "skipped"
         })
