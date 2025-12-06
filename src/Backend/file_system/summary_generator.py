@@ -170,14 +170,22 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             "link": link,
         })
 
-    for vuln in prio_vuln_data.get("prioritized_vulns", []):
+    def prioritized_vulns_organizer(vuln, vuln_source):
+        if not vuln:
+            return
+        
         key = vuln.get("cveID")
         if not key:
-            continue
+            return
+        
+        if key in exclusions_dict:
+            target_dict = exclusions_dict
+        elif key in summary_dict:
+            target_dict = summary_dict
+        else:
+            target_dict = None
 
-        target_dict = summary_dict if key in summary_dict else exclusions_dict
-
-        if key in target_dict:
+        if target_dict is not None:
             target_dict[key]["kev_priority"] = "CISA_KEV"
             target_dict[key]["kev_added_date"] = vuln.get("dateAdded")
             target_dict[key]["kev_due_date"] = vuln.get("dueDate")
@@ -185,6 +193,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             add_vuln_kev(key, {
                 "source": "kev",
                 "id": key,
+                "vuln_source": vuln_source,
                 "type": "kev",
                 "description": vuln.get("shortDescription")  or "No description available",
                 "severity": vuln.get("severity", "Unknown"),
@@ -197,6 +206,13 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
                 "kev_added_date": vuln.get("dateAdded"),
                 "kev_due_date": vuln.get("dueDate")
             })
+
+    for vuln in prio_vuln_data.get("prioritized_vulns", {}).get("matched_grype_vulnerabilities", []):
+        prioritized_vulns_organizer(vuln, "grype")
+
+    for vuln in prio_vuln_data.get("prioritized_vulns", {}).get("matched_trivy_vulnerabilities", []):
+        prioritized_vulns_organizer(vuln, "trivy")
+
 
     for issue in sast_report_json.get("results", []):
         key = issue.get("check_id", "unknown_rule")

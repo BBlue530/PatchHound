@@ -84,6 +84,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                 elements.append(Paragraph(f"<b>Severity:</b> {safe_text(excl.get('severity'))}", wrap_style))
 
                 elements.append(Paragraph(f"<b>Source:</b> {safe_text(excl.get('source'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Found by:</b> {safe_text(excl.get('vuln_source'))}", wrap_style))
                 elements.append(Paragraph(f"<b>Type:</b> {safe_text(excl.get('type'))}", wrap_style))
                 elements.append(Paragraph(f"<b>Description:</b> {safe_text(excl.get('description'))}", wrap_style))
 

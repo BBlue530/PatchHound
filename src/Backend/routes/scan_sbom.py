@@ -99,7 +99,15 @@ def scan_sbom():
         os.unlink(tmp_path)
     
     grype_vulns_cyclonedx_json_data = json.loads(grype_vulns_cyclonedx_json.stdout)
-    prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data)
+
+    try:
+        trivy_report.seek(0)
+        trivy_report_data = json.load(trivy_report)
+        trivy_report.seek(0)
+    except json.JSONDecodeError:
+        return jsonify({"error": "Trivy report is not valid JSON"}), 400
+    
+    prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data)
 
     path_to_resources_token = jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp)
 

@@ -67,7 +67,7 @@ def sbom_validation():
 
             cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}.pub")
 
-            vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_vulns_cyclonedx.json")
+            grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_vulns_cyclonedx.json")
             prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
 
             # Syft checks
@@ -250,12 +250,19 @@ def sbom_validation():
 
                 previous_vulns_data = None
                 
-                if os.path.exists(vulns_output_path):
-                    with open(vulns_output_path, "r") as f:
+                if os.path.exists(grype_vulns_output_path):
+                    with open(grype_vulns_output_path, "r") as f:
                         try:
                             previous_vulns_data = json.load(f)
                         except json.JSONDecodeError:
                             previous_vulns_data = None
+
+                if os.path.exists(trivy_report_path):
+                    with open(trivy_report_path, "r") as f:
+                        try:
+                            trivy_report_data = json.load(f)
+                        except json.JSONDecodeError:
+                            trivy_report_data = None
 
                 with open(exclusions_file_path, "r") as f:
                     exclusions_data = json.load(f)
@@ -286,10 +293,10 @@ def sbom_validation():
                     print(message)
                     alert_event_system(audit_trail, message, alert, alert_path)
 
-                with open(vulns_output_path, "w") as f:
+                with open(grype_vulns_output_path, "w") as f:
                     json.dump(grype_vulns_cyclonedx_json_data, f, indent=2)
 
-                prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data)
+                prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data)
                 with open(prio_output_path, "w") as f:
                     json.dump(prio_vuln_data, f, indent=4)
 
