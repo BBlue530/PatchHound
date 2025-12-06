@@ -2,27 +2,39 @@
   "exclusions": [
     {
       "vulnerability": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
-      "scope": "Trusted source",
-      "public_comment": "Subprocess shell=True used with trusted internal variables, safe in context.",
-      "internal_comment": "Its fine"
+      "scope": "/Backend/core/system.py:24",
+      "public_comment": "Subprocess call uses shell=True but only with internal, sanitized variables, making injection risk negligible.",
+      "internal_comment": "Safe because inputs are controlled and validated no user input is passed to subprocess."
     },
     {
       "vulnerability": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
-      "scope": "Trusted source",
-      "public_comment": "Downloading Cosign from a fixed, trusted URL.",
-      "internal_comment": "Its fine"
+      "scope": "/Backend/core/system.py:46",
+      "public_comment": "Dynamic urllib usage downloads Cosign from a fixed, trusted URL. Not exposed to untrusted input.",
+      "internal_comment": "Safe: URL is hardcoded and verified; no risk of arbitrary file access."
     },
     {
       "vulnerability": "DS026",
-      "scope": "Not needed",
-      "public_comment": "No HEALTHCHECK instruction. not critical.",
-      "internal_comment": "Its fine"
+      "scope": "Dockerfile",
+      "public_comment": "No HEALTHCHECK instruction. Operational risk is low, not a security risk.",
+      "internal_comment": "Container monitored via orchestration system, healthcheck not critical for security."
     },
     {
       "vulnerability": "DS029",
-      "scope": "Not a risk",
-      "public_comment": "apt-get missing --no-install-recommends. not a security risk.",
-      "internal_comment": "Its fine"
+      "scope": "Dockerfile",
+      "public_comment": "apt-get missing --no-install-recommends. Minimal impact on image size not a security risk.",
+      "internal_comment": "Installing extra recommended packages does not affect security acceptable for this build."
+    },
+    {
+      "vulnerability": "python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host",
+      "scope": "/Backend/app.py:35",
+      "public_comment": "Flask app runs in a controlled, isolated VM for testing not exposed to the public.",
+      "internal_comment": "Safe for testing environment risk is minimal."
+    },
+    {
+      "vulnerability": "DS002",
+      "scope": "Dockerfile",
+      "public_comment": "Container runs as root in isolated test VM no exposure to untrusted networks or sensitive data.",
+      "internal_comment": "High-severity in production, but acceptable in controlled test environment. Must be fixed before deployment."
     }
   ]
 }
