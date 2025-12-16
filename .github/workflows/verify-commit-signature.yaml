@@ -1,0 +1,31 @@
+name: Verify Git Commit Signature
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
+
+jobs:
+  verify-signatures:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check commit signatures
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          commits=$(gh pr view ${{ github.event.pull_request.number }} \
+            --json commits \
+            --jq '.commits[].oid')
+
+          for commit in $commits; do
+            verified=$(gh api repos/${{ github.repository }}/commits/$commit \
+              --jq '.commit.verification.verified')
+
+            if [ "$verified" != "true" ]; then
+              echo "[!] Commit $commit is not GPG/SSH signed"
+              exit 1
+            fi
+          done
+
+          echo "[+] All commits are signed"

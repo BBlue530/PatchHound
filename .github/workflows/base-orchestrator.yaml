@@ -99,3 +99,10 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GH_REPO_PAT }}
       # gitignore verify secrets
+
+  verify-commit-signature:
+    if: always()
+    uses: ./.github/workflows/verify-commit-signature.yaml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_REPO_PAT }}
+      # verify commit signature secrets
