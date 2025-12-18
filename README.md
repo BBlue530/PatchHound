@@ -4,7 +4,14 @@
 
 ## Overview
 
-An open-source, plug-and-play **SBOM (Software Bill of Materials) vulnerability scanner** that generates comprehensive vulnerability reports for container images or source code repositories. 
+PatchHound is an open-source **SBOM (Software Bill of Materials) vulnerability scanner** for source code and container images. It centralizes SBOMs, vulnerabilities found, and prioritization into a single workflow. 
+
+PatchHound helps teams by:
+- Generating comprehensive audit ready reports suitable for compliance and security reviews.
+- Vulnerability management through exclusions allowing public comment(visible in pdf report), internal comment and scope of vulnerability.
+- Reducing alert noise through exclusion management with tracked justifications.
+- Producing detailed PDF summaries that include scan metadata, statistics, exclusions, tool versions, prioritized findings and when the scan/report was generated.
+- Prioritizing risk by highlighting critical and CISA KEV listed vulnerabilities.
 
 PatchHound not only scans for vulnerabilities but also supports **signing and verifying container images** ensuring integrity and supply chain security.
 
