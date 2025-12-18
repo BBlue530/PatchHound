@@ -290,6 +290,6 @@ patchhound <COMMAND> --help
 ---
 ## Usage in pipeline
 
-For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-scan.yml)
+For usage in a pipeline you can refer to the workflow in this repo [here](https://github.com/BBlue530/PatchHound/blob/master/.github/workflows/patchhound-scan.yaml)
 
 ---

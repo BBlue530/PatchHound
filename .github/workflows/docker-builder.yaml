@@ -9,9 +9,6 @@ on:
       IMAGE_NAME:
         required: true
         type: string
-      IMAGE_TAG:
-        required: true
-        type: string
       WILDCARD_COMMAND:
         required: true
         type: string
@@ -30,11 +27,33 @@ jobs:
       WILDCARD_COMMAND: ${{ inputs.WILDCARD_COMMAND }}
 
     steps:
-
       - uses: actions/checkout@v3
+
+      - name: Check if tag points to main
+        run: |
+          git fetch origin main
+          MAIN_SHA=$(git rev-parse origin/main)
+
+          if [ "$GITHUB_SHA" != "$MAIN_SHA" ]; then
+            echo "[!] Not in main."
+            exit 78
+          fi
+
+      - name: Set image tags
+        id: meta
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "[+] Current tags: ${VERSION}, latest"
+            echo "tags=${VERSION},latest" >> $GITHUB_OUTPUT
+          else
+            echo "[+] Current tag: latest"
+            echo "tags=latest" >> $GITHUB_OUTPUT
+          fi
 
       - name: Running wildcard command
         working-directory: ${{ github.workspace }}
+        if: ${{ env.WILDCARD_COMMAND != '' }}
         run: eval $WILDCARD_COMMAND
 
       - name: Log in to GHCR
@@ -49,8 +68,14 @@ jobs:
 
       - name: Build Docker image
         working-directory: ${{ inputs.WORK_DIR }}
-        run: docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
+        run: docker build -t "$IMAGE_NAME:build" .
+
+      - name: Tag Docker image
+        run: |
+          IFS=',' read -ra TAGS <<< "${{ steps.meta.outputs.tags }}"
+          for TAG in "${TAGS[@]}"; do
+            docker tag "$IMAGE_NAME:build" "$IMAGE_NAME:$TAG"
+          done
       
       - name: Push Docker image to GHCR
-        working-directory: ${{ inputs.WORK_DIR }}
-        run: docker push "$IMAGE_NAME:$IMAGE_TAG"
+        run: docker push --all-tags "$IMAGE_NAME"
