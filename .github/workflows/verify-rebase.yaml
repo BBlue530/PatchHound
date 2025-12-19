@@ -2,9 +2,6 @@ name: Verify Rebase
 
 on:
   workflow_call:
-    secrets:
-      GH_TOKEN:
-        required: true
 
 jobs:
   rebase-check:
@@ -41,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
       CURRENT_BRANCH: ${{ needs.rebase-check.outputs.current_branch }}
 
     needs: rebase-check
