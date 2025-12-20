@@ -1,0 +1,20 @@
+backend:
+  storage:
+
+    secret_data:
+      local:
+        enabled: True
+
+      secret_manager:
+        enabled: False
+        secret_manager_name: "${SECRET_MANAGER_NAME}"
+        secrets_name:
+          api_key: "secret_api_key"
+          jwt_key: "secret_jwt_key"
+          cosign_key: "secret_cosign_key"
+auth:
+  aws:
+    enabled: False
+    aws_access_key_id: "${AWS_ACCESS_KEY_ID}"
+    aws_secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    aws_default_region: "${AWS_DEFAULT_REGION}"

@@ -4,6 +4,7 @@ from utils.schedule_handling import scheduled_event
 from database.create_db import create_database
 from core.system import install_tools
 from validation.secrets_manager import generate_secrets, verify_secrets
+from config.read_app_config import read_app_config
 
 # Route blueprints
 from routes.generate_pdf import pdf_bp
@@ -24,6 +25,7 @@ app.register_blueprint(token_key_bp)
 
 if __name__ == "__main__":
     install_tools()
+    read_app_config()
     generate_secrets()
     verify_secrets()
     scheduled_event()
