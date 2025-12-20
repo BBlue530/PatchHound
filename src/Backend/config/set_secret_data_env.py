@@ -1,6 +1,6 @@
 import os
 import sys
-from config.expand_env_var import expand_env
+from config.helpers.expand_env_var import expand_env
 from config.secret_data.get_secret_data import set_secrets_in_env
 
 def secret_data_storage_config(app_config):

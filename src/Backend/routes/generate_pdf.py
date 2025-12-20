@@ -8,7 +8,6 @@ from utils.jwt_path import decode_jwt_path_to_resources
 from database.validate_token import validate_token
 from utils.file_hash import hash_file
 from file_system.file_save import sign_file
-from file_system.resource_handling import get_resources
 from core.variables import all_repo_scans_folder, all_resources_folder
 
 pdf_bp = Blueprint("pdf", __name__)

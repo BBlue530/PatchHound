@@ -12,6 +12,27 @@ backend:
           api_key: "secret_api_key"
           jwt_key: "secret_jwt_key"
           cosign_key: "secret_cosign_key"
+    
+    token_key_database:
+      local:
+        enabled: True
+      
+      external_database:
+        enabled: False
+        username: "${EXTERNAL_DB_USERNAME}"
+        password: "${EXTERNAL_DB_PASSWORD}"
+        db_name: "${EXTERNAL_DB_NAME}"
+        db_host: "${EXTERNAL_DB_HOST}"
+
+    scan_data:
+      local:
+        enabled: True
+
+      s3_bucket:
+        enabled: False
+        bucket: "${BUCKET}"
+        bucket_key: "${BUCKET_KEY}"
+        
 auth:
   aws:
     enabled: False

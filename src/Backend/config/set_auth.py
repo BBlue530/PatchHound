@@ -1,6 +1,6 @@
 import os
 import sys
-from config.expand_env_var import expand_env
+from config.helpers.expand_env_var import expand_env
 
 def aws_auth(app_config):
     aws_auth_enabled = app_config.get("auth", {}).get("aws", {}) .get("enabled", False)
