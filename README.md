@@ -83,6 +83,57 @@ Public images only require `read:packages`.
 
 ---
 
+# Config
+
+The backend currently supports the AWS ecosystem for storing secrets, S3 buckets for external scan data storage, and PostgreSQL for database management. All configurations are done in [app-config.yaml](https://github.com/BBlue530/PatchHound/blob/main/src/Backend/app-config.yaml) Support for additional storage backends may be added in the future.
+
+
+```
+backend:
+  storage:
+
+    secret_data:
+      local:
+        enabled: True
+
+      secret_manager:
+        enabled: False
+        secret_manager_name: "${SECRET_MANAGER_NAME}"
+        secrets_name:
+          api_key: "secret_api_key"
+          jwt_key: "secret_jwt_key"
+          cosign_key: "secret_cosign_key"
+    
+    token_key_database:
+      local:
+        enabled: True
+      
+      external_database:
+        enabled: False
+        username: "${EXTERNAL_DB_USERNAME}"
+        password: "${EXTERNAL_DB_PASSWORD}"
+        db_name: "${EXTERNAL_DB_NAME}"
+        db_host: "${EXTERNAL_DB_HOST}"
+
+    scan_data:
+      local:
+        enabled: True
+
+      s3_bucket:
+        enabled: False
+        bucket: "${BUCKET}"
+        bucket_key: "${BUCKET_KEY}"
+        
+auth:
+  aws:
+    enabled: False
+    aws_access_key_id: "${AWS_ACCESS_KEY_ID}"
+    aws_secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    aws_default_region: "${AWS_DEFAULT_REGION}"
+```
+
+---
+
 # Docs
 - [Docs](https://github.com/BBlue530/PatchHound/tree/master/docs).
 - [quick-start](https://github.com/BBlue530/PatchHound/blob/master/docs/quick-start.md)
