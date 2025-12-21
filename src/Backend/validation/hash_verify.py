@@ -10,7 +10,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
     audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
 
-    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}syft__sbom_cyclonedx.json")
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
     syft_sbom_attestation_path = f"{syft_sbom_path}.att"
 
     trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
@@ -28,7 +28,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
         history_data = json.load(f)
 
     old_entry = None
-    for entry in history_data["history"]:
+    for entry in history_data:
         if str(timestamp_folder) in entry:
             old_entry = entry[timestamp_folder]
             break

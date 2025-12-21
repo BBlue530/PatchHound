@@ -3,10 +3,13 @@ import json
 import os
 import subprocess
 import json
+import tempfile
 from core.variables import env
 from logs.alerts import alert_event_system
 from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
+from s3_handling.s3_get import get_resource_s3_internal_use
+from s3_handling.s3_send import send_files_to_s3
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     with open(alert_path, "w") as f:
@@ -220,12 +223,33 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
         return verify_image_status
     
 def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_path, repo_name):
+    temp_files = []
+
     try:
+        if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
+            cosign_key_priv_bytes = get_resource_s3_internal_use(cosign_key_path).read()
+            cosign_key_pub_bytes = get_resource_s3_internal_use(cosign_pub_path).read()
+
+            temp_priv = tempfile.NamedTemporaryFile(delete=False)
+            temp_priv.write(cosign_key_priv_bytes)
+            temp_priv.flush()
+            temp_files.append(temp_priv.name)
+
+            temp_pub = tempfile.NamedTemporaryFile(delete=False)
+            temp_pub.write(cosign_key_pub_bytes)
+            temp_pub.flush()
+            temp_files.append(temp_pub.name)
+
+            cosign_key_priv = temp_priv.name
+            cosign_key_pub = temp_pub.name
+        else:
+            cosign_key_priv = cosign_key_path
+            cosign_key_pub = cosign_pub_path
         subprocess.run(
             [
                 "cosign", "sign-blob",
                 "-y",
-                "--key", cosign_key_path,
+                "--key", cosign_key_priv,
                 "--output-signature", file_sig_path,
                 file_filename_path
             ],
@@ -233,14 +257,11 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
             env=env
         )
         print(f"[+] File signed: {file_sig_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"[!] Failed to sign file for repo: {repo_name} {e.stderr}!")
     
-    try:
         subprocess.run(
             [
                 "cosign", "verify-blob",
-                "--key", cosign_pub_path,
+                "--key", cosign_key_pub,
                 "--signature", file_sig_path,
                 file_filename_path
             ],
@@ -248,7 +269,18 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
             env=env
         )
         print(f"[+] Verified file signature for repo: {repo_name}")
-        return 
-    except subprocess.CalledProcessError:
-        print(f"[!] Signature for file failed for repo: {repo_name}!")
-        return
+
+        if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
+            # Any files that gets signed will be sent to s3 bucket. Might change it later on...
+            send_files_to_s3(file_sig_path, file_sig_path)
+            send_files_to_s3(file_filename_path, file_filename_path)
+    
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Signing or verification failed for repo {repo_name}: {e.stderr}")
+
+    finally:
+        for f in temp_files:
+            try:
+                os.unlink(f)
+            except Exception:
+                pass

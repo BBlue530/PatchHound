@@ -32,6 +32,8 @@ def append_audit_trail(audit_trail_path, new_audit_event):
     if isinstance(new_audit_event, dict):
         new_audit_event = [new_audit_event]
     audit_trail.extend(new_audit_event)
+    
+    # S3/Local dir stuff here if stuff <--------------------------------------------------------------------
     with open(audit_trail_path, "w") as f:
         json.dump(audit_trail, f, indent=4)
     file_stable_check(audit_trail_path)

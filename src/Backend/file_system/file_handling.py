@@ -10,6 +10,7 @@ from validation.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
+from s3_handling.s3_send import send_files_to_s3
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file):
     secret_type = "cosign_key"
@@ -23,7 +24,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name)
 
-    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}syft__sbom_cyclonedx.json")
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
     semgrep_sast_report_path = os.path.join(scan_dir, f"{repo_name}_semgrep_sast_report.json")
     trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
     grype_path = os.path.join(scan_dir, f"{repo_name}_grype_vulns_cyclonedx.json")
@@ -80,6 +81,10 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, alerts_list)
 
     repo_lock(repo_dir, repo_files)
+    
+    send_files_to_s3(scan_dir, scan_dir)
+    send_files_to_s3(exclusions_file_path, repo_dir)
+    send_files_to_s3(alert_path, repo_dir)
 
 def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

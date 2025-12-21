@@ -7,19 +7,24 @@ from flask import abort
 import json
 import os
 from utils.helpers import safe_text
+from s3_handling.s3_get import get_resource_s3_internal_use
 from core.variables import all_repo_scans_folder, all_resources_folder
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
-
-    if not os.path.isdir(base_dir):
-        abort(404, description=f"Directory not found: {base_dir}")
     
     pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}_pdf_summary_report.pdf")
     summary_report_path = os.path.join(base_dir, f"{current_repo_decoded}_summary_report.json")
 
-    with open(summary_report_path, "r") as f:
-        summary_report = json.load(f)
+    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
+        memory_file = get_resource_s3_internal_use(summary_report_path)
+        summary_report = json.load(memory_file)
+    else:
+        if not os.path.isdir(base_dir):
+            abort(404, description=f"Directory not found: {base_dir}")
+
+        with open(summary_report_path, "r") as f:
+            summary_report = json.load(f)
     
     current_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
@@ -151,9 +156,9 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
                 if vuln.get('source') == "grype":
                     grype_link = None
-                    grype_link = safe_text(kev_vuln.get('link'))
+                    grype_link = safe_text(vuln.get('link'))
 
-                    elements.append(Paragraph(f'<b>ID:</b> <link href="{grype_link}">{safe_text(kev_vuln.get("id"))}</link>', wrap_style))
+                    elements.append(Paragraph(f'<b>ID:</b> <link href="{grype_link}">{safe_text(vuln.get("id"))}</link>', wrap_style))
                     elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Score:</b> {safe_text(vuln.get('score'))}", wrap_style))
                     elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(vuln.get('cvss_vector'))}", wrap_style))
@@ -183,7 +188,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     trivy_link = None
                     trivy_link = safe_text(vuln.get('link'))
 
-                    elements.append(Paragraph(f'<b>ID:</b> <link href="{trivy_link}">{safe_text(kev_vuln.get("id"))}</link>', wrap_style))
+                    elements.append(Paragraph(f'<b>ID:</b> <link href="{trivy_link}">{safe_text(vuln.get("id"))}</link>', wrap_style))
                     elements.append(Paragraph(f"<b>Severity:</b> {safe_text(vuln.get('severity'))}", wrap_style))
                     elements.append(Paragraph(f"<b>Score:</b> {safe_text(vuln.get('score'))}", wrap_style))
                     elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(vuln.get('cvss_vector'))}", wrap_style))
