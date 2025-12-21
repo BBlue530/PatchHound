@@ -6,6 +6,7 @@ from vuln_scan.get_vulns_count import vuln_count
 from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
 from utils.folder_lock import repo_lock
 from utils.helpers import load_json
+from utils.cleanup import cleanup_scan_data
 from validation.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
@@ -85,6 +86,8 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     send_files_to_s3(scan_dir, scan_dir)
     send_files_to_s3(exclusions_file_path, repo_dir)
     send_files_to_s3(alert_path, repo_dir)
+
+    cleanup_scan_data()
 
 def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

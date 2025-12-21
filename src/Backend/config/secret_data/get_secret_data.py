@@ -1,6 +1,7 @@
 import os
 import boto3
 import json
+import base64
 
 def read_external_secret(secret_type):
     if secret_type == "api_key":
@@ -20,22 +21,30 @@ def set_secrets_in_env(app_config):
         os.environ["jwt_key"] = read_login_secret_from_secret_manager(jwt_key_secret_name)
         os.environ["cosign_key"] = read_login_secret_from_secret_manager(cosign_key_secret_name)
 
-def read_login_secret_from_secret_manager(secret_name):
+def read_login_secret_from_secret_manager(secret_key_name):
     session = boto3.session.Session(
         aws_access_key_id=os.environ.get("aws_access_key_id"),
         aws_secret_access_key=os.environ.get("aws_secret_access_key"),
         region_name=os.environ.get("aws_default_region"),
     )
 
+    secret_name = os.environ.get("secret_manager_name")
+
     client = session.client("secretsmanager")
 
     response = client.get_secret_value(SecretId=secret_name)
 
-    raw_secret_value = response.get("SecretString") or response.get("SecretBinary")
+    if "SecretString" in response:
+        secret_payload = response["SecretString"]
+    else:
+        secret_payload = base64.b64decode(response["SecretBinary"]).decode("utf-8")
 
     try:
-        obj = json.loads(raw_secret_value)
-        return next(iter(obj.values()))
-
+        secret_obj = json.loads(secret_payload)
     except json.JSONDecodeError:
-        return raw_secret_value
+        raise ValueError("Secret is not valid JSON")
+
+    if secret_key_name not in secret_obj:
+        raise KeyError(f"[!] Key: '{secret_key_name}' not found in secret '{secret_name}'")
+
+    return secret_obj[secret_key_name]
