@@ -46,47 +46,11 @@ For installation, setup, and detailed API documentation, see the [Backend README
 ### CLI
 The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound).
 
-### Container images
-Container images are available for both the backend and the CLI. These images include everything you need to get started quickly.
-
-#### [Backend container image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_backend):
-```
-docker pull ghcr.io/bblue530/patchhound_backend:latest
-```
-#### [CLI image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_cli):
-```
-docker pull ghcr.io/bblue530/patchhound_cli:latest
-```
-
 ---
 
-## Notes
-
-When scanning a directory (`TARGET="."`), Syft will warn about missing explicit name/version metadata. This does **not** affect scan results.
-
-If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to `false`
-
-If you are scanning a container image make sure to add a secret named `PAT_TOKEN` to your repository.
-
-1. Go to **Settings > Secrets and variables > Actions**
-2. Click **New repository secret**
-3. Name it: `PAT_TOKEN`
-4. Paste your PAT
-5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#scan)
-
-### Required Token Permissions
-
-- **`read:packages`** - required to pull images
-- **`repo`** - only required if you are accessing **private images** or **private repositories**
-
-Public images only require `read:packages`.
-
----
-
-# Config
+## Config
 
 The backend currently supports the AWS ecosystem for storing secrets, S3 buckets for external scan data storage, and PostgreSQL for database management. All configurations are done in [app-config.yaml](https://github.com/BBlue530/PatchHound/blob/main/src/Backend/app-config.yaml) Support for additional storage backends may be added in the future.
-
 
 ```
 backend:
@@ -134,11 +98,49 @@ auth:
 
 ---
 
+### Container images
+Container images are available for both the backend and the CLI. These images include everything you need to get started quickly.
+
+#### [Backend container image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_backend):
+```
+docker pull ghcr.io/bblue530/patchhound_backend:latest
+```
+#### [CLI image](https://github.com/BBlue530/PatchHound/pkgs/container/patchhound_cli):
+```
+docker pull ghcr.io/bblue530/patchhound_cli:latest
+```
+
+---
+
+## Notes
+
+When scanning a directory (`TARGET="."`), Syft will warn about missing explicit name/version metadata. This does **not** affect scan results.
+
+If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to `false`
+
+If you are scanning a container image make sure to add a secret named `PAT_TOKEN` to your repository.
+
+1. Go to **Settings > Secrets and variables > Actions**
+2. Click **New repository secret**
+3. Name it: `PAT_TOKEN`
+4. Paste your PAT
+5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#scan)
+
+### Required Token Permissions
+
+- **`read:packages`** - required to pull images
+- **`repo`** - only required if you are accessing **private images** or **private repositories**
+
+Public images only require `read:packages`.
+
+---
+
 # Docs
-- [Docs](https://github.com/BBlue530/PatchHound/tree/master/docs).
+- [docs](https://github.com/BBlue530/PatchHound/tree/master/docs).
 - [quick-start](https://github.com/BBlue530/PatchHound/blob/master/docs/quick-start.md)
 - [backend](https://github.com/BBlue530/PatchHound/blob/main/docs/backend.md)
 - [cli-commands](https://github.com/BBlue530/PatchHound/blob/main/docs/cli-commands.md)
+- [config](https://github.com/BBlue530/PatchHound/blob/main/docs/config.md)
 
 ---
 
