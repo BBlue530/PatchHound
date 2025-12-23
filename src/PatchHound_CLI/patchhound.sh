@@ -2,7 +2,12 @@
 set -e
 
 BASE_DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" && pwd )"
+CONFIG_FILE="$BASE_DIR/scan.config"
+SCAN_PROFILE_CONFIG_FILE="$BASE_DIR/scan_profile.config"
 export BASE_DIR
+export CONFIG_FILE
+export SCAN_PROFILE_CONFIG_FILE
+
 COMMAND="$1"
 shift || true
 source "$BASE_DIR/system/env_system.sh"
