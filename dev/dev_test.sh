@@ -46,7 +46,7 @@ done
 sleep 30
 
 echo "[~] Creating new token..."
-patchhound create --api-key "$API_KEY" --org test_org --exp 30 | tee "$BACKEND_LOG"
+patchhound token-key create --api-key "$API_KEY" --org test_org --exp 30 | tee "$BACKEND_LOG"
 
 TOKEN_KEY=$(grep -A1 "Token Key Created" "$BACKEND_LOG" | tail -n1 | awk '{print $1}' | tr -d '\r')
 echo "[+] Token: $TOKEN_KEY"

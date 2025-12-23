@@ -27,6 +27,9 @@ case "$COMMAND" in
             change)
                 source "$BASE_DIR/commands/token_key_commands/change.sh" "$@"
                 ;;
+            remove)
+                source "$BASE_DIR/commands/token_key_commands/remove.sh" "$@"
+                ;;
             *)
                 usage_help
                 ;;

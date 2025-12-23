@@ -18,6 +18,7 @@ HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
 # Token key command endpoints
 CREATE_TOKEN_API_URL="${BASE_URL}/v1/create-token-key"
 KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"
+REMOVE_TOKEN_API_URL="${BASE_URL}/v1/remove-token-key"
 
 # Resource command endpoints
 GET_RESOURCES_API_URL="${BASE_URL}/v1/get-resources"

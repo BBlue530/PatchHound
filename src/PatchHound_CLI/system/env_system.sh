@@ -11,13 +11,19 @@ usage_config() {
 
 usage_change() {
     echo "Usage:"
-    echo "  patchhound change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>"
+    echo "  patchhound token-key change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>"
     exit 1
 }
 
 usage_create() {
     echo "Usage:"
-    echo "  patchhound create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>"
+    echo "  patchhound token-key create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>"
+    exit 1
+}
+
+usage_remove() {
+    echo "Usage:"
+    echo "  patchhound token-key remove --api-key <API_KEY> --token <TOKEN_KEY>"
     exit 1
 }
 
@@ -110,17 +116,18 @@ usage_help() {
     echo "  patchhound <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  config       Manage PatchHound config (set/get/list)"
-    echo "  change       Enable or disable token keys"
-    echo "  create       Create new token keys"
-    echo "  resource     Get or list repository resources"
-    echo "  exclude      Manage vulnerability exclusions (add/list/remove)"
-    echo "  scan         Run a new scan"
-    echo "  sign         Sign container images"
-    echo "  verify       Verify signed container images"
-    echo "  health       Perform health check of the API"
-    echo "  resource pdf Generate PDF summary reports"
-    echo "  --help       Show this help message"
+    echo "  config                 Manage PatchHound config (set/get/list)"
+    echo "  token-key change       Enable or disable token keys"
+    echo "  token-key create       Create new token keys"
+    echo "  token-key remove       Remove token keys"
+    echo "  resource               Get or list repository resources"
+    echo "  exclude                Manage vulnerability exclusions (add/list/remove)"
+    echo "  scan                   Run a new scan"
+    echo "  sign                   Sign container images"
+    echo "  verify                 Verify signed container images"
+    echo "  health                 Perform health check of the API"
+    echo "  resource pdf           Generate PDF summary reports"
+    echo "  --help                 Show this help message"
     echo ""
     echo "Use 'patchhound <command> --help' for more information on a specific command."
     exit 1
