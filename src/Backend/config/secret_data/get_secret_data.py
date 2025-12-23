@@ -10,16 +10,6 @@ def read_external_secret(secret_type):
         return os.environ.get("jwt_key")
     elif secret_type == "cosign_key":
         return os.environ.get("cosign_key")
-    
-def set_secrets_in_env(app_config):
-    if os.environ.get("secret_manager_enabled", "False").lower() == "true":
-        api_key_secret_name = app_config.get("backend", {}).get("storage", {}).get("secret_data", {}).get("secret_manager", {}).get("aws", {}).get("secrets_name", {}).get("api_key", None)
-        jwt_key_secret_name = app_config.get("backend", {}).get("storage", {}).get("secret_data", {}).get("secret_manager", {}).get("aws", {}).get("secrets_name", {}).get("jwt_key", None)
-        cosign_key_secret_name = app_config.get("backend", {}).get("storage", {}).get("secret_data", {}).get("secret_manager", {}).get("aws", {}).get("secrets_name", {}).get("cosign_key", None)
-        
-        os.environ["api_key"] = read_secret_from_secret_manager(api_key_secret_name)
-        os.environ["jwt_key"] = read_secret_from_secret_manager(jwt_key_secret_name)
-        os.environ["cosign_key"] = read_secret_from_secret_manager(cosign_key_secret_name)
 
 def read_secret_from_secret_manager(secret_key_name):
     session = boto3.session.Session(
