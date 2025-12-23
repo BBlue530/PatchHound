@@ -14,12 +14,20 @@ PATCHHOUND_VERSION="0.1.20"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
-KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"
+
+# Token key command endpoints
 CREATE_TOKEN_API_URL="${BASE_URL}/v1/create-token-key"
+KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"
+
+# Resource command endpoints
 GET_RESOURCES_API_URL="${BASE_URL}/v1/get-resources"
 LIST_RESOURCES_API_URL="${BASE_URL}/v1/list-resources"
 PDF_SUMMARY_API_URL="${BASE_URL}/v1/generate-pdf"
+
+# Image command endpoints
 IMAGE_SIGN_API_URL="${BASE_URL}/v1/sign-image"
 IMAGE_VERIFY_API_URL="${BASE_URL}/v1/verify-image"
+
+# Base image command endpoints
 BASE_IMAGE_SIGN_API_URL="${BASE_URL}/v1/sign-base-image"
 BASE_IMAGE_VERIFY_API_URL="${BASE_URL}/v1/verify-base-image"
