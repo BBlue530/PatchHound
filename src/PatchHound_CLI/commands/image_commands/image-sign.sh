@@ -1,6 +1,6 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-BASE_DIR="$( dirname "$SCRIPT_DIR" )"
-CONFIG_FILE="$SCRIPT_DIR/../scan.config"
+
+CONFIG_FILE="$BASE_DIR/scan.config"
 source "$BASE_DIR/system/config.sh"
 source "$BASE_DIR/system/env_system.sh"
 

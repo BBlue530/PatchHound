@@ -2,6 +2,7 @@
 set -e
 
 BASE_DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" && pwd )"
+export BASE_DIR
 COMMAND="$1"
 shift || true
 source "$BASE_DIR/system/env_system.sh"
