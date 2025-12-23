@@ -19,7 +19,7 @@ if [ -n "$GITHUB_REPOSITORY" ]; then
 elif [ -n "$CI_PROJECT_PATH" ]; then
     REPO_NAME="$CI_PROJECT_PATH"
 else
-    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/../scan_profile.config"
+    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/scan_profile.config"
     REPO_NAME=$(grep "^REPO_NAME=" "$SCAN_PROFILE_CONFIG_FILE" | cut -d= -f2-)
     if [ -z "$REPO_NAME" ]; then
       print_message "[!]" "Missing config" "REPO_NAME is missing"

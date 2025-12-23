@@ -6,7 +6,7 @@ if [[ ! -f "$EXCLUDE_FILE" ]]; then
 fi
 
 if [ -z "$REPO_NAME" ]; then
-    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/../scan_profile.config"
+    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/scan_profile.config"
     REPO_NAME=$(grep "^REPO_NAME=" "$SCAN_PROFILE_CONFIG_FILE" | cut -d= -f2-)
     if [ -z "$REPO_NAME" ]; then
       print_message "[!]" "Missing config" "REPO_NAME is missing"
@@ -15,7 +15,7 @@ if [ -z "$REPO_NAME" ]; then
 fi
 
 if [ -z "$COMMIT_AUTHOR" ]; then
-    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/../scan_profile.config"
+    SCAN_PROFILE_CONFIG_FILE="$SCRIPT_DIR/scan_profile.config"
     COMMIT_AUTHOR=$(grep "^COMMIT_AUTHOR=" "$SCAN_PROFILE_CONFIG_FILE" | cut -d= -f2-)
     if [ -z "$COMMIT_AUTHOR" ]; then
       print_message "[!]" "Missing config" "COMMIT_AUTHOR is missing"
