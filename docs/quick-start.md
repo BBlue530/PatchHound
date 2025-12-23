@@ -51,7 +51,7 @@ Optionally set `SAST_SCAN`, `TRIVY_SCAN`, or `SCAN_IMAGE` depending on what you 
 ## Create a Token Key
 Create a new token for your organization to authenticate scans:
 ```
-patchhound create --api-key <api_key> --org <organization> --exp 30
+patchhound token-key create --api-key <api_key> --org <organization> --exp 30
 ```
 - Replace `<api_key>` with the api key your backend provided you
 - Replace `<organization>` with your org name
@@ -118,7 +118,7 @@ This will validate the image against the previously generated signature ensuring
 PatchHound makes it simple to scan for vulnerabilities, manage tokens, and generate reports all from the CLI. After completing this quick start, you should be able to run your first scan, retrieve results, and optionally sign or verify container images.
 
 For more in-depth information:
-- Learn more about the Backend [here](https://github.com/BBlue530/PatchHound/blob/master/docs/backend.md#backend-patchhound)
+- Learn more about the Backend [here](https://github.com/BBlue530/PatchHound/blob/master/docs/backend.md#backend-patchhound) or its configurations [here](https://github.com/BBlue530/PatchHound/blob/main/docs/config.md)
 - Learn more about the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound)
 
 ---
@@ -126,6 +126,6 @@ For more in-depth information:
 # Dev quick start
 If you want to quickly start PatchHound for development or testing, you can use the `dev_test.sh` script located in the `dev` directory. 
 
-This script automates setting up the backend, installing the CLI, generating an API key, creating a token, and running a scan.
+This script automates setting up the backend, installing the CLI, generating an API key, creating a token and running a scan.
 
 ---

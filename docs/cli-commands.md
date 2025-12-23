@@ -145,18 +145,26 @@ patchhound health --token <TOKEN_KEY>
 
 ---
 
-## Create
+## Token key
+
+Token keys are what allows you to interact with the backend and to manage token keys you will need access to the API key. Token keys can be created, changed or removed and all commands are under `token-key` flag.
+
+### Create
 Create a new token key for an organization with a specified expiration period:
 ```
-patchhound create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>
+patchhound token-key create --api-key <API_KEY> --org <ORGANIZATION> --exp <EXPIRATION_DAYS>
 ```
 
----
-
-## Change
-Enable or disable a specific token keys:
+### Change
+Enable or disable a specific token key:
 ```
-patchhound change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>
+patchhound token-key change --api-key <API_KEY> --token <TOKEN_KEY> --ins <enable|disable>
+```
+
+### Remove
+Delete a specific token key:
+```
+patchhound token-key remove --api-key <API_KEY> --token <TOKEN_KEY>
 ```
 
 ---
