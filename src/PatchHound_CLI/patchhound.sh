@@ -35,6 +35,9 @@ case "$COMMAND" in
             remove)
                 source "$BASE_DIR/commands/token_key_commands/remove.sh" "$@"
                 ;;
+            list)
+                source "$BASE_DIR/commands/token_key_commands/list.sh" "$@"
+                ;;
             *)
                 usage_help
                 ;;

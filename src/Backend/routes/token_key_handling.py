@@ -2,6 +2,7 @@ from flask import request, jsonify, Blueprint
 from database.create_key import create_key
 from database.remove_key import remove_key
 from database.key_status import enable_key, disable_key
+from database.list_key import list_all_keys
 from validation.secrets_manager import verify_api_key
 
 token_key_bp = Blueprint("token_key", __name__)
@@ -72,4 +73,17 @@ def remove_token_key():
         return jsonify({"error": "token_key missing"}), 400
 
     response = remove_key(token_key)
+    return response
+
+@token_key_bp.route('/v1/list-token-key', methods=['POST'])
+def list_token_key():
+
+    api_key = request.form.get("api_key")
+    if not api_key:
+        return jsonify({"error": "api_key missing"}), 401
+    response, valid = verify_api_key(api_key)
+    if valid == False:
+        return response
+
+    response = list_all_keys()
     return response

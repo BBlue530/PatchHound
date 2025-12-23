@@ -27,6 +27,12 @@ usage_remove() {
     exit 1
 }
 
+usage_list() {
+    echo "Usage:"
+    echo "  patchhound token-key remove --api-key <API_KEY>"
+    exit 1
+}
+
 usage_get_resource() {
     echo "Usage:"
     echo "  patchhound resource get --token <TOKEN> --path-token <PATH_TO_RESOURCES_TOKEN>"

@@ -10,7 +10,7 @@ if [ -z "$BASE_URL" ]; then
   exit 1
 fi
 
-PATCHHOUND_VERSION="0.1.21"
+PATCHHOUND_VERSION="0.1.22"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
@@ -19,6 +19,7 @@ HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
 CREATE_TOKEN_API_URL="${BASE_URL}/v1/create-token-key"
 KEY_STATUS_API_URL="${BASE_URL}/v1/change-key-status"
 REMOVE_TOKEN_API_URL="${BASE_URL}/v1/remove-token-key"
+LIST_TOKEN_API_URL="${BASE_URL}/v1/list-token-key"
 
 # Resource command endpoints
 GET_RESOURCES_API_URL="${BASE_URL}/v1/get-resources"
