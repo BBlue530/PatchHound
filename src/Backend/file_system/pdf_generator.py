@@ -144,6 +144,31 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                 elements.append(Paragraph(f'<b>Link:</b> <link href="{kev_link}">{kev_link}</link>', wrap_style))
                 elements.append(Spacer(1, 12))
 
+    new_vulnerabilities = summary_report.get("new_vulnerabilities")
+
+    if new_vulnerabilities:
+        elements.append(Paragraph("New Found Vulnerabilities", styles["Heading2"]))
+        for new_vuln in summary_report.get("new_vulnerabilities", []):
+            if new_vuln:
+                new_vuln_link = None
+                new_vuln_link = safe_text(new_vuln.get('link'))
+
+                elements.append(Paragraph(f'<b>ID:</b> <link href="{new_vuln_link}">{safe_text(new_vuln.get("id"))}</link>', wrap_style))
+                elements.append(Paragraph(f"<b>Severity:</b> {safe_text(new_vuln.get('severity'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Score:</b> {safe_text(new_vuln.get('score'))}", wrap_style))
+                elements.append(Paragraph(f"<b>CVSS vector:</b> {safe_text(new_vuln.get('cvss_vector'))}", wrap_style))
+
+                elements.append(Paragraph(f"<b>Found timestamp:</b> {safe_text(new_vuln.get('vuln_found_timestamp'))}", wrap_style))
+
+                elements.append(Paragraph(f"<b>Source:</b> {safe_text(new_vuln.get('source'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Type:</b> {safe_text(new_vuln.get('type'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Description:</b> {safe_text(new_vuln.get('description'))}", wrap_style))
+
+                elements.append(Paragraph(f"<b>Package:</b> {safe_text(new_vuln.get('package'))}", wrap_style))
+                elements.append(Paragraph(f"<b>Version:</b> {safe_text(new_vuln.get('version'))}", wrap_style))
+                elements.append(Paragraph(f'<b>Link:</b> <link href="{new_vuln_link}">{new_vuln_link}</link>', wrap_style))
+                elements.append(Spacer(1, 12))
+
     elements.append(Paragraph("Vulnerabilities", styles["Heading2"]))
 
     vulnerabilities = summary_report.get("vulnerabilities")

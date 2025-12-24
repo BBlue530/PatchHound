@@ -11,6 +11,7 @@ from logs.audit_trail import save_audit_trail, audit_trail_event
 from validation.hash_verify import verify_sha
 from s3_handling.s3_get import get_all_resources_s3_internal_use_tmp
 from s3_handling.s3_send import send_files_to_s3
+from file_system.summary_generator import add_new_vulns_to_summary
 
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -88,6 +89,8 @@ def sbom_validation():
 
                 grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_grype_vulns_cyclonedx.json")
                 prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
+
+                summary_report_path = os.path.join(latest_scan_dir, f"{repo_name}_summary_report.json")
 
                 # Syft checks
                 if not os.path.exists(syft_sbom_path):
@@ -312,6 +315,8 @@ def sbom_validation():
                         print(message)
                         alert_event_system(audit_trail, message, alert, alert_path)
 
+                        add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path)
+
                     prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data)
 
                     with open(grype_vulns_output_path, "w") as f:
@@ -329,9 +334,11 @@ def sbom_validation():
                         # latest_scan_dir = os.path.join(repo_path, timestamp_folder)
                         s3_grype_vulns_output_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_grype_vulns_cyclonedx.json")
                         s3_prio_output_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_prio_vuln_data.json")
+                        s3_summary_report_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_grype_vulns_cyclonedx.json")
 
                         send_files_to_s3(grype_vulns_output_path, s3_grype_vulns_output_path)
                         send_files_to_s3(prio_output_path, s3_prio_output_path)
+                        send_files_to_s3(summary_report_path, s3_summary_report_path)
 
                     if daily_scan is False:
                         audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

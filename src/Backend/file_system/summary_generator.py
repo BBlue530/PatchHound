@@ -1,3 +1,5 @@
+import json
+import datetime
 from logs.audit_trail import audit_trail_event
 from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 
@@ -377,3 +379,72 @@ def exclusion_lookup(exclusions_file_json, key, data):
                 exclusion_data["link"] = data.get("link")
             return exclusion_data
     return data
+
+def add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path):
+    new_vulns = []
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    for vuln in grype_vulns_cyclonedx_json_data.get("vulnerabilities", []):
+        key = vuln.get("id")
+        if not key:
+            continue
+        elif key not in new_cves_to_alert:
+            continue
+
+        severity = None
+        score = None
+        vector = None
+
+        for rating in vuln.get("ratings", []):
+                
+            if "CVSSv3" in (rating.get("method") or ""):
+                severity = rating.get("severity") or severity
+                score = rating.get("score")
+                vector = rating.get("vector")
+                break
+
+            if severity is None and rating.get("severity"):
+                severity = rating.get("severity")
+
+            if score is None and rating.get("score") is not None:
+                score = rating.get("score")
+
+            if vector is None and rating.get("vector"):
+                vector = rating.get("vector")
+
+        try:
+            score = float(score) if score is not None else None
+        except (TypeError, ValueError):
+            score = None
+
+        pkg_ref = vuln.get("affects", [{}])[0].get("ref") or ""
+        pkg_name, pkg_version = "unknown", "unknown"
+        if pkg_ref.startswith("pkg:"):
+            try:
+                _, rest = pkg_ref.split("pkg:", 1)
+                _, rest = rest.split("/", 1)
+                pkg_name, pkg_version = rest.split("@", 1)
+            except ValueError:
+                pass
+
+        link = get_vulnerability_link(key, vuln, "url")
+
+        new_vulns.append({
+            "source": "grype",
+            "id": key,
+            "type": "vulnerability",
+            "description": vuln.get("description")  or "No description available",
+            "severity": severity,
+            "score": score,
+            "cvss_vector": vector,
+            "package": pkg_name,
+            "version": pkg_version,
+            "link": link,
+            "vuln_found_timestamp": timestamp
+        })
+
+    with open(summary_report_path, "r") as f:
+        summary_report_json = json.load(f)
+    summary_report_json["new_vulnerabilities"] = new_vulns
+    with open(summary_report_path, "w") as f:
+        json.dump(summary_report_json, f, indent=2)
