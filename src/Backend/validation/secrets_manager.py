@@ -6,7 +6,7 @@ from config.secret_data. get_secret_data import read_external_secret
 from core.variables import secret_storage, length, secret_types
     
 def read_secret(secret_type):
-    if os.environ.get("secret_manager_enabled", "False").lower() == "true":
+    if os.environ.get("secret_in_env_enabled", "False").lower() == "true":
         secret_value = read_external_secret(secret_type)
         return secret_value
     else:
@@ -16,7 +16,7 @@ def read_secret(secret_type):
 def verify_api_key(api_key):
     secret_type = "api_key"
 
-    if os.environ.get("secret_manager_enabled", "False").lower() == "true":
+    if os.environ.get("secret_in_env_enabled", "False").lower() == "true":
         stored_api_key = read_external_secret(secret_type)
     else:
         if not os.path.isfile(secret_storage):
@@ -61,7 +61,7 @@ def read_secret_local(secret_type):
     return secret_value
 
 def generate_secrets():
-    if os.environ.get("secret_manager_enabled", "False").lower() != "true":
+    if os.environ.get("secret_in_env_enabled", "False").lower() != "true":
         dir_path = os.path.dirname(secret_storage)
         if dir_path:
             os.makedirs(dir_path, exist_ok=True)
@@ -104,21 +104,21 @@ def generate_secrets():
                 json.dump(secrets_data, f, indent=4)
 
 def verify_secrets():
-    if os.environ.get("secret_manager_enabled", "False").lower() == "true":
+    if os.environ.get("secret_in_env_enabled", "False").lower() == "true":
         # I know this isnt the best way to do this buts its a temp thing
         api_key = os.environ.get("api_key")
         jwt_key = os.environ.get("jwt_key")
         cosign_key = os.environ.get("cosign_key")
         if not api_key:
-            print("[!] External secret missing in env [api_key]")
+            print("[!] External secret in env [api_key]")
             sys.exit(1)
         elif not jwt_key:
-            print("[!] External secret missing in env [jwt_key]")
+            print("[!] External secret in env [jwt_key]")
             sys.exit(1)
         elif not cosign_key:
-            print("[!] External secret missing in env [cosign_key]")
+            print("[!] External secret in env [cosign_key]")
             sys.exit(1)
-        print("[+] External secret manager set")
+        print("[+] External secret set")
     else:
         for secret_type in secret_types:
             secret_value = read_secret(secret_type)

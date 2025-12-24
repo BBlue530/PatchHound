@@ -3,7 +3,15 @@ backend:
 
     secret_data:
       local:
-        enabled: True
+        generate_secrets:
+          enabled: True
+
+        secrets:
+          enabled: False
+          secrets_name:
+            api_key: "${API_KEY}"
+            jwt_key: "${JWT_KEY}"
+            cosign_key: "${COSIGN_KEY}"
 
       secret_manager:
         aws:

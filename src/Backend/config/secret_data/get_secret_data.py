@@ -11,14 +11,12 @@ def read_external_secret(secret_type):
     elif secret_type == "cosign_key":
         return os.environ.get("cosign_key")
 
-def read_secret_from_secret_manager(secret_key_name):
+def read_secret_from_secret_manager(secret_key_name, secret_name):
     session = boto3.session.Session(
         aws_access_key_id=os.environ.get("aws_access_key_id"),
         aws_secret_access_key=os.environ.get("aws_secret_access_key"),
         region_name=os.environ.get("aws_default_region"),
     )
-
-    secret_name = os.environ.get("secret_manager_name")
 
     client = session.client("secretsmanager")
 
