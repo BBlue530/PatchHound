@@ -18,6 +18,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     cosign_key = read_secret(secret_type)
 
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
+    # The COSIGN_PASSWORD used to encrypt the priv key
     env["COSIGN_PASSWORD"] = cosign_key
 
     repo_name = current_repo.replace("/", "_")

@@ -143,6 +143,7 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
             check=True,
             env=env
         )
+        # Its fine to have the priv key saved since its encrypted by the COSIGN_PASSWORD
         os.rename(os.path.join(scan_dir, "cosign.key"), cosign_key_path)
         os.rename(os.path.join(scan_dir, "cosign.pub"), cosign_pub_path)
         audit_trail_event(audit_trail, "KEY_GENERATION", {

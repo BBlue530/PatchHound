@@ -31,7 +31,7 @@ This document details all supported configuration keys, their purpose, and usage
 |`secret_manager.aws.secret_manager_name`|Name of the AWS Secret Manager.|
 |`secret_manager.aws.secrets_name.api_key`|Key name for storing API keys.|
 |`secret_manager.aws.secrets_name.jwt_key`|Key name for storing JWT keys.|
-|`secret_manager.aws.secrets_name.cosign_key`|Key name for storing Cosign keys.|
+|`secret_manager.aws.secrets_name.cosign_key`|Key name for storing Cosign password which is used to encrypt the private key.|
 |`token_key_database`|Configuration for the token key database (local or external).|
 |`token_key_database.external_database.username`|PostgreSQL username.|
 |`token_key_database.external_database.password`|PostgreSQL password|
