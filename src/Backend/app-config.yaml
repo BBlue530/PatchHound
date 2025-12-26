@@ -36,11 +36,12 @@ backend:
     scan_data:
       local:
         enabled: True
-
-      s3_bucket:
-        enabled: False
-        bucket: "${BUCKET}"
-        bucket_key: "${BUCKET_KEY}"
+        
+      aws:
+        s3_bucket:
+          enabled: False
+          bucket: "${BUCKET}"
+          bucket_key: "${BUCKET_KEY}"
         
 auth:
   aws:

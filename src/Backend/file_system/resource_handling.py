@@ -2,15 +2,15 @@ import os
 import io
 import zipfile
 from flask import send_file, abort
-from s3_handling.s3_read import read_files_from_s3
-from s3_handling.s3_get import get_resources_s3
+from external_storage.external_storage_read import read_files_from_external_storage
+from external_storage.external_storage_get import get_resources_external_storage
 from core.variables import all_repo_scans_folder, all_resources_folder
 
 def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded):
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
-    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-        files_in_s3 = read_files_from_s3(base_dir)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        files_in_s3 = read_files_from_external_storage(base_dir)
 
         if not files_in_s3:
             abort(404, description="No files found to return")
@@ -48,8 +48,8 @@ def list_resources(organization_decoded, current_repo_decoded, timestamp_decoded
 def get_resources(organization_decoded, current_repo_decoded, timestamp_decoded, file_names):
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
-    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-        files_to_get_and_return = get_resources_s3(base_dir, file_names)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        files_to_get_and_return = get_resources_external_storage(base_dir, file_names)
         return files_to_get_and_return
     else:
         if not os.path.isdir(base_dir):

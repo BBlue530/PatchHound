@@ -11,7 +11,7 @@ from validation.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
-from s3_handling.s3_send import send_files_to_s3
+from external_storage.external_storage_send import send_files_to_external_storage
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file):
     secret_type = "cosign_key"
@@ -84,9 +84,10 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
 
     repo_lock(repo_dir, repo_files)
     
-    send_files_to_s3(scan_dir, scan_dir)
-    send_files_to_s3(exclusions_file_path, repo_dir)
-    send_files_to_s3(alert_path, repo_dir)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        send_files_to_external_storage(scan_dir, scan_dir)
+        send_files_to_external_storage(exclusions_file_path, repo_dir)
+        send_files_to_external_storage(alert_path, repo_dir)
 
     cleanup_scan_data()
 

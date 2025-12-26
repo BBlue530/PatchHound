@@ -9,8 +9,8 @@ from logs.alerts import alert_event_system
 from utils.helpers import extract_cve_ids
 from logs.audit_trail import save_audit_trail, audit_trail_event
 from validation.hash_verify import verify_sha
-from s3_handling.s3_get import get_all_resources_s3_internal_use_tmp
-from s3_handling.s3_send import send_files_to_s3
+from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
+from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.summary_generator import add_new_vulns_to_summary
 
 def sbom_validation():
@@ -19,8 +19,8 @@ def sbom_validation():
     temp_resources_root = None
     audit_trail = []
     try:
-        if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-            temp_resources_root = get_all_resources_s3_internal_use_tmp(all_resources_folder)
+        if os.environ.get("external_storage_enabled", "False").lower() == "true":
+            temp_resources_root = get_resources_external_storage_internal_use_tmp(all_resources_folder)
 
             repo_scans_dir = os.path.join(temp_resources_root, all_repo_scans_folder)
             image_sign_dir = os.path.join(temp_resources_root, all_image_signature_folder)
@@ -28,7 +28,7 @@ def sbom_validation():
             print(repo_scans_dir)
 
             if not os.path.isdir(repo_scans_dir):
-                print(f"[!] S3 missing resource file: {temp_resources_root}")
+                print(f"[!] AWS s3 missing resource file: {temp_resources_root}")
                 return
         else:
             repo_scans_dir = os.path.join(all_resources_folder, all_repo_scans_folder)
@@ -325,7 +325,7 @@ def sbom_validation():
                     with open(prio_output_path, "w") as f:
                         json.dump(prio_vuln_data, f, indent=4)
 
-                    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
+                    if os.environ.get("external_storage_enabled", "False").lower() == "true":
                         # Notes for myself just what is what. Can be ignored and will be removed later.
                         # temp_resources_root = "/tmp/s3_resources_xxx"
                         # repo_scans_dir = os.path.join(temp_resources_root, all_repo_scans_folder)
@@ -336,9 +336,9 @@ def sbom_validation():
                         s3_prio_output_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_prio_vuln_data.json")
                         s3_summary_report_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_grype_vulns_cyclonedx.json")
 
-                        send_files_to_s3(grype_vulns_output_path, s3_grype_vulns_output_path)
-                        send_files_to_s3(prio_output_path, s3_prio_output_path)
-                        send_files_to_s3(summary_report_path, s3_summary_report_path)
+                        send_files_to_external_storage(grype_vulns_output_path, s3_grype_vulns_output_path)
+                        send_files_to_external_storage(prio_output_path, s3_prio_output_path)
+                        send_files_to_external_storage(summary_report_path, s3_summary_report_path)
 
                     if daily_scan is False:
                         audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

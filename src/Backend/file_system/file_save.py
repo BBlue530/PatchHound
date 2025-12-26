@@ -8,8 +8,8 @@ from core.variables import env
 from logs.alerts import alert_event_system
 from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
-from s3_handling.s3_get import get_resource_s3_internal_use
-from s3_handling.s3_send import send_files_to_s3
+from external_storage.external_storage_get import get_resources_external_storage_internal_use
+from external_storage.external_storage_send import send_files_to_external_storage
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     file_save_status = True
@@ -302,9 +302,9 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
     temp_files = []
 
     try:
-        if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-            cosign_key_priv_bytes = get_resource_s3_internal_use(cosign_key_path).read()
-            cosign_key_pub_bytes = get_resource_s3_internal_use(cosign_pub_path).read()
+        if os.environ.get("external_storage_enabled", "False").lower() == "true":
+            cosign_key_priv_bytes = get_resources_external_storage_internal_use(cosign_key_path).read()
+            cosign_key_pub_bytes = get_resources_external_storage_internal_use(cosign_pub_path).read()
 
             temp_priv = tempfile.NamedTemporaryFile(delete=False)
             temp_priv.write(cosign_key_priv_bytes)
@@ -346,10 +346,10 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
         )
         print(f"[+] Verified file signature for repo: {repo_name}")
 
-        if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-            # Any files that gets signed will be sent to s3 bucket. Might change it later on...
-            send_files_to_s3(file_sig_path, file_sig_path)
-            send_files_to_s3(file_filename_path, file_filename_path)
+        if os.environ.get("external_storage_enabled", "False").lower() == "true":
+            # Any files that gets signed will be sent to external storage. Might change it later on...
+            send_files_to_external_storage(file_sig_path, file_sig_path)
+            send_files_to_external_storage(file_filename_path, file_filename_path)
     
     except subprocess.CalledProcessError as e:
         print(f"[!] Signing or verification failed for repo {repo_name}: {e.stderr}")

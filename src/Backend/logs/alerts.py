@@ -2,13 +2,13 @@ import os
 import json
 import requests
 from logs.audit_trail import audit_trail_event
-from s3_handling.s3_get import get_resource_s3_internal_use
+from external_storage.external_storage_get import get_resources_external_storage_internal_use
 
 def alert_event_system(audit_trail, message, alert, alert_config_path):
     alert_system_webhook = None
 
-    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-        memory_file = get_resource_s3_internal_use(alert_config_path)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        memory_file = get_resources_external_storage_internal_use(alert_config_path)
         alert_system_json = json.load(memory_file)
         print(alert_config_path)
         print(alert_system_json)

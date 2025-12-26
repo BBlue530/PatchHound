@@ -1,7 +1,7 @@
 import json
 import os
 from utils.file_hash import hash_file
-from s3_handling.s3_append import append_to_s3
+from external_storage.external_storage_append import append_to_external_storage
 
 def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, alerts_list):
     syft_sbom_att_hash = hash_file(syft_sbom_attestation_path)
@@ -28,10 +28,10 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
         }
     }
 
-    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-        append_to_s3(new_entry, repo_history_path)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        append_to_external_storage(new_entry, repo_history_path)
     else:
-        print("[+] S3 not enabled.")
+        print("[+] AWS s3 not enabled.")
         if not os.path.exists(repo_history_path):
             history_data = {"repo": os.path.basename(os.path.dirname(repo_history_path)), "history": []}
         else:

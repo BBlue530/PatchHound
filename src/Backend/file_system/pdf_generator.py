@@ -7,7 +7,7 @@ from flask import abort
 import json
 import os
 from utils.helpers import safe_text
-from s3_handling.s3_get import get_resource_s3_internal_use
+from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from core.variables import all_repo_scans_folder, all_resources_folder
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
@@ -16,8 +16,8 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}_pdf_summary_report.pdf")
     summary_report_path = os.path.join(base_dir, f"{current_repo_decoded}_summary_report.json")
 
-    if os.environ.get("s3_bucket_enabled", "False").lower() == "true":
-        memory_file = get_resource_s3_internal_use(summary_report_path)
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        memory_file = get_resources_external_storage_internal_use(summary_report_path)
         summary_report = json.load(memory_file)
     else:
         if not os.path.isdir(base_dir):
