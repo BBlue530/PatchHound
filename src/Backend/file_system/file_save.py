@@ -12,41 +12,116 @@ from s3_handling.s3_get import get_resource_s3_internal_use
 from s3_handling.s3_send import send_files_to_s3
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
-    with open(alert_path, "w") as f:
-        json.dump(alert_system_json, f, indent=4)
-    file_stable_check(alert_path)
+    file_save_status = True
+    files_failed_save = []
 
-    with open(syft_sbom_path, "w") as f:
-        json.dump(syft_sbom_json, f, indent=4)
-    file_stable_check(syft_sbom_path)
-
-    with open(semgrep_sast_report_path, "w") as f:
-        json.dump(semgrep_sast_report_json, f, indent=4)
-    file_stable_check(semgrep_sast_report_path)
-
-    with open(trivy_report_path, "w") as f:
-        json.dump(trivy_report_json, f, indent=4)
-    file_stable_check(trivy_report_path)
-
-    with open(grype_path, "w") as f:
-        json.dump(grype_vulns_cyclonedx_json_data, f, indent=4)
-    file_stable_check(grype_path)
-
-    with open(prio_path, "w") as f:
-        json.dump(prio_vuln_data, f, indent=4)
-    file_stable_check(prio_path)
-
-    with open(summary_report_path, "w") as f:
-        json.dump(summary_report, f, indent=4)
-    file_stable_check(summary_report_path)
-
-    with open(exclusions_file_path, "w") as f:
-        json.dump(exclusions_file_json, f, indent=4)
-    file_stable_check(exclusions_file_path)
-
-    audit_trail_event(audit_trail, "FILE_SAVE", {
-            "status": "success"
+    if alert_system_json:
+        with open(alert_path, "w") as f:
+            json.dump(alert_system_json, f, indent=4)
+        file_stable_check(alert_path)
+    else:
+        files_failed_save.append("alert_system")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "alert_system": alert_path,
+            "status": "fail"
         })
+
+    if syft_sbom_json:
+        with open(syft_sbom_path, "w") as f:
+            json.dump(syft_sbom_json, f, indent=4)
+        file_stable_check(syft_sbom_path)
+    else:
+        files_failed_save.append("syft_sbom")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "syft_sbom": syft_sbom_path,
+            "status": "fail"
+        })
+    
+    if semgrep_sast_report_json:
+        with open(semgrep_sast_report_path, "w") as f:
+            json.dump(semgrep_sast_report_json, f, indent=4)
+        file_stable_check(semgrep_sast_report_path)
+    else:
+        files_failed_save.append("semgrep_sast_report")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "semgrep_sast_report": semgrep_sast_report_path,
+            "status": "fail"
+        })
+
+    if trivy_report_json:
+        with open(trivy_report_path, "w") as f:
+            json.dump(trivy_report_json, f, indent=4)
+        file_stable_check(trivy_report_path)
+    else:
+        files_failed_save.append("trivy_report")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "trivy_report": trivy_report_path,
+            "status": "fail"
+        })
+
+    if grype_vulns_cyclonedx_json_data:
+        with open(grype_path, "w") as f:
+            json.dump(grype_vulns_cyclonedx_json_data, f, indent=4)
+        file_stable_check(grype_path)
+    else:
+        files_failed_save.append("grype_vulns_cyclonedx")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "grype_vulns_cyclonedx": grype_path,
+            "status": "fail"
+        })
+
+    if prio_vuln_data:
+        with open(prio_path, "w") as f:
+            json.dump(prio_vuln_data, f, indent=4)
+        file_stable_check(prio_path)
+    else:
+        files_failed_save.append("prio_vuln_data")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "pyio_vuln_data": prio_path,
+            "status": "fail"
+        })
+
+    if summary_report:
+        with open(summary_report_path, "w") as f:
+            json.dump(summary_report, f, indent=4)
+        file_stable_check(summary_report_path)
+    else:
+        files_failed_save.append("summary_report")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "summary_report": summary_report_path,
+            "status": "fail"
+        })
+
+    if exclusions_file_json:
+        with open(exclusions_file_path, "w") as f:
+            json.dump(exclusions_file_json, f, indent=4)
+        file_stable_check(exclusions_file_path)
+    else:
+        files_failed_save.append("exclusions_file")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "exclusion_file": exclusions_file_path,
+            "status": "fail"
+        })
+    if file_save_status:
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+                "status": "success"
+            })
+    else:
+        message = f"[!] Failed to save files!"
+        alert = "Workflow : Failed to save files"
+        audit_trail_event(audit_trail, "KEY_GENERATION", {
+            "status": "fail"
+        })
+        print(message)
+        alert_event_system(audit_trail, message, alert, alert_path)
 
 def attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:
@@ -159,7 +234,7 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
         })
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
-        if alerts_list is not False:
+        if alerts_list is not None:
             alerts_list.append(f"{message}")
 
 def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, repo_name, alert_path):
