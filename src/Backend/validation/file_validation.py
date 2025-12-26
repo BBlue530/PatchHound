@@ -332,13 +332,11 @@ def sbom_validation():
                         # token_path = os.path.join(repo_scans_dir, organization)
                         # repo_path = os.path.join(token_path, repo_name)
                         # latest_scan_dir = os.path.join(repo_path, timestamp_folder)
-                        s3_grype_vulns_output_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_grype_vulns_cyclonedx.json")
-                        s3_prio_output_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_prio_vuln_data.json")
-                        s3_summary_report_path = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder, f"{repo_name}_grype_vulns_cyclonedx.json")
+                        s3_bucker_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder)
 
-                        send_files_to_external_storage(grype_vulns_output_path, s3_grype_vulns_output_path)
-                        send_files_to_external_storage(prio_output_path, s3_prio_output_path)
-                        send_files_to_external_storage(summary_report_path, s3_summary_report_path)
+                        send_files_to_external_storage(grype_vulns_output_path, s3_bucker_dir)
+                        send_files_to_external_storage(prio_output_path, s3_bucker_dir)
+                        send_files_to_external_storage(summary_report_path, s3_bucker_dir)
 
                     if daily_scan is False:
                         audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
