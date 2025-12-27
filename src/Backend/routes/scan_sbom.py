@@ -14,9 +14,9 @@ from vuln_scan.kev_catalog import compare_kev_catalog
 
 scan_sbom_bp = Blueprint("scan_sbom", __name__)
 
-def threading_save_scan_files(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content):
+def threading_save_scan_files(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content, semgrep_sast_ruleset):
     syft_sbom_file_obj = io.BytesIO(syft_sbom_content)
-    save_scan_files(audit_trail, current_repo, syft_sbom_file_obj, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content)
+    save_scan_files(audit_trail, current_repo, syft_sbom_file_obj, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content, semgrep_sast_ruleset)
 
 @scan_sbom_bp.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
@@ -55,6 +55,7 @@ def scan_sbom():
 
     syft_sbom_file = request.files['sbom']
     semgrep_sast_report = request.files['sast_report']
+    semgrep_sast_ruleset_str = request.form.get("sast_ruleset")
     trivy_report = request.files['trivy_report']
     exclusions_file = request.files['exclusions']
     current_repo = request.form.get("current_repo")
@@ -67,6 +68,11 @@ def scan_sbom():
         tool_versions = json.loads(tool_versions_str)
     except (json.JSONDecodeError, TypeError):
         tool_versions = {}
+
+    try:
+        semgrep_sast_ruleset = json.loads(semgrep_sast_ruleset_str)
+    except (json.JSONDecodeError, TypeError):
+        semgrep_sast_ruleset_str = {}
     
     try:
         syft_sbom_file.seek(0)
@@ -140,6 +146,6 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content)
+        args=(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file_content, semgrep_sast_ruleset)
     ).start()
     return jsonify(result_parsed)

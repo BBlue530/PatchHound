@@ -31,9 +31,12 @@ tool_versions_json=$(jq -n \
   --arg semgrep "$SEMGREP_VERSION" \
   '{syft_version: $syft, trivy_version: $trivy, semgrep_version: $semgrep}')
 
+SAST_RULESETS_JSON=$(printf '%s\n' "${SAST_RULESETS[@]}" | jq -R . | jq -s .)
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
+  -F "sast_ruleset=$SAST_RULESETS_JSON" \
   -F "trivy_report=@trivy_report.json" \
   -F "exclusions=@exclusions.json" \
   -F "token=$TOKEN" \

@@ -3,7 +3,7 @@ import datetime
 from logs.audit_trail import audit_trail_event
 from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 
-def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions):
+def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, semgrep_sast_ruleset):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
@@ -329,6 +329,9 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             "grype_version": GRYPE_VERSION,
             "cosign_version": COSIGN_VERSION,
             "patchhound_version": patchhound_version
+        },
+        "ruleset": {
+            "semgrep": semgrep_sast_ruleset
         }
     }
 

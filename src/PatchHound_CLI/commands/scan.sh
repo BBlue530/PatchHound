@@ -3,6 +3,7 @@ source "$BASE_DIR/system/env_system.sh"
 
 TOKEN=""
 PAT_TOKEN=""
+SAST_RULESETS=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -34,6 +35,28 @@ while [[ $# -gt 0 ]]; do
                     print_message "[!]" "Key not found" "${KEY} does not exist in config"
                 fi
                 shift 2
+            done
+            ;;
+        --sast-ruleset)
+            shift
+            if [[ $# -eq 0 ]] || [[ "$1" == --* ]]; then
+                usage_scan_sast_ruleset
+                exit 1
+            fi
+
+            while (( $# > 0 )) && [[ "$1" != --* ]]; do
+                RULESET="$1"
+
+                if [[ "$RULESET" != /* ]] && [[ "$RULESET" != */* ]]; then
+                    RULESET="p/$RULESET"
+                fi
+
+                if [[ ! "$RULESET" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
+                    print_message "[!]" "Invalid ruleset" "Skipping $RULESET"
+                else
+                    SAST_RULESETS+=("--config=$RULESET")
+                fi
+                shift
             done
             ;;
         *)

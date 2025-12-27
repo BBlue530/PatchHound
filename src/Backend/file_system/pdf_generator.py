@@ -8,7 +8,7 @@ import json
 import os
 from utils.helpers import safe_text
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
-from core.variables import all_repo_scans_folder, all_resources_folder
+from core.variables import all_repo_scans_folder, all_resources_folder, SEMGREP_RULESETS
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
@@ -37,6 +37,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         fontName="Helvetica",
         fontSize=8,
         leading=10,
+    )
+
+    wrap_style_indented = ParagraphStyle(
+        name="Indented",
+        parent=wrap_style,
+        leftIndent=20,
+        spaceAfter=6
     )
 
     doc = SimpleDocTemplate(pdf_filename_path, pagesize=A4)
@@ -74,6 +81,19 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(Paragraph(f"<b>Cosign:</b> {tool_version.get('cosign_version')}", wrap_style))
     elements.append(Paragraph(f"<b>PatchHound:</b> {tool_version.get('patchhound_version')}", wrap_style))
     elements.append(Spacer(1, 12))
+
+    rulesets = summary_report.get("ruleset")
+
+    semgrep_rulesets_raw = rulesets.get("semgrep", [])
+    semgrep_rulesets = normalize_semgrep_ruleset(semgrep_rulesets_raw)
+
+    if semgrep_rulesets:
+        elements.append(Paragraph("Rulesets", styles["Heading2"]))
+        elements.append(Paragraph(f"<b>Semgrep ruleset:</b>", wrap_style))
+        for semgrep_ruleset in semgrep_rulesets:
+            elements.append(Paragraph(f"    {semgrep_ruleset}", wrap_style_indented))
+
+        elements.append(Spacer(1, 12))
 
     elements.append(Paragraph("Exclusions", styles["Heading2"]))
 
@@ -292,3 +312,18 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     doc.build(elements)
     print(f"[+] PDF report saved as: {pdf_filename_path}")
     return pdf_filename_path
+
+def normalize_semgrep_ruleset(semgrep_ruleset_raw):
+    if not semgrep_ruleset_raw:
+        return []
+    
+    normalized_semgrep_rulesets = []
+
+    for ruleset in semgrep_ruleset_raw:
+        ruleset_normalized = ruleset.replace("--config=", "")
+
+        ruleset_description = SEMGREP_RULESETS.get(ruleset_normalized, "Unknown Semgrep ruleset")
+
+        normalized_semgrep_rulesets.append(f"<b>{ruleset_normalized}:</b> {ruleset_description}")
+
+    return normalized_semgrep_rulesets
