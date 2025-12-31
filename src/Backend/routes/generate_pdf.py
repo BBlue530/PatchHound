@@ -3,7 +3,7 @@ import os
 import io
 import zipfile
 import time
-from file_system.pdf_generator import summary_to_pdf
+from file_system.pdf_report.pdf_generator import summary_to_pdf
 from utils.jwt_path import decode_jwt_path_to_resources
 from database.validate_token import validate_token
 from utils.file_hash import hash_file
