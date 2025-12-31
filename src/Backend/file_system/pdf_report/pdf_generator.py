@@ -1,6 +1,6 @@
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, HRFlowable, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from datetime import datetime
 from flask import abort
@@ -8,9 +8,9 @@ import json
 import os
 from utils.helpers import safe_text
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
-from core.variables import all_repo_scans_folder, all_resources_folder, SEMGREP_RULESETS
+from core.variables import all_repo_scans_folder, all_resources_folder
 from file_system.pdf_report.pdf_table_builds import *
-from file_system.pdf_report.pdf_variables import SEVERITY_COLORS
+from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
@@ -67,29 +67,36 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     counters = summary_report.get("counters")
 
     elements.append(Paragraph("Stats", styles["Heading2"]))
-    elements.append(Paragraph(f"<b>Packages found:</b> {counters.get('package_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>KEV vulnerabilities found:</b> {counters.get('kev_vuln_counter')}", wrap_style))
-    elements.append(Paragraph(f"<b>Excluded vulnerabilities found:</b> {counters.get('excluded_kev_vuln_counter')}", wrap_style))
 
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
+    elements.append(Paragraph(f"<b>Packages found:</b> {counters.get('package_counter')}", wrap_style))
+
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Excluded vulnerabilities found:</b> {counters.get('excluded_vuln_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>Vulnerabilities found:</b> {counters.get('vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>KEV vulnerabilities found:</b> {counters.get('kev_vuln_counter')}", wrap_style))
 
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Excluded misconfigurations found:</b> {counters.get('excluded_misconf_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>Misconfigurations found:</b> {counters.get('misconf_counter')}", wrap_style))
 
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Excluded exposed secrets found:</b> {counters.get('excluded_exposed_secret_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>Exposed secrets found:</b> {counters.get('exposed_secret_counter')}", wrap_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
     elements.append(Spacer(1, 12))
 
     tool_version = summary_report.get("tool_version")
 
     elements.append(Paragraph("Tool versions", styles["Heading2"]))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Syft:</b> {tool_version.get('syft_version')}", wrap_style))
     elements.append(Paragraph(f"<b>Semgrep:</b> {tool_version.get('semgrep_version')}", wrap_style))
     elements.append(Paragraph(f"<b>Trivy:</b> {tool_version.get('trivy_version')}", wrap_style))
     elements.append(Paragraph(f"<b>Grype:</b> {tool_version.get('grype_version')}", wrap_style))
     elements.append(Paragraph(f"<b>Cosign:</b> {tool_version.get('cosign_version')}", wrap_style))
     elements.append(Paragraph(f"<b>PatchHound:</b> {tool_version.get('patchhound_version')}", wrap_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
     elements.append(Spacer(1, 12))
 
     rulesets = summary_report.get("ruleset")
@@ -100,9 +107,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if semgrep_rulesets:
         elements.append(Paragraph("Rulesets", styles["Heading2"]))
         elements.append(Paragraph(f"<b>Semgrep ruleset:</b>", wrap_style))
-        for semgrep_ruleset in semgrep_rulesets:
-            elements.append(Paragraph(f"    {semgrep_ruleset}", wrap_style_indented))
+        elements.append(Spacer(1, 6))
+        for ruleset in semgrep_rulesets:
+            elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
+            elements.append(Paragraph(f"<b>{ruleset['name']}</b>", wrap_style))
+            elements.append(Paragraph(ruleset["description"], wrap_style))
 
+        elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
         elements.append(Spacer(1, 12))
 
     exclusions = summary_report.get("exclusions")
@@ -395,57 +406,3 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     doc.build(elements)
     print(f"[+] PDF report saved as: {pdf_filename_path}")
     return pdf_filename_path
-
-def normalize_semgrep_ruleset(semgrep_ruleset_raw):
-    if not semgrep_ruleset_raw:
-        return []
-    
-    normalized_semgrep_rulesets = []
-
-    for ruleset in semgrep_ruleset_raw:
-        ruleset_normalized = ruleset.replace("--config=", "")
-
-        ruleset_description = SEMGREP_RULESETS.get(ruleset_normalized, "Unknown Semgrep ruleset")
-
-        normalized_semgrep_rulesets.append(f"<b>{ruleset_normalized}:</b> {ruleset_description}")
-
-    return normalized_semgrep_rulesets
-
-def build_data_table(new_table_data, new_severity_rows, table_widths):
-    if not new_table_data or len(new_table_data) < 2:
-        return None
-    
-    new_table_build = Table(
-        new_table_data,
-        repeatRows=1,
-        colWidths=table_widths,
-    )
-
-    new_table_build.setStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.transparent]),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-
-        ("VALIGN", (0, 1), (-1, -1), "TOP"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-
-        ("ALIGN", (1, 1), (1, -1), "CENTER"),
-
-        ("WORDWRAP", (0, 0), (-1, -1), "CJK"),
-    ])
-
-    if new_severity_rows:
-        for row_index, severity in new_severity_rows:
-            color = SEVERITY_COLORS.get(severity.lower())
-
-            if color:
-                new_table_build.setStyle([
-                    ("BACKGROUND", (3, row_index), (3, row_index), color),
-                    ("TEXTCOLOR", (3, row_index), (3, row_index), colors.black),
-                ])
-    
-    return new_table_build
