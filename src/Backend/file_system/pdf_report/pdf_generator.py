@@ -42,13 +42,6 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         leading=10,
     )
 
-    wrap_style_indented = ParagraphStyle(
-        name="Indented",
-        parent=wrap_style,
-        leftIndent=20,
-        spaceAfter=6
-    )
-
     table_style = ParagraphStyle(
         name="TableCell",
         fontSize=4,
@@ -59,10 +52,14 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     doc = SimpleDocTemplate(pdf_filename_path, pagesize=A4)
     elements = []
 
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph("Security Scan Summary", styles["Title"]))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
+    elements.append(Paragraph(summary_report.get("repo_name"), styles["Title"]))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Scan date:</b> {scan_generated_date}", wrap_style))
     elements.append(Paragraph(f"<b>Report generated date:</b> {report_generated_date}", wrap_style))
-    elements.append(Spacer(1, 12))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
 
     counters = summary_report.get("counters")
 

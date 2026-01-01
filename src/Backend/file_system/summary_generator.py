@@ -4,7 +4,7 @@ from pathlib import Path
 from logs.audit_trail import audit_trail_event
 from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 
-def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset):
+def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
@@ -323,6 +323,7 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
             })
 
     summary_report = {
+        "repo_name": repo_name,
         "packages": list(packages_dict.values()),
         "vulnerabilities": list(summary_dict.values()),
         "kev_vulnerabilities": list(kev_prio_dict.values()),
