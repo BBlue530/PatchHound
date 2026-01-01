@@ -10,6 +10,8 @@ from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
+from validation.secrets_manager import read_secret
+from core.variables import local_bin
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
     file_save_status = True
@@ -299,6 +301,13 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
         return verify_image_status
     
 def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_path, repo_name):
+    print("[~] Signing file...")
+    secret_type = "cosign_key"
+    cosign_key = read_secret(secret_type)
+
+    env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
+    env["COSIGN_PASSWORD"] = cosign_key
+
     temp_files = []
 
     try:
