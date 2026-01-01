@@ -33,6 +33,11 @@ tool_versions_json=$(jq -n \
 
 SAST_RULESETS_JSON=$(printf '%s\n' "${SAST_RULESETS[@]}" | jq -R . | jq -s .)
 
+SCAN_ROOT="$(realpath -P "$TARGET")"
+scan_root_json=$(jq -n \
+  --arg scan_root "$SCAN_ROOT" \
+  '{scan_root: $scan_root}')
+
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
   -F "sbom=@sbom.cyclonedx.json" \
   -F "sast_report=@sast_report.json" \
@@ -45,6 +50,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "commit_sha=$COMMIT_SHA" \
   -F "commit_author=$COMMIT_AUTHOR" \
   -F "tool_versions=$tool_versions_json" \
+  -F "scan_root=$scan_root_json" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?

@@ -1,9 +1,10 @@
 import json
 import datetime
+from pathlib import Path
 from logs.audit_trail import audit_trail_event
 from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 
-def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, semgrep_sast_ruleset):
+def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
@@ -218,14 +219,30 @@ def generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_dat
 
 
     for issue in semgrep_sast_report_json.get("results", []):
-        key = issue.get("check_id", "unknown_rule")
-        add_vuln(key, {
+        
+        scan_root = Path(scan_root).resolve()
+        issue_path = Path(issue.get("path", "")).resolve()
+
+        try:
+            relative_issue_path = issue_path.relative_to(scan_root)
+        except ValueError:
+            relative_issue_path = Path(issue_path.name)
+
+        relative_issue_path = relative_issue_path.as_posix()
+
+        fingerprint = (
+            issue.get("fingerprint")
+            or issue.get("extra", {}).get("fingerprint")
+            or "unknown_fingerprint"
+        )
+        unique_key = f"semgrep_{issue.get('check_id', 'unknown_rule')}_{fingerprint}"
+        add_vuln(unique_key, {
             "source": "semgrep",
-            "id": key,
+            "id": unique_key,
             "type": "vulnerability",
             "description": issue.get("extra", {}).get("message")  or "No description available",
             "severity": issue.get("extra", {}).get("severity", "Unknown"),
-            "path": issue.get("path", "unknown_path"),
+            "path": relative_issue_path,
             "line": issue.get("start", {}).get("line", "0")
         })
 

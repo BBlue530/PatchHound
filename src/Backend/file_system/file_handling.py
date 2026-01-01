@@ -13,7 +13,7 @@ from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
 from external_storage.external_storage_send import send_files_to_external_storage
 
-def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, timestamp, exclusions_file, semgrep_sast_ruleset):
+def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file, semgrep_sast_ruleset):
     secret_type = "cosign_key"
     cosign_key = read_secret(secret_type)
 
@@ -67,7 +67,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
         
-        summary_report = generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, semgrep_sast_ruleset)
+        summary_report = generate_summary(audit_trail, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset)
         save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
         
         # Handles attestation of syft and trivy SBOMs
