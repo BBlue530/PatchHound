@@ -1,24 +1,21 @@
-grype_exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+grype_exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Severity",
+    "Severity",
 
-        "Type",
+    "Type",
 
-        "Score",
-        "CVSS Vector",
-        "Package",
-        "Version",
-        "Link",
+    "Score",
+    "CVSS Vector",
+    "Package",
+    "Version",
+    "Link",
 
-        "Scope",
-        "Comment",
-    ]
+    "Scope",
+    "Comment",
 ]
-grype_exclusions_vulnerabilities_severity_rows = []
 
 grype_excl_col_widths = [
     50,  # ID
@@ -39,27 +36,27 @@ grype_excl_col_widths = [
     50,  # Comment
 ]
 
-trivy_vulnerability_exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_grype_exclusions_vulnerabilities_table_data():
+    return [grype_exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+trivy_vulnerability_exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Score",
-        "CVSS Vector",
-        "Package",
-        "Version",
-        "Link",
+    "Type",
 
-        "Scope",
-        "Comment",
-    ]
+    "Score",
+    "CVSS Vector",
+    "Package",
+    "Version",
+    "Link",
+
+    "Scope",
+    "Comment",
 ]
-trivy_vulnerability_exclusions_vulnerabilities_severity_rows = []
 
 trivy_vulnerability_excl_col_widths = [
     50,  # ID
@@ -80,25 +77,25 @@ trivy_vulnerability_excl_col_widths = [
     50,  # Comment
 ]
 
-semgrep_exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_trivy_vulnerability_exclusions_vulnerabilities_table_data():
+    return [trivy_vulnerability_exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+semgrep_exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Type",
-        "Path",
-        "Line",
+    "Type",
 
-        "Scope",
-        "Comment",
-    ]
+    "Type",
+    "Path",
+    "Line",
+
+    "Scope",
+    "Comment",
 ]
-semgrep_exclusions_vulnerabilities_severity_rows = []
 
 semgrep_excl_col_widths = [
     50,  # ID
@@ -116,26 +113,26 @@ semgrep_excl_col_widths = [
     50,  # Comment
 ]
 
-trivy_misconfiguration_exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_semgrep_exclusions_vulnerabilities_table_data():
+    return [semgrep_exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+trivy_misconfiguration_exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Title",
-        "Resolution",
-        "File",
-        "Links",
+    "Type",
 
-        "Scope",
-        "Comment",
-    ]
+    "Title",
+    "Resolution",
+    "File",
+    "Links",
+
+    "Scope",
+    "Comment",
 ]
-trivy_misconfiguration_exclusions_vulnerabilities_severity_rows = []
 
 trivy_misconfiguration_excl_col_widths = [
     50,  # ID
@@ -155,25 +152,25 @@ trivy_misconfiguration_excl_col_widths = [
     50,   # Comment
 ]
 
-trivy_secret_exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_trivy_misconfiguration_exclusions_vulnerabilities_table_data():
+    return [trivy_misconfiguration_exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+trivy_secret_exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Title",
-        "File",
-        "Message",
+    "Type",
 
-        "Scope",
-        "Comment",
-    ]
+    "Title",
+    "File",
+    "Message",
+
+    "Scope",
+    "Comment",
 ]
-trivy_secret_exclusions_vulnerabilities_severity_rows = []
 
 trivy_secret_excl_col_widths = [
     50,  # ID
@@ -192,28 +189,28 @@ trivy_secret_excl_col_widths = [
     50,  # Comment
 ]
 
-exclusions_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_trivy_secret_exclusions_vulnerabilities_table_data():
+    return [trivy_secret_exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+exclusions_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Score",
-        "CVSS vector",
-        "Found by",
-        "Package",
-        "Version",
-        "Link",
+    "Type",
 
-        "Scope",
-        "Comment",
-    ]
+    "Score",
+    "CVSS vector",
+    "Found by",
+    "Package",
+    "Version",
+    "Link",
+
+    "Scope",
+    "Comment",
 ]
-exclusions_vulnerabilities_severity_rows = []
 
 excl_col_widths = [
     50,  # ID
@@ -235,26 +232,26 @@ excl_col_widths = [
     50,  # Comment
 ]
 
-kev_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_exclusions_vulnerabilities_table_data():
+    return [exclusions_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+kev_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Priority",
-        "Vendor",
-        "Title",
-        "Required action",
-        "Added date",
-        "Due date",
-        "Link",
-    ]
+    "Type",
+
+    "Priority",
+    "Vendor",
+    "Title",
+    "Required action",
+    "Added date",
+    "Due date",
+    "Link",
 ]
-kev_vulnerabilities_severity_rows = []
 
 kev_col_widths = [
     50,  # ID
@@ -274,25 +271,25 @@ kev_col_widths = [
     100, # Link
 ]
 
-new_vulnerabilities_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
-        
-        "Severity",
+def fetch_kev_vulnerabilities_table_data():
+    return [kev_vulnerabilities_table_data_headers.copy()]
 
-        "Type",
-        
-        "Score",
-        "CVSS vector",
-        "Found timestamp",
-        "Package",
-        "Version",
-        "Link",
-    ]
+new_vulnerabilities_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
+    
+    "Severity",
+
+    "Type",
+    
+    "Score",
+    "CVSS vector",
+    "Found timestamp",
+    "Package",
+    "Version",
+    "Link",
 ]
-new_vulnerabilities_severity_rows = []
 
 new_vuln_col_widths = [
     50,  # ID
@@ -309,27 +306,26 @@ new_vuln_col_widths = [
     50,  # Package
     25,  # Version
     100, # Link
-
 ]
 
-vulnerabilities_grype_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_new_vulnerabilities_table_data():
+    return [new_vulnerabilities_table_data_headers.copy()]
 
-        "Severity",
+vulnerabilities_grype_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Score",
-        "CVSS vector",
-        "Package",
-        "Version",
-        "Link",
-    ]
+    "Type",
+
+    "Score",
+    "CVSS vector",
+    "Package",
+    "Version",
+    "Link",
 ]
-vulnerabilities_grype_severity_rows = []
 
 grype_vuln_col_widths = [
     50,  # ID
@@ -347,21 +343,21 @@ grype_vuln_col_widths = [
     100, # Link
 ]
 
-vulnerabilities_semgrep_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_vulnerabilities_grype_table_data():
+    return [vulnerabilities_grype_table_data_headers.copy()]
 
-        "Severity",
+vulnerabilities_semgrep_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Path",
-        "Line",
-    ]
+    "Type",
+
+    "Path",
+    "Line",
 ]
-vulnerabilities_semgrep_severity_rows = []
 
 semgrep_col_widths = [
     50,  # ID
@@ -376,24 +372,24 @@ semgrep_col_widths = [
     100, # Line
 ]
 
-vulnerabilities_trivy_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_vulnerabilities_semgrep_table_data():
+    return [vulnerabilities_semgrep_table_data_headers.copy()]
 
-        "Severity",
+vulnerabilities_trivy_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Score",
-        "CVSS vector",
-        "Package",
-        "Version",
-        "Link",
-    ]
+    "Type",
+
+    "Score",
+    "CVSS vector",
+    "Package",
+    "Version",
+    "Link",
 ]
-vulnerabilities_trivy_severity_rows = []
 
 trivy_vuln_col_widths = [
     50,  # ID
@@ -411,23 +407,23 @@ trivy_vuln_col_widths = [
     100, # Link
 ]
 
-misconfigurations_trivy_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_vulnerabilities_trivy_table_data():
+    return [vulnerabilities_trivy_table_data_headers.copy()]
 
-        "Severity",
+misconfigurations_trivy_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Title",
-        "Resolution",
-        "File",
-        "Links",
-    ]
+    "Type",
+
+    "Title",
+    "Resolution",
+    "File",
+    "Links",
 ]
-misconfigurations_trivy_severity_rows = []
 
 trivy_misconfig_col_widths = [
     50,  # ID
@@ -444,22 +440,22 @@ trivy_misconfig_col_widths = [
     100, # Links
 ]
 
-secrets_trivy_table_data = [
-    [
-        "ID",
-        "Source",
-        "Description",
+def fetch_misconfigurations_trivy_table_data():
+    return [misconfigurations_trivy_table_data_headers.copy()]
 
-        "Severity",
+secrets_trivy_table_data_headers = [
+    "ID",
+    "Source",
+    "Description",
 
-        "Type",
+    "Severity",
 
-        "Title",
-        "File",
-        "Message",
-    ]
+    "Type",
+
+    "Title",
+    "File",
+    "Message",
 ]
-secrets_trivy_severity_rows = []
 
 trivy_secrets_col_widths = [
     50,  # ID
@@ -475,23 +471,24 @@ trivy_secrets_col_widths = [
     150, # Message
 ]
 
-packages_table_data = [
-    [
-        "ID",
-        "Source",
-        # Description?
+def fetch_secrets_trivy_table_data():
+    return [secrets_trivy_table_data_headers.copy()]
 
-        "Name",
-        "Version",
-        "Type",
-        "PURL",
-        "CPE",
-        "Package type",
-        "Language",
-        "Metadata type",
-        "Found by",
-        "Locations",
-    ]
+packages_table_data_headers = [
+    "ID",
+    "Source",
+    # Description?
+
+    "Name",
+    "Version",
+    "Type",
+    "PURL",
+    "CPE",
+    "Package type",
+    "Language",
+    "Metadata type",
+    "Found by",
+    "Locations",
 ]
 
 packages_col_widths = [
@@ -510,3 +507,6 @@ packages_col_widths = [
     60,  # Found by
     50,  # Locations
 ]
+
+def fetch_packages_table_data():
+    return [packages_table_data_headers.copy()]

@@ -13,6 +13,35 @@ from file_system.pdf_report.pdf_table_builds import *
 from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
+    grype_exclusions_vulnerabilities_severity_rows = []
+    trivy_vulnerability_exclusions_vulnerabilities_severity_rows = []
+    semgrep_exclusions_vulnerabilities_severity_rows = []
+    trivy_misconfiguration_exclusions_vulnerabilities_severity_rows = []
+    trivy_secret_exclusions_vulnerabilities_severity_rows = []
+    exclusions_vulnerabilities_severity_rows = []
+    kev_vulnerabilities_severity_rows = []
+    new_vulnerabilities_severity_rows = []
+    vulnerabilities_grype_severity_rows = []
+    vulnerabilities_semgrep_severity_rows = []
+    vulnerabilities_trivy_severity_rows = []
+    misconfigurations_trivy_severity_rows = []
+    secrets_trivy_severity_rows = []
+
+    grype_exclusions_vulnerabilities_table_data = fetch_grype_exclusions_vulnerabilities_table_data()
+    trivy_vulnerability_exclusions_vulnerabilities_table_data = fetch_trivy_vulnerability_exclusions_vulnerabilities_table_data()
+    semgrep_exclusions_vulnerabilities_table_data = fetch_semgrep_exclusions_vulnerabilities_table_data()
+    trivy_misconfiguration_exclusions_vulnerabilities_table_data = fetch_trivy_misconfiguration_exclusions_vulnerabilities_table_data()
+    trivy_secret_exclusions_vulnerabilities_table_data = fetch_trivy_secret_exclusions_vulnerabilities_table_data()
+    exclusions_vulnerabilities_table_data = fetch_exclusions_vulnerabilities_table_data()
+    kev_vulnerabilities_table_data = fetch_kev_vulnerabilities_table_data()
+    new_vulnerabilities_table_data = fetch_new_vulnerabilities_table_data()
+    vulnerabilities_grype_table_data = fetch_vulnerabilities_grype_table_data()
+    vulnerabilities_semgrep_table_data = fetch_vulnerabilities_semgrep_table_data()
+    vulnerabilities_trivy_table_data = fetch_vulnerabilities_trivy_table_data()
+    misconfigurations_trivy_table_data = fetch_misconfigurations_trivy_table_data()
+    secrets_trivy_table_data = fetch_secrets_trivy_table_data()
+    packages_table_data = fetch_packages_table_data()
+
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
     
     pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}_pdf_summary_report.pdf")
