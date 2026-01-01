@@ -118,31 +118,155 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if exclusions:
         for excl in summary_report.get("exclusions", []):
             if excl:
-                exclusions_vulnerabilities_row_index = len(exclusions_vulnerabilities_table_data)
-
                 exclusions_vulnerabilities_severity = safe_text(excl.get("severity"))
 
-                exclusions_vulnerabilities_table_data.append([
-                    Paragraph(safe_text(excl.get("id")), table_style),
-                    Paragraph(safe_text(excl.get("source")), table_style),
-                    Paragraph(safe_text(excl.get("description")), table_style),
+                if excl.get("source") == "grype":
+                    grype_exclusions_vulnerabilities_row_index = len(grype_exclusions_vulnerabilities_table_data)
 
-                    Paragraph(exclusions_vulnerabilities_severity, table_style),
+                    grype_exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
 
-                    Paragraph(safe_text(excl.get('type')), table_style),
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
 
-                    Paragraph(safe_text(excl.get('score')), table_style),
-                    Paragraph(safe_text(excl.get('cvss_vector')), table_style),
-                    Paragraph(safe_text(excl.get('vuln_source')), table_style),
-                    Paragraph(safe_text(excl.get('package')), table_style),
-                    Paragraph(safe_text(excl.get('version')), table_style),
-                    Paragraph(f'<link href="{excl.get('link')}">{excl.get('link')}</link>', table_style),
-                    
-                    Paragraph(safe_text(excl.get('scope')), table_style),
-                    Paragraph(safe_text(excl.get('public_comment')), table_style),
-                ])
+                        Paragraph(safe_text(excl.get('type')), table_style),
 
-                exclusions_vulnerabilities_severity_rows.append((exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+                        Paragraph(safe_text(excl.get("score")), table_style),
+                        Paragraph(safe_text(excl.get("cvss_vector")), table_style),
+                        Paragraph(safe_text(excl.get("package")), table_style),
+                        Paragraph(safe_text(excl.get("version")), table_style),
+                        Paragraph(f'<link href="{safe_text(excl.get('link'))}">{safe_text(excl.get('link'))}</link>', table_style),
+
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    grype_exclusions_vulnerabilities_severity_rows.append((grype_exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+
+                elif excl.get("source") == "trivy_vulnerability":
+                    trivy_vulnerability_exclusions_vulnerabilities_row_index = len(trivy_vulnerability_exclusions_vulnerabilities_table_data)
+
+                    trivy_vulnerability_exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
+
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(excl.get('type')), table_style),
+
+                        Paragraph(safe_text(excl.get("score")), table_style),
+                        Paragraph(safe_text(excl.get("cvss_vector")), table_style),
+                        Paragraph(safe_text(excl.get("package")), table_style),
+                        Paragraph(safe_text(excl.get("version")), table_style),
+                        Paragraph(f'<link href="{safe_text(excl.get('link'))}">{safe_text(excl.get('link'))}</link>', table_style),
+
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    trivy_vulnerability_exclusions_vulnerabilities_severity_rows.append((trivy_vulnerability_exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+
+                elif excl.get("source") == "semgrep":
+                    semgrep_exclusions_vulnerabilities_row_index = len(semgrep_exclusions_vulnerabilities_table_data)
+
+                    semgrep_exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
+
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(excl.get('type')), table_style),
+
+                        Paragraph(safe_text(excl.get("path")), table_style),
+                        Paragraph(safe_text(excl.get("line")), table_style),
+
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    semgrep_exclusions_vulnerabilities_severity_rows.append((semgrep_exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+
+                elif excl.get("source") == "trivy_misconfiguration":
+                    trivy_misconfiguration_exclusions_vulnerabilities_row_index = len(trivy_misconfiguration_exclusions_vulnerabilities_table_data)
+
+                    links = excl.get("links", [])
+                    misconfig_links = ""
+
+                    if links:
+                        misconfig_links = "<br/>".join(
+                            f'{i}. <link href="{safe_text(link)}">{safe_text(link)}</link>'
+                            for i, link in enumerate(links, 1)
+                        )
+
+                    trivy_misconfiguration_exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
+
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(excl.get('type')), table_style),
+
+                        Paragraph(safe_text(excl.get("title")), table_style),
+                        Paragraph(safe_text(excl.get("resolution")), table_style),
+                        Paragraph(safe_text(excl.get("file")), table_style),
+                        Paragraph(misconfig_links or "-", table_style),
+
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    trivy_misconfiguration_exclusions_vulnerabilities_severity_rows.append((trivy_misconfiguration_exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+
+                elif excl.get("source") == "trivy_secret":
+                    trivy_secret_exclusions_vulnerabilities_row_index = len(trivy_secret_exclusions_vulnerabilities_table_data)
+
+                    trivy_secret_exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
+
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(excl.get('type')), table_style),
+
+                        Paragraph(safe_text(vuln.get("title")), table_style),
+                        Paragraph(safe_text(vuln.get("file")), table_style),
+                        Paragraph(safe_text(vuln.get("message")), table_style),
+
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    trivy_secret_exclusions_vulnerabilities_severity_rows.append((trivy_secret_exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
+
+                else:
+                    exclusions_vulnerabilities_row_index = len(exclusions_vulnerabilities_table_data)
+
+                    exclusions_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(excl.get("id")), table_style),
+                        Paragraph(safe_text(excl.get("source")), table_style),
+                        Paragraph(safe_text(excl.get("description")), table_style),
+
+                        Paragraph(exclusions_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(excl.get('type')), table_style),
+
+                        Paragraph(safe_text(excl.get('score')), table_style),
+                        Paragraph(safe_text(excl.get('cvss_vector')), table_style),
+                        Paragraph(safe_text(excl.get('vuln_source')), table_style),
+                        Paragraph(safe_text(excl.get('package')), table_style),
+                        Paragraph(safe_text(excl.get('version')), table_style),
+                        Paragraph(f'<link href="{excl.get('link')}">{excl.get('link')}</link>', table_style),
+                        
+                        Paragraph(safe_text(excl.get('scope')), table_style),
+                        Paragraph(safe_text(excl.get('public_comment')), table_style),
+                    ])
+
+                    exclusions_vulnerabilities_severity_rows.append((exclusions_vulnerabilities_row_index, exclusions_vulnerabilities_severity))
 
     kev_vulnerabilities = summary_report.get("kev_vulnerabilities")
 
@@ -243,6 +367,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(semgrep_severity, table_style),
 
                         Paragraph(safe_text(vuln.get("type")), table_style),
+                        
                         Paragraph(safe_text(vuln.get("path")), table_style),
                         Paragraph(safe_text(vuln.get("line")), table_style),
                     ])
@@ -294,6 +419,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(misconfigurations_trivy_severity, table_style),
 
                         Paragraph(safe_text(vuln.get("type")), table_style),
+
                         Paragraph(safe_text(vuln.get("title")), table_style),
                         Paragraph(safe_text(vuln.get("resolution")), table_style),
                         Paragraph(safe_text(vuln.get("file")), table_style),
@@ -315,6 +441,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(secrets_trivy_severity, table_style),
 
                         Paragraph(safe_text(vuln.get("type")), table_style),
+
                         Paragraph(safe_text(vuln.get("title")), table_style),
                         Paragraph(safe_text(vuln.get("file")), table_style),
                         Paragraph(safe_text(vuln.get("message")), table_style),
@@ -343,7 +470,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     Paragraph(safe_text(package.get("locations")), table_style),
                 ])
                 
+    grype_exclusions_vulnerabilities_table = build_data_table(grype_exclusions_vulnerabilities_table_data, grype_exclusions_vulnerabilities_severity_rows, grype_excl_col_widths)
+    trivy_vulnerability_exclusions_vulnerabilities_table = build_data_table(trivy_vulnerability_exclusions_vulnerabilities_table_data, trivy_vulnerability_exclusions_vulnerabilities_severity_rows, trivy_vulnerability_excl_col_widths)
+    semgrep_exclusions_vulnerabilities_table = build_data_table(semgrep_exclusions_vulnerabilities_table_data, semgrep_exclusions_vulnerabilities_severity_rows, semgrep_excl_col_widths)
+    trivy_misconfiguration_exclusions_vulnerabilities_table = build_data_table(trivy_misconfiguration_exclusions_vulnerabilities_table_data, trivy_misconfiguration_exclusions_vulnerabilities_severity_rows, trivy_misconfiguration_excl_col_widths)
+    trivy_secret_exclusions_vulnerabilities_table = build_data_table(trivy_secret_exclusions_vulnerabilities_table_data, trivy_secret_exclusions_vulnerabilities_severity_rows, trivy_secret_excl_col_widths)
     exclusions_vulnerabilities_table = build_data_table(exclusions_vulnerabilities_table_data, exclusions_vulnerabilities_severity_rows, excl_col_widths)
+
     kev_vulnerabilities_table = build_data_table(kev_vulnerabilities_table_data, kev_vulnerabilities_severity_rows, kev_col_widths)
     new_vulnerabilities_table = build_data_table(new_vulnerabilities_table_data, new_vulnerabilities_severity_rows, new_vuln_col_widths)
     vulnerabilities_grype_table = build_data_table(vulnerabilities_grype_table_data, vulnerabilities_grype_severity_rows, grype_vuln_col_widths)
@@ -357,8 +490,34 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         elements.append(Paragraph("<b>No exclusions found</b>", wrap_style))
     else:
         elements.append(Paragraph("Exclusions", styles["Heading2"]))
-        elements.append(exclusions_vulnerabilities_table)
-        elements.append(Spacer(1, 12))
+        if grype_exclusions_vulnerabilities_table or trivy_vulnerability_exclusions_vulnerabilities_table or semgrep_exclusions_vulnerabilities_table:
+            elements.append(Paragraph(f"<b>Vulnerabilities</b>", wrap_style))
+
+            if grype_exclusions_vulnerabilities_table:
+                elements.append(grype_exclusions_vulnerabilities_table)
+                elements.append(Spacer(1, 12))
+
+            if trivy_vulnerability_exclusions_vulnerabilities_table:
+                elements.append(trivy_vulnerability_exclusions_vulnerabilities_table)
+                elements.append(Spacer(1, 12))
+
+            if semgrep_exclusions_vulnerabilities_table:
+                elements.append(semgrep_exclusions_vulnerabilities_table)
+                elements.append(Spacer(1, 12))
+
+        if trivy_misconfiguration_exclusions_vulnerabilities_table:
+            elements.append(Paragraph(f"<b>Misconfigurations</b>", wrap_style))
+            elements.append(trivy_misconfiguration_exclusions_vulnerabilities_table)
+            elements.append(Spacer(1, 12))
+
+        if trivy_secret_exclusions_vulnerabilities_table:
+            elements.append(Paragraph(f"<b>Exposed secrets</b>", wrap_style))
+            elements.append(trivy_secret_exclusions_vulnerabilities_table)
+            elements.append(Spacer(1, 12))
+
+        if exclusions_vulnerabilities_table:
+            elements.append(exclusions_vulnerabilities_table)
+            elements.append(Spacer(1, 12))
 
     if not kev_vulnerabilities:
         elements.append(Paragraph(f"<b>No vulnerabilities found in CISA KEV</b>", wrap_style))

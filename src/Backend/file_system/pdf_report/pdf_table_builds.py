@@ -1,3 +1,197 @@
+grype_exclusions_vulnerabilities_table_data = [
+    [
+        "ID",
+        "Source",
+        "Description",
+
+        "Severity",
+
+        "Type",
+
+        "Score",
+        "CVSS Vector",
+        "Package",
+        "Version",
+        "Link",
+
+        "Scope",
+        "Comment",
+    ]
+]
+grype_exclusions_vulnerabilities_severity_rows = []
+
+grype_excl_col_widths = [
+    50,  # ID
+    50,  # Source
+    100, # Description
+
+    50,  # Severity
+
+    25,  # Type
+
+    25,  # Score
+    50,  # CVSS Vector
+    50,  # Package
+    25,  # Version
+    50,  # Link
+    
+    25,  # Scope
+    50,  # Comment
+]
+
+trivy_vulnerability_exclusions_vulnerabilities_table_data = [
+    [
+        "ID",
+        "Source",
+        "Description",
+
+        "Severity",
+
+        "Type",
+
+        "Score",
+        "CVSS Vector",
+        "Package",
+        "Version",
+        "Link",
+
+        "Scope",
+        "Comment",
+    ]
+]
+trivy_vulnerability_exclusions_vulnerabilities_severity_rows = []
+
+trivy_vulnerability_excl_col_widths = [
+    50,  # ID
+    50,  # Source
+    100, # Description
+
+    50,  # Severity
+
+    25,  # Type
+
+    25,  # Score
+    50,  # CVSS Vector
+    50,  # Package
+    25,  # Version
+    50,  # Link
+    
+    25,  # Scope
+    50,  # Comment
+]
+
+semgrep_exclusions_vulnerabilities_table_data = [
+    [
+        "ID",
+        "Source",
+        "Description",
+
+        "Severity",
+
+        "Type",
+
+        "Type",
+        "Path",
+        "Line",
+
+        "Scope",
+        "Comment",
+    ]
+]
+semgrep_exclusions_vulnerabilities_severity_rows = []
+
+semgrep_excl_col_widths = [
+    50,  # ID
+    50,  # Source
+    100, # Description
+
+    50,  # Severity
+
+    25,  # Type
+
+    150, # Path
+    100, # Line
+    
+    25,  # Scope
+    50,  # Comment
+]
+
+trivy_misconfiguration_exclusions_vulnerabilities_table_data = [
+    [
+        "ID",
+        "Source",
+        "Description",
+
+        "Severity",
+
+        "Type",
+
+        "Title",
+        "Resolution",
+        "File",
+        "Links",
+
+        "Scope",
+        "Comment",
+    ]
+]
+trivy_misconfiguration_exclusions_vulnerabilities_severity_rows = []
+
+trivy_misconfiguration_excl_col_widths = [
+    50,  # ID
+    50,  # Source
+    100, # Description
+
+    50,  # Severity
+
+    25,  # Type
+
+    50,   # Title
+    100,  # Resolution
+    50,   # File
+    50,   # Links
+    
+    25,   # Scope
+    50,   # Comment
+]
+
+trivy_secret_exclusions_vulnerabilities_table_data = [
+    [
+        "ID",
+        "Source",
+        "Description",
+
+        "Severity",
+
+        "Type",
+
+        "Title",
+        "File",
+        "Message",
+
+        "Scope",
+        "Comment",
+    ]
+]
+trivy_secret_exclusions_vulnerabilities_severity_rows = []
+
+trivy_secret_excl_col_widths = [
+    50,  # ID
+    50,  # Source
+    100, # Description
+
+    50,  # Severity
+
+    25,  # Type
+
+    50,  # Title
+    100, # File
+    100, # Message
+    
+    25,  # Scope
+    50,  # Comment
+]
+
 exclusions_vulnerabilities_table_data = [
     [
         "ID",
@@ -30,15 +224,15 @@ excl_col_widths = [
 
     25,  # Type
 
-    25,    # Score
-    50,    # CVSS vector
-    40,    # Found by
-    40,    # Package
-    40,    # Version
-    50,    # Link
+    25,  # Score
+    50,  # CVSS vector
+    45,  # Found by
+    40,  # Package
+    40,  # Version
+    50,  # Link
     
-    25,    # Scope
-    55,    # Comment
+    25,  # Scope
+    50,  # Comment
 ]
 
 kev_vulnerabilities_table_data = [
@@ -74,7 +268,7 @@ kev_col_widths = [
     25,  # Priority
     25,  # Vendor
     25,  # Title
-    75, # Required action
+    75,  # Required action
     25,  # Added date
     25,  # Due date
     100, # Link
@@ -109,12 +303,12 @@ new_vuln_col_widths = [
 
     50,  # Type
 
-    25,    # Score
-    50,    # CVSS vector
-    50,    # Found timestamp
-    50,    # Package
-    25,    # Version
-    100,    # Link
+    25,  # Score
+    50,  # CVSS vector
+    50,  # Found timestamp
+    50,  # Package
+    25,  # Version
+    100, # Link
 
 ]
 
@@ -150,7 +344,7 @@ grype_vuln_col_widths = [
     50,  # CVSS vector
     50,  # Package
     50,  # Version
-    100,  # Link
+    100, # Link
 ]
 
 vulnerabilities_semgrep_table_data = [
@@ -276,7 +470,7 @@ trivy_secrets_col_widths = [
     
     50,  # Type
 
-    50, # Title
+    50,  # Title
     100, # File
     150, # Message
 ]

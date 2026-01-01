@@ -379,26 +379,10 @@ def get_vulnerability_link(key, vuln, vuln_url_key):
 def exclusion_lookup(exclusions_file_json, key, data):
     for e in exclusions_file_json.get("exclusions", []):
         if e.get("vulnerability") == key:
-            exclusion_data = {
-                "id": key,
-                "scope": e.get("scope"),
-                "public_comment": e.get("public_comment"),
-                "internal_comment": e.get("internal_comment"),
-
-                # These are shared across all data
-                "source": data.get("source"),
-                "type": data.get("type"),
-                "description": data.get("description"),
-                "severity": data.get("severity")
-            }
-            # These are shared with some of the data
-            if data.get("package"):
-                exclusion_data["package"] = data.get("package")
-            if data.get("version"):
-                exclusion_data["version"] = data.get("version")
-            if data.get("link"):
-                exclusion_data["link"] = data.get("link")
-            return exclusion_data
+            data["scope"] = e.get("scope")
+            data["public_comment"] = e.get("public_comment")
+            data["internal_comment"] = e.get("internal_comment")
+            return data
     return data
 
 def add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path):
