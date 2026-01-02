@@ -12,6 +12,7 @@ from validation.hash_verify import verify_sha
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
 from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.summary_generator import add_new_vulns_to_summary
+from file_system.repo_history_tracking import update_repo_history
 
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -91,6 +92,8 @@ def sbom_validation():
                 prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
 
                 summary_report_path = os.path.join(latest_scan_dir, f"{repo_name}_summary_report.json")
+
+                repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
 
                 # Syft checks
                 if not os.path.exists(syft_sbom_path):
@@ -257,6 +260,7 @@ def sbom_validation():
                 # Verify the hash for the files to prevent tampering
                 print(f"[~] Verifying file hash for repo: {repo_name}")
                 verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path)
+                print(f"[+] Verified file hash for repo: {repo_name}")
                 
                 # Checks for if new vulnerabilities have been found in the packages
                 print(f"[~] Scanning latest SYFT_SBOM for repo: {repo_name}")
@@ -316,6 +320,9 @@ def sbom_validation():
                         alert_event_system(audit_trail, message, alert, alert_path)
 
                         add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path)
+                        update_repo_history(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder)
+                    else:
+                        print(f"[+] No new vulnerabilities found in SBOM for repo: {repo_name}")
 
                     prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data)
 
@@ -332,16 +339,22 @@ def sbom_validation():
                         # token_path = os.path.join(repo_scans_dir, organization)
                         # repo_path = os.path.join(token_path, repo_name)
                         # latest_scan_dir = os.path.join(repo_path, timestamp_folder)
-                        s3_bucker_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder)
+                        s3_bucker_dir_timestamp_folder = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp_folder)
+                        s3_bucker_dir_repo_name = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name)
 
-                        send_files_to_external_storage(grype_vulns_output_path, s3_bucker_dir)
-                        send_files_to_external_storage(prio_output_path, s3_bucker_dir)
-                        send_files_to_external_storage(summary_report_path, s3_bucker_dir)
+                        send_files_to_external_storage(grype_vulns_output_path, s3_bucker_dir_timestamp_folder)
+                        send_files_to_external_storage(prio_output_path, s3_bucker_dir_timestamp_folder)
+                        send_files_to_external_storage(summary_report_path, s3_bucker_dir_timestamp_folder)
+                        send_files_to_external_storage(repo_history_path, s3_bucker_dir_repo_name)
 
                     if daily_scan is False:
                         audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                         audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}_audit_trail_{audit_timestamp}.json")
                         save_audit_trail(audit_trail_path, audit_trail)
+
+                        if os.environ.get("external_storage_enabled", "False").lower() == "true":
+                            send_files_to_external_storage(audit_trail_path, s3_bucker_dir_timestamp_folder)
+
                     print(f"[+] Scan finished for repo: {repo_name}")
 
                 except subprocess.CalledProcessError as e:

@@ -9,6 +9,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
 
     repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
     audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
+    summary_report_path = os.path.join(scan_dir, f"{repo_name}_summary_report.json")
 
     syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
     syft_sbom_attestation_path = f"{syft_sbom_path}.att"
@@ -23,6 +24,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     trivy_sbom_hash_new = hash_file(trivy_report_path)
 
     audit_trail_hash_new = hash_file(audit_trail_path)
+    summary_report_hash_new = hash_file(summary_report_path)
 
     with open(repo_history_path, "r") as f:
         repo_history = json.load(f)
@@ -54,6 +56,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     trivy_sbom_hash_old = old_entry["trivy_sbom_hash"]
 
     audit_trail_hash_old = old_entry["audit_trail_hash"]
+    summary_report_hash_old = old_entry["summary_report_hash"]
 
     # Syft checks
     if syft_sbom_att_hash_new != syft_sbom_att_hash_old:
@@ -102,6 +105,17 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
         "reason": f"audit_trail hash mismatch for: {timestamp_folder}"
         })
         message = f"[!]  Audit trail hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        alert = "Scheduled Event : Tampering Detected"
+        print(f"{message}")
+        alert_event_system(audit_trail, message, alert, alert_path)
+
+    # Summary report check
+    if summary_report_hash_new != summary_report_hash_old:
+        audit_trail_event(audit_trail, "HASH_VERIFY", {
+        "status": "fail",
+        "reason": f"summary_report_hash hash mismatch for: {timestamp_folder}"
+        })
+        message = f"[!]  Summary report hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
         alert = "Scheduled Event : Tampering Detected"
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)

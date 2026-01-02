@@ -80,7 +80,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         vulns_found = vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count)
         
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
-        track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, alerts_list)
+        track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list)
 
     repo_lock(repo_dir, repo_files)
     
