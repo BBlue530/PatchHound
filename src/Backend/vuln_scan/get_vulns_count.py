@@ -13,7 +13,7 @@ def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusi
             return sast_issue_count
         return sast_issue_count + 1
 
-    if semgrep_sast_report_json.get("SAST_SCAN") is not False:
+    if not semgrep_sast_report_json.get("SAST_SCAN"):
         for issue in semgrep_sast_report_json.get("results", []):
             rule_id = issue.get("check_id", "unknown_rule")
             sast_issue_count = add_vuln(rule_id, sast_issue_count)
