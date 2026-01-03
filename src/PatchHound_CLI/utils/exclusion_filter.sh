@@ -21,3 +21,22 @@ find_exclusions_file() {
     done
     return 1
 }
+
+exclusions_filter_semgrep() {
+  local file="$1"
+  local jq_filter="$2"
+
+  jq --slurpfile exclusions exclusions.json "
+    [
+      $jq_filter
+      | (
+          \"semgrep_\" + .check_id + \"_\" +
+          (.extra.fingerprint // \"unknown_fingerprint\")
+        ) as \$vid
+      | select(
+          (\$exclusions[0].exclusions | map(.vulnerability) | index(\$vid)) | not
+        )
+    ]
+    | length
+  " "$file"
+}

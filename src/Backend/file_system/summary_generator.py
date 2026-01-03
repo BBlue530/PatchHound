@@ -219,16 +219,6 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
 
 
     for issue in semgrep_sast_report_json.get("results", []):
-        
-        scan_root = Path(scan_root).resolve()
-        issue_path = Path(issue.get("path", "")).resolve()
-
-        try:
-            relative_issue_path = issue_path.relative_to(scan_root)
-        except ValueError:
-            relative_issue_path = Path(issue_path.name)
-
-        relative_issue_path = relative_issue_path.as_posix()
 
         fingerprint = (
             issue.get("fingerprint")
@@ -242,7 +232,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
             "type": "vulnerability",
             "description": issue.get("extra", {}).get("message")  or "No description available",
             "severity": issue.get("extra", {}).get("severity", "Unknown"),
-            "path": relative_issue_path,
+            "path": issue.get("path"),
             "line": issue.get("start", {}).get("line", "0")
         })
 

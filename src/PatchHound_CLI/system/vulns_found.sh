@@ -3,8 +3,8 @@ source "$BASE_DIR/utils/exclusion_filter.sh"
 EXCLUSIONS_FILE=$(find_exclusions_file) || { echo "exclusions.json not found"; exit 1; }
 
 if [[ -f sast_report.json ]]; then
-    CRITICAL_COUNT_SAST=$(exclusions_filter sast_report.json '.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")' "check_id")
-    ISSUES_COUNT_SAST=$(exclusions_filter sast_report.json '.results[]?' "check_id")
+    CRITICAL_COUNT_SAST=$(exclusions_filter_semgrep sast_report.json '.results[] | select(.extra.severity == "ERROR" or .extra.severity == "CRITICAL")' "check_id")
+    ISSUES_COUNT_SAST=$(exclusions_filter_semgrep sast_report.json '.results[]?' "check_id")
 else
     CRITICAL_COUNT_SAST=0
     ISSUES_COUNT_SAST=0
