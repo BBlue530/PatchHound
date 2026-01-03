@@ -58,15 +58,24 @@ backend:
 
     secret_data:
       local:
-        enabled: True
+        generate_secrets:
+          enabled: True
+
+        secrets:
+          enabled: False
+          secrets_name:
+            api_key: "${API_KEY}"
+            jwt_key: "${JWT_KEY}"
+            cosign_key: "${COSIGN_KEY}"
 
       secret_manager:
-        enabled: False
-        secret_manager_name: "${SECRET_MANAGER_NAME}"
-        secrets_name:
-          api_key: "secret_api_key"
-          jwt_key: "secret_jwt_key"
-          cosign_key: "secret_cosign_key"
+        aws:
+          enabled: False
+          secret_manager_name: "${SECRET_MANAGER_NAME}"
+          secrets_name:
+            api_key: "secret_api_key"
+            jwt_key: "secret_jwt_key"
+            cosign_key: "secret_cosign_key"
     
     token_key_database:
       local:
@@ -82,11 +91,12 @@ backend:
     scan_data:
       local:
         enabled: True
-
-      s3_bucket:
-        enabled: False
-        bucket: "${BUCKET}"
-        bucket_key: "${BUCKET_KEY}"
+        
+      aws:
+        s3_bucket:
+          enabled: False
+          bucket: "${BUCKET}"
+          bucket_key: "${BUCKET_KEY}"
         
 auth:
   aws:

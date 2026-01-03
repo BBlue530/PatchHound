@@ -112,6 +112,7 @@ patchhound config --list
 ---
 
 ## Scan
+### Security scan
 `patchhound scan` runs the vulnerability scanning.
 Scan is designed for use in a pipeline and might not work properly if used outside of one.
 ```
@@ -121,6 +122,13 @@ If your scanning a private image you will need to pass a `PAT_TOKEN` for your re
 ```
 patchhound scan --token <TOKEN> --pat <PAT_TOKEN>
 ```
+
+### SAST ruleset
+PatchHound uses [Semgrep](https://github.com/semgrep/semgrep) to run SAST scans. If you have enabled SAST scan you can use custom rulesets by using the `--sast-ruleset` flag
+```
+patchhound scan --token <TOKEN> --sast-ruleset <SEMGREP_RULESET_1> <SEMGREP_RULESET_2>
+```
+Any rulesets provided will be executed as part of the scan and will be listed in both the summary report and the generated PDF report.
 
 ### Ephemeral environment variables
 If you want to set configuration values only for a specific scan you can use the `--set-config` flag. 
