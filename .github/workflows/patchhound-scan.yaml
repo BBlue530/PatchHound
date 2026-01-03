@@ -23,11 +23,25 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Check release tags
+        id: meta
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "[+] Current tags: ${VERSION}"
+            echo "tags=${VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "[+] No tag found"
+            echo "tags=" >> $GITHUB_OUTPUT
+          fi
+
       - name: PatchHound scan
+        if: ${{ steps.meta.outputs.tag != '' }}
         run: |
           patchhound scan --token "$TOKEN" --set-config BASE_URL "$BASE_URL" ALERT_WEBHOOK "$ALERT_WEBHOOK"
 
       - name: Upload vulnerability summary
+        if: ${{ steps.meta.outputs.tag != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: vulnerability-summary
