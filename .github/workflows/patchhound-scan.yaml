@@ -1,6 +1,7 @@
 name: PatchHound Pipeline
 
 on:
+  workflow_dispatch:
   workflow_call:
     secrets:
       BASE_URL:
