@@ -357,7 +357,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
             "status": "success"
         })
 
-    return summary_report
+    return summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter
 
 def get_vulnerability_link(key, vuln, vuln_url_key):
     if key.startswith("GHSA"):

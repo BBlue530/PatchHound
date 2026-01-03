@@ -1,6 +1,6 @@
 from logs.audit_trail import audit_trail_event
 
-def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
+def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
     sast_issue_count = 0
     excluded_ids = {
         e.get("vulnerability")
@@ -15,10 +15,18 @@ def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusi
 
     if not semgrep_sast_report_json.get("SAST_SCAN"):
         for issue in semgrep_sast_report_json.get("results", []):
-            rule_id = issue.get("check_id", "unknown_rule")
-            sast_issue_count = add_vuln(rule_id, sast_issue_count)
+            fingerprint = (
+                issue.get("fingerprint")
+                or issue.get("extra", {}).get("fingerprint")
+                or "unknown_fingerprint"
+            )
+            unique_key = f"semgrep_{issue.get('check_id', 'unknown_rule')}_{fingerprint}"
+            sast_issue_count = add_vuln(unique_key, sast_issue_count)
 
     vulns_found = {
+        "excluded_vuln_counter": excluded_vuln_counter,
+        "excluded_misconf_counter": excluded_misconf_counter,
+        "excluded_exposed_secret_counter": excluded_exposed_secret_counter,
         "grype_critical": grype_critical_count,
         "grype_high": grype_high_count,
         "grype_medium": grype_medium_count,

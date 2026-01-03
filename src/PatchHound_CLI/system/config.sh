@@ -12,7 +12,7 @@ fi
 
 DEFAULT_SAST_RULESETS=(--config=p/security-audit --config=p/ci)
 
-PATCHHOUND_VERSION="0.1.30"
+PATCHHOUND_VERSION="0.1.31"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"
