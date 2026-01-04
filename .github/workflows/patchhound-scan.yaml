@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload vulnerability summary
         if: ${{ steps.meta.outputs.tag != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: vulnerability-summary
           path: |
