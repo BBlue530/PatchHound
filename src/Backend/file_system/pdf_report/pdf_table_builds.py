@@ -105,7 +105,7 @@ semgrep_excl_col_widths = [
 
     50,  # Type
 
-    125, # Path
+    150, # Path
     50, # Line
     
     50,  # Scope

@@ -1,6 +1,6 @@
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, HRFlowable, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, PageBreak, HRFlowable, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from datetime import datetime
 from flask import abort
@@ -518,6 +518,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if not exclusions:
         elements.append(Paragraph("<b>No exclusions found</b>", wrap_style))
     else:
+        elements.append(PageBreak())
         elements.append(Paragraph("Exclusions", styles["Heading2"]))
         if grype_exclusions_vulnerabilities_table or trivy_vulnerability_exclusions_vulnerabilities_table or semgrep_exclusions_vulnerabilities_table:
             elements.append(Paragraph(f"<b>Vulnerabilities</b>", wrap_style))
@@ -551,11 +552,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if not kev_vulnerabilities:
         elements.append(Paragraph(f"<b>No vulnerabilities found in CISA KEV</b>", wrap_style))
     else:
+        elements.append(PageBreak())
         elements.append(Paragraph("<b>CISA KEV Prioritized Vulnerabilities</b>", styles["Heading2"]))
         elements.append(kev_vulnerabilities_table)
         elements.append(Spacer(1, 12))
 
     if new_vulnerabilities:
+        elements.append(PageBreak())
         elements.append(Paragraph("<b>New Found Vulnerabilities</b>", styles["Heading2"]))
         elements.append(new_vulnerabilities_table)
         elements.append(Spacer(1, 12))
@@ -563,6 +566,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if not vulnerabilities:
         elements.append(Paragraph(f"<b>No vulnerabilities found</b>", wrap_style))
     else:
+        elements.append(PageBreak())
         elements.append(Paragraph("<b>Vulnerabilities</b>", styles["Heading2"]))
         elements.append(vulnerabilities_grype_table)
         elements.append(Spacer(1, 12))
@@ -572,11 +576,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         elements.append(Spacer(1, 12))
 
         if misconfigurations_trivy_table:
+            elements.append(PageBreak())
             elements.append(Paragraph("<b>Misconfigurations</b>", styles["Heading2"]))
             elements.append(misconfigurations_trivy_table)
             elements.append(Spacer(1, 12))
 
         if secrets_trivy_table:
+            elements.append(PageBreak())
             elements.append(Paragraph("<b>Exposed Secrets</b>", styles["Heading2"]))
             elements.append(secrets_trivy_table)
             elements.append(Spacer(1, 12))
@@ -584,6 +590,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     if not packages:
         elements.append(Paragraph(f"<b>No packages found</b>", wrap_style))
     else:
+        elements.append(PageBreak())
         elements.append(Paragraph("<b>Packages</b>", styles["Heading2"]))
         elements.append(packages_table)
         elements.append(Spacer(1, 12))
