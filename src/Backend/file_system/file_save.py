@@ -300,7 +300,7 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
         verify_image_status = jsonify({"verify_image_status": "image verification mismatch and is not trusted"}), 422
         return verify_image_status
     
-def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_path, repo_name):
+def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_path, repo_name, s3_bucket_dir):
     print("[~] Signing file...")
     secret_type = "cosign_key"
     cosign_key = read_secret(secret_type)
@@ -327,6 +327,10 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
 
             cosign_key_priv = temp_priv.name
             cosign_key_pub = temp_pub.name
+
+            with open(cosign_pub_path, "wb") as f:
+                f.write(cosign_key_pub_bytes)
+            print(f"[+] Wrote public key to disk: {cosign_pub_path}")
         else:
             cosign_key_priv = cosign_key_path
             cosign_key_pub = cosign_pub_path
@@ -357,8 +361,8 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
 
         if os.environ.get("external_storage_enabled", "False").lower() == "true":
             # Any files that gets signed will be sent to external storage. Might change it later on...
-            send_files_to_external_storage(file_sig_path, file_sig_path)
-            send_files_to_external_storage(file_filename_path, file_filename_path)
+            send_files_to_external_storage(file_sig_path, s3_bucket_dir)
+            send_files_to_external_storage(file_filename_path, s3_bucket_dir)
     
     except subprocess.CalledProcessError as e:
         print(f"[!] Signing or verification failed for repo {repo_name}: {e.stderr}")

@@ -43,6 +43,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     packages_table_data = fetch_packages_table_data()
 
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
+    os.makedirs(base_dir, exist_ok=True)
     
     pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}_pdf_summary_report.pdf")
     summary_report_path = os.path.join(base_dir, f"{current_repo_decoded}_summary_report.json")

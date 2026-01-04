@@ -41,7 +41,7 @@ def generate_pdf():
 
         pdf_sig_path = f"{pdf_filename_path}.sig"
 
-        sign_file(cosign_key_path, cosign_pub_path, pdf_sig_path, pdf_filename_path, current_repo_decoded)
+        sign_file(cosign_key_path, cosign_pub_path, pdf_sig_path, pdf_filename_path, current_repo_decoded, scan_dir)
 
         pdf_report_hash = hash_file(pdf_filename_path)
 
