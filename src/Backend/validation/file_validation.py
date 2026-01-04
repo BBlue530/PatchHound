@@ -9,6 +9,7 @@ from logs.alerts import alert_event_system
 from utils.helpers import extract_cve_ids
 from logs.audit_trail import save_audit_trail, audit_trail_event
 from validation.hash_verify import verify_sha
+from validation.file_exist import verify_file_exists
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
 from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.summary_generator import add_new_vulns_to_summary
@@ -94,6 +95,30 @@ def sbom_validation():
                 summary_report_path = os.path.join(latest_scan_dir, f"{repo_name}_summary_report.json")
 
                 repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
+
+                # These are not used anywhere and are just here to make sure they actually exist
+                semgrep_sast_report_path = os.path.join(latest_scan_dir, f"{repo_name}_semgrep_sast_report.json")
+                old_audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}_audit_trail.json")
+                cosign_key_path = os.path.join(latest_scan_dir, f"{repo_name}.key")
+
+                all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, exclusions_file_path, cosign_pub_path, grype_vulns_output_path, prio_output_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
+
+                if not all_files_exist:
+                    audit_trail_event(audit_trail, "MISSING_FILES", {
+                    "status": "fail",
+                    "files_missing": files_missing,
+                    })
+                    message = f"[!] Missing files in repo: {repo_name} timestamp folder: {timestamp_folder}. Files missing: [{files_missing}]"
+                    alert = "Scheduled Event : SYFT_Attestation Missing"
+                    print(f"{message}")
+                    
+                    if os.path.exists(alert_path):
+                        alert_event_system(audit_trail, message, alert, alert_path)
+
+                    audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                    audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}_audit_trail_{audit_timestamp}.json")
+                    save_audit_trail(audit_trail_path, audit_trail)
+                    continue
 
                 # Syft checks
                 if not os.path.exists(syft_sbom_path):
