@@ -24,13 +24,13 @@ grype_excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
     25,  # Score
-    50,  # CVSS Vector
-    35,  # Package
+    35,  # CVSS Vector
+    30,  # Package
     25,  # Version
-    40,  # Link
+    35,  # Link
     
     50,  # Scope
     50,  # Comment
@@ -65,13 +65,13 @@ trivy_vulnerability_excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
     25,  # Score
-    50,  # CVSS Vector
-    35,  # Package
+    35,  # CVSS Vector
+    30,  # Package
     25,  # Version
-    40,  # Link
+    35,  # Link
     
     50,  # Scope
     50,  # Comment
@@ -103,9 +103,9 @@ semgrep_excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
-    150, # Path
+    125, # Path
     50, # Line
     
     50,  # Scope
@@ -140,10 +140,10 @@ trivy_misconfiguration_excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
     50,   # Title
-    75,  # Resolution
+    50,  # Resolution
     50,   # File
     50,   # Links
     
@@ -178,10 +178,10 @@ trivy_secret_excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
     50,  # Title
-    75, # File
+    50, # File
     100, # Message
     
     50,  # Scope
@@ -218,13 +218,13 @@ excl_col_widths = [
 
     50,  # Severity
 
-    25,  # Type
+    50,  # Type
 
     25,  # Score
-    50,  # CVSS vector
+    35,  # CVSS vector
     30,  # Found by
-    35,  # Package
-    35,  # Version
+    30,  # Package
+    30,  # Version
     50,  # Link
     
     50,  # Scope
