@@ -166,7 +166,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(safe_text(excl.get("cvss_vector")), table_style),
                         Paragraph(safe_text(excl.get("package")), table_style),
                         Paragraph(safe_text(excl.get("version")), table_style),
-                        Paragraph(f'<link href="{safe_text(excl.get('link'))}">{safe_text(excl.get('link'))}</link>', table_style),
+                        Paragraph(f"<link href='{safe_text(excl.get('link'))}'>{safe_text(excl.get('link'))}</link>", table_style),
 
                         Paragraph(safe_text(excl.get('scope')), table_style),
                         Paragraph(safe_text(excl.get('public_comment')), table_style),
@@ -190,7 +190,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(safe_text(excl.get("cvss_vector")), table_style),
                         Paragraph(safe_text(excl.get("package")), table_style),
                         Paragraph(safe_text(excl.get("version")), table_style),
-                        Paragraph(f'<link href="{safe_text(excl.get('link'))}">{safe_text(excl.get('link'))}</link>', table_style),
+                        Paragraph(f"<link href='{safe_text(excl.get('link'))}'>{safe_text(excl.get('link'))}</link>", table_style),
 
                         Paragraph(safe_text(excl.get('scope')), table_style),
                         Paragraph(safe_text(excl.get('public_comment')), table_style),
@@ -227,7 +227,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
                     if links:
                         misconfig_links = "<br/>".join(
-                            f'{i}. <link href="{safe_text(link)}">{safe_text(link)}</link>'
+                            f"{i}. <link href='{safe_text(link)}'>{safe_text(link)}</link>"
                             for i, link in enumerate(links, 1)
                         )
 
@@ -290,7 +290,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(safe_text(excl.get('vuln_source')), table_style),
                         Paragraph(safe_text(excl.get('package')), table_style),
                         Paragraph(safe_text(excl.get('version')), table_style),
-                        Paragraph(f'<link href="{excl.get('link')}">{excl.get('link')}</link>', table_style),
+                        Paragraph(f"<link href='{excl.get('link')}'>{excl.get('link')}</link>", table_style),
                         
                         Paragraph(safe_text(excl.get('scope')), table_style),
                         Paragraph(safe_text(excl.get('public_comment')), table_style),
@@ -322,7 +322,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     Paragraph(safe_text(kev_vuln.get("required_action")), table_style),
                     Paragraph(safe_text(kev_vuln.get("kev_added_date")), table_style),
                     Paragraph(safe_text(kev_vuln.get("kev_due_date")), table_style),
-                    Paragraph(f'<link href="{kev_vuln.get('link')}">{kev_vuln.get('link')}</link>', table_style),
+                    Paragraph(f"<link href='{kev_vuln.get('link')}'>{kev_vuln.get('link')}</link>", table_style),
                 ])
 
                 kev_vulnerabilities_severity_rows.append((kev_vulnerabilities_row_index, kev_vulnerabilities_severity))
@@ -350,7 +350,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                     Paragraph(safe_text(new_vuln.get("vuln_found_timestamp")), table_style),
                     Paragraph(safe_text(new_vuln.get("package")), table_style),
                     Paragraph(safe_text(new_vuln.get("source")), table_style),
-                    Paragraph(f'<link href="{safe_text(new_vuln.get('link'))}">{safe_text(new_vuln.get('link'))}</link>', table_style),
+                    Paragraph(f"<link href='{safe_text(new_vuln.get('link'))}'>{safe_text(new_vuln.get('link'))}</link>", table_style),
                 ])
 
                 new_vulnerabilities_severity_rows.append((new_vulnerabilities_row_index, new_vulnerabilities_severity))
@@ -379,7 +379,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(safe_text(vuln.get("cvss_vector")), table_style),
                         Paragraph(safe_text(vuln.get("package")), table_style),
                         Paragraph(safe_text(vuln.get("version")), table_style),
-                        Paragraph(f'<link href="{safe_text(vuln.get('link'))}">{safe_text(vuln.get('link'))}</link>', table_style),
+                        Paragraph(f"<link href='{safe_text(vuln.get('link'))}'>{safe_text(vuln.get('link'))}</link>", table_style),
                     ])
 
                     vulnerabilities_grype_severity_rows.append((vulnerabilities_grype_row_index, vulnerabilities_grype_severity))
@@ -422,7 +422,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                         Paragraph(safe_text(vuln.get("cvss_vector")), table_style),
                         Paragraph(safe_text(vuln.get("package")), table_style),
                         Paragraph(safe_text(vuln.get("version")), table_style),
-                        Paragraph(f'<link href="{safe_text(vuln.get('link'))}">{safe_text(vuln.get('link'))}</link>', table_style),
+                        Paragraph(f"<link href='{safe_text(vuln.get('link'))}'>{safe_text(vuln.get('link'))}</link>", table_style),
                     ])
 
                     vulnerabilities_trivy_severity_rows.append((vulnerabilities_trivy_row_index, vulnerabilities_trivy_severity))
@@ -437,7 +437,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
                     if links:
                         misconfig_links = "<br/>".join(
-                            f'{i}. <link href="{safe_text(link)}">{safe_text(link)}</link>'
+                            f"{i}. <link href='{safe_text(link)}'>{safe_text(link)}</link>"
                             for i, link in enumerate(links, 1)
                         )
 
