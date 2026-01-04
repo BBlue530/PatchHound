@@ -33,34 +33,38 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
         nonlocal excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter
 
         if key in excluded_ids:
-            if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
-                excluded_vuln_counter += 1
-            elif data.get("source") == "trivy_misconfiguration":
-                excluded_misconf_counter += 1
-            elif data.get("source") == "trivy_secret":
-                excluded_exposed_secret_counter += 1
-            exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
-            exclusions_dict[key] = exclusion_data
+            if key not in exclusions_dict:
+                if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
+                    excluded_vuln_counter += 1
+                elif data.get("source") == "trivy_misconfiguration":
+                    excluded_misconf_counter += 1
+                elif data.get("source") == "trivy_secret":
+                    excluded_exposed_secret_counter += 1
+                exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
+                exclusions_dict[key] = exclusion_data
         else:
-            if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
-                vuln_counter += 1
-            elif data.get("source") == "trivy_misconfiguration":
-                misconf_counter += 1
-            elif data.get("source") == "trivy_secret":
-                exposed_secret_counter += 1
-            summary_dict[key] = data
+            if key not in summary_dict:
+                if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
+                    vuln_counter += 1
+                elif data.get("source") == "trivy_misconfiguration":
+                    misconf_counter += 1
+                elif data.get("source") == "trivy_secret":
+                    exposed_secret_counter += 1
+                summary_dict[key] = data
 
     def add_vuln_kev(key, data):
         nonlocal excluded_kev_vuln_counter, kev_vuln_counter
 
         if key in excluded_ids:
-            excluded_kev_vuln_counter += 1
+            if key not in exclusions_dict:
+                excluded_kev_vuln_counter += 1
 
-            exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
-            exclusions_dict[key] = exclusion_data
+                exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
+                exclusions_dict[key] = exclusion_data
         else:
-            kev_vuln_counter += 1
-            kev_prio_dict[key] = data
+            if key not in kev_prio_dict:
+                kev_vuln_counter += 1
+                kev_prio_dict[key] = data
     
     if semgrep_sast_report_json.get("SAST_SCAN") is False:
         summary_dict["SAST_SCAN_SKIPPED"] = {
