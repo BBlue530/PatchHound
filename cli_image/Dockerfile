@@ -22,7 +22,8 @@ VOLUME ["/cli_image/config"]
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
     | sh -s -- -b "$BASE_DIR_BIN" "v$SYFT_VERSION"
 
-RUN wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz && \
+RUN curl -fL -o trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz \
+      https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz && \
     tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz && \
     mv trivy "$BASE_DIR_BIN/trivy" && \
     rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz

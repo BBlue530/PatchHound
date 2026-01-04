@@ -25,7 +25,8 @@ fi
 if [[ "$TRIVY_OUTPUT" != *"$TRIVY_VERSION"* ]]; then
   if [ "$TRIVY_SCAN" = "true" ]; then
     print_message "[~]" "Installing Trivy..." ""
-    wget https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
+    curl -fL -o trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz \
+      https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
     tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
     mv trivy "$BASE_DIR_BIN/trivy"
   fi
