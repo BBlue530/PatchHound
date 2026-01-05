@@ -1,16 +1,18 @@
 from logs.audit_trail import audit_trail_event
 
-def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count):
+def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter):
     sast_issue_count = 0
-    excluded_ids = {
-        e.get("vulnerability")
-        for e in exclusions_file_json.get("exclusions", [])
-        if e.get("vulnerability")
-    }
+
+# Keeping this commented for now. If i want the exclusions to get respected here just uncomment.
+#    excluded_ids = {
+#        e.get("vulnerability")
+#        for e in exclusions_file_json.get("exclusions", [])
+#        if e.get("vulnerability")
+#    }
 
     def add_vuln(key, sast_issue_count):
-        if key in excluded_ids:
-            return sast_issue_count
+#        if key in excluded_ids:
+#            return sast_issue_count
         return sast_issue_count + 1
 
     if not semgrep_sast_report_json.get("SAST_SCAN"):
@@ -27,6 +29,9 @@ def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusi
         "excluded_vuln_counter": excluded_vuln_counter,
         "excluded_misconf_counter": excluded_misconf_counter,
         "excluded_exposed_secret_counter": excluded_exposed_secret_counter,
+        "excluded_kev_vuln_counter": excluded_kev_vuln_counter,
+        "total_vuln_counter": vuln_counter,
+        "kev_vuln_counter": kev_vuln_counter,
         "grype_critical": grype_critical_count,
         "grype_high": grype_high_count,
         "grype_medium": grype_medium_count,
@@ -37,8 +42,8 @@ def vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusi
         "trivy_medium": trivy_medium_count,
         "trivy_low": trivy_low_count,
         "trivy_unknown": trivy_unknown_count,
-        "trivy_misconfigurations": trivy_misconf_count,
-        "trivy_secrets": trivy_secret_count,
+        "trivy_misconfigurations": misconf_counter,
+        "trivy_secrets": exposed_secret_counter,
         "sast_issues": sast_issue_count
     }
 

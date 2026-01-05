@@ -3,42 +3,29 @@ import json
 def check_vuln_file_trivy(trivy_report_path, exclusions_file_path):
     with open(trivy_report_path, "r") as f:
         report = json.load(f)
-    
-    with open(exclusions_file_path, "r") as f:
-        exclusions_data = json.load(f)
-    excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
 
-    trivy_crit_count = 0
-    trivy_high_count = 0
-    trivy_medium_count = 0
-    trivy_low_count = 0
-    trivy_unknown_count = 0
-    trivy_misconf_count = 0
-    trivy_secret_count = 0
+# Keeping this commented for now. If i want the exclusions to get respected here just uncomment.
+#    with open(exclusions_file_path, "r") as f:
+#        exclusions_data = json.load(f)
+#    excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
 
+    severity_levels = ["critical", "high", "medium", "low", "unknown"]
+    severity_counts = {level: 0 for level in severity_levels}
+
+    # Severities count
     for result in report.get("Results", []):
-        for v in result.get("Vulnerabilities", []):
-            if v.get("VulnerabilityID") in excluded_ids:
-                continue
-            if v.get("Severity") == "CRITICAL":
-                trivy_crit_count += 1
-            elif v.get("Severity") == "HIGH":
-                trivy_high_count += 1
-            elif v.get("Severity") == "MEDIUM":
-                trivy_medium_count += 1
-            elif v.get("Severity") == "LOW":
-                trivy_low_count += 1
-            elif v.get("Severity") == "UNKOWN":
-                trivy_unknown_count += 1
+        for vuln in result.get("Vulnerabilities", []):
+#            vuln_id = vuln.get("VulnerabilityID")
+#            if vuln_id in excluded_ids:
+#                continue
+            severity = vuln.get("Severity", "").lower()
+            if severity in severity_counts:
+                severity_counts[severity] += 1
 
-        for m in result.get("Misconfigurations", []):
-            if m.get("ID") in excluded_ids:
-                continue
-            trivy_misconf_count += 1
+    trivy_crit_count = severity_counts['critical']
+    trivy_high_count = severity_counts['high']
+    trivy_medium_count = severity_counts['medium']
+    trivy_low_count = severity_counts['low']
+    trivy_unknown_count = severity_counts['unknown']
 
-        for s in result.get("Secrets", []):
-            if s.get("RuleID") in excluded_ids:
-                continue
-            trivy_secret_count += 1
-
-    return trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count
+    return trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count

@@ -67,7 +67,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
         
-        summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter = generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset)
+        summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset)
         save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json)
         
         # Handles attestation of syft and trivy SBOMs
@@ -75,9 +75,9 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         trivy_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, trivy_report_path, trivy_sbom_attestation_path, trivy_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
 
         # Handles counting vulnerabilities and exclusions
-        trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count = check_vuln_file_trivy(trivy_report_path, exclusions_file_path)
-        grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count = check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path)
-        vulns_found = vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count)
+        trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count = check_vuln_file_trivy(trivy_report_path, exclusions_file_path)
+        grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count = check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, misconf_counter, exposed_secret_counter, exclusions_file_path)
+        vulns_found = vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
         
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
         track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list)

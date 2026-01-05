@@ -36,12 +36,16 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
             if key not in exclusions_dict:
                 if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
                     excluded_vuln_counter += 1
+                    vuln_counter += 1
                 elif data.get("source") == "trivy_misconfiguration":
                     excluded_misconf_counter += 1
+                    misconf_counter += 1
                 elif data.get("source") == "trivy_secret":
                     excluded_exposed_secret_counter += 1
+                    exposed_secret_counter += 1
                 exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
                 exclusions_dict[key] = exclusion_data
+
         else:
             if key not in summary_dict:
                 if data.get("source") in ("grype", "semgrep", "trivy_vulnerability"):
@@ -58,9 +62,11 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
         if key in excluded_ids:
             if key not in exclusions_dict:
                 excluded_kev_vuln_counter += 1
+                kev_vuln_counter += 1
 
                 exclusion_data = exclusion_lookup(exclusions_file_json, key, data)
                 exclusions_dict[key] = exclusion_data
+
         else:
             if key not in kev_prio_dict:
                 kev_vuln_counter += 1
@@ -351,7 +357,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
             "status": "success"
         })
 
-    return summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter
+    return summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter
 
 def get_vulnerability_link(key, vuln, vuln_url_key):
     if key.startswith("GHSA"):

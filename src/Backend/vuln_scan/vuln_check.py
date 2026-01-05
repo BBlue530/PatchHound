@@ -13,26 +13,30 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
     with open(grype_path) as f:
         vuln_data = json.load(f)
 
-    with open(exclusions_file_path, "r") as f:
-        exclusions_data = json.load(f)
-    excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
+# Keeping this commented for now. If i want the exclusions to get respected here just uncomment.
+#    with open(exclusions_file_path, "r") as f:
+#        exclusions_data = json.load(f)
+#    excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
     
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
     severity_counts = {level: 0 for level in severity_levels}
 
     # Severities count
     for vuln in vuln_data.get("vulnerabilities", []):
-        vuln_ids = [v.get("VulnerabilityID") for v in vuln.get("Vulnerabilities", [])]
-        if any(v_id in excluded_ids for v_id in vuln_ids):
-            continue
-        for rating in vuln.get("ratings", []):
-            severity = rating.get("severity", "").lower()
-            if severity in severity_counts:
-                severity_counts[severity] += 1
+#        vuln_id = vuln.get("id")
+#        if vuln_id in excluded_ids:
+#            continue
+        severity = vuln.get("severity", "").lower()
+        if severity in severity_counts:
+            severity_counts[severity] += 1
     
-    crit_count = severity_counts.get("critical", 0)
+    grype_critical_count = severity_counts['critical']
+    grype_high_count = severity_counts['high']
+    grype_medium_count = severity_counts['medium']
+    grype_low_count = severity_counts['low']
+    grype_unknown_count = severity_counts['unknown']
 
-    if (crit_count > 0 or trivy_crit_count > 0) and "discord" in alert_system_webhook:
+    if (grype_critical_count > 0 or trivy_crit_count > 0) and "discord" in alert_system_webhook:
         print("[!] Sending Discord alert with severity breakdown...")
 
         message = {
@@ -40,11 +44,11 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
                 "title": "🚨 Vulnerability Severity Report",
                 "description": (
                     f"**Repo:** {repo_name}\n\n"
-                    f"**Critical:** {severity_counts['critical']}\n"
-                    f"**High:** {severity_counts['high']}\n"
-                    f"**Medium:** {severity_counts['medium']}\n"
-                    f"**Low:** {severity_counts['low']}\n"
-                    f"**Unknown:** {severity_counts['unknown']}"
+                    f"**Critical:** {grype_critical_count}\n"
+                    f"**High:** {grype_high_count}\n"
+                    f"**Medium:** {grype_medium_count}\n"
+                    f"**Low:** {grype_low_count}\n"
+                    f"**Unknown:** {grype_unknown_count}"
                     f"\n"
                     f"**Trivy Scan:**\n"
                     f"**Critical:** {trivy_crit_count}\n"
@@ -88,7 +92,7 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
         })
             alerts_list.append(f"{alert_status}")
 
-    elif (crit_count > 0 or trivy_crit_count > 0) and "slack" in alert_system_webhook:
+    elif (grype_critical_count > 0 or trivy_crit_count > 0) and "slack" in alert_system_webhook:
         print("[!] Sending Slack alert with severity breakdown...")
 
         message = {
@@ -98,11 +102,11 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
                     "color": "#FF0000",
                     "fields": [
                         {"title": "Repo", "value": repo_name, "short": False},
-                        {"title": "Critical", "value": str(severity_counts["critical"]), "short": True},
-                        {"title": "High", "value": str(severity_counts["high"]), "short": True},
-                        {"title": "Medium", "value": str(severity_counts["medium"]), "short": True},
-                        {"title": "Low", "value": str(severity_counts["low"]), "short": True},
-                        {"title": "Unknown", "value": str(severity_counts["unknown"]), "short": True},
+                        {"title": "Critical", "value": str(grype_critical_count), "short": True},
+                        {"title": "High", "value": str(grype_high_count), "short": True},
+                        {"title": "Medium", "value": str(grype_medium_count), "short": True},
+                        {"title": "Low", "value": str(grype_low_count), "short": True},
+                        {"title": "Unknown", "value": str(grype_unknown_count), "short": True},
                     ]
                 },
                 {
@@ -157,11 +161,5 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
             "message": "vulnerability severity report summary",
         })
         alerts_list.append(f"{alert_status}")
-    
-    grype_critical_count = severity_counts['critical']
-    grype_high_count = severity_counts['high']
-    grype_medium_count = severity_counts['medium']
-    grype_low_count = severity_counts['low']
-    grype_unknown_count = severity_counts['unknown']
 
     return grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count

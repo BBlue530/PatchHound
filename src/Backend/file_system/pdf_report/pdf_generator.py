@@ -101,6 +101,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Excluded vulnerabilities found:</b> {counters.get('excluded_vuln_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>Vulnerabilities found:</b> {counters.get('vuln_counter')}", wrap_style))
+    elements.append(Paragraph(f"<b>Excluded KEV vulnerabilities found:</b> {counters.get('excluded_kev_vuln_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>KEV vulnerabilities found:</b> {counters.get('kev_vuln_counter')}", wrap_style))
 
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
