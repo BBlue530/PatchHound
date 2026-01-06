@@ -1,4 +1,5 @@
 import os
+from flask import request
 from core.variables import all_repo_scans_folder, local_bin, env, all_resources_folder
 from vuln_scan.vuln_check import check_vuln_file
 from vuln_scan.trivy_vuln_check import check_vuln_file_trivy
@@ -11,6 +12,7 @@ from validation.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
+from logs.export_logs import log_exporter
 from external_storage.external_storage_send import send_files_to_external_storage
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file, semgrep_sast_ruleset):
@@ -90,6 +92,13 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         send_files_to_external_storage(alert_path, repo_dir)
 
     cleanup_scan_data()
+
+    new_entry = {
+        "message": "Scan completed",
+        "level": "info",
+        "module": "save_scan_files",
+    }
+    log_exporter(new_entry)
 
 def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

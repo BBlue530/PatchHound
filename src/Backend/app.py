@@ -1,10 +1,12 @@
 from flask import Flask
+import os
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils.schedule_handling import scheduled_event
 from database.create_db import create_database
 from core.system import install_tools
 from validation.secrets_manager import generate_secrets, verify_secrets
 from config.read_app_config import read_app_config
+from logs.export_logs import setup_opentelemetry_logging
 
 # Route blueprints
 from routes.generate_pdf import pdf_bp
@@ -26,6 +28,9 @@ app.register_blueprint(token_key_bp)
 if __name__ == "__main__":
     install_tools()
     read_app_config()
+    if os.environ.get("opentelemetry_log_exporter_enabled", "False").lower() == "true":
+        setup_opentelemetry_logging()
+
     generate_secrets()
     verify_secrets()
     scheduled_event()

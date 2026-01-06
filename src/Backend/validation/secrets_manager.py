@@ -2,7 +2,9 @@ import json
 import secrets
 import os
 import sys
+from flask import request
 from config.secret_data. get_secret_data import read_external_secret
+from logs.export_logs import log_exporter
 from core.variables import secret_storage, length, secret_types
     
 def read_secret(secret_type):
@@ -44,17 +46,35 @@ def verify_api_key(api_key):
 def read_secret_local(secret_type):
     if not os.path.isfile(secret_storage):
         print("[!] Secrets file not found")
+        new_entry = {
+            "message": "Secret file not found",
+            "level": "error",
+            "module": "secrets",
+        }
+        log_exporter(new_entry)
         return None
 
     try:
         with open(secret_storage, "r") as f:
             secrets_data = json.load(f)
     except json.JSONDecodeError:
+        new_entry = {
+            "message": "Secret file is invalid",
+            "level": "error",
+            "module": "secrets",
+        }
+        log_exporter(new_entry)
         print("[!] Secrets file is invalid")
         return None
 
     secret_value = secrets_data.get(secret_type)
     if not secret_value:
+        new_entry = {
+            "message": f"Secret does not exist {secret_type}",
+            "level": "error",
+            "module": "secrets",
+        }
+        log_exporter(new_entry)
         print(f"[!] Secret '{secret_type}' not found in file")
         return None
 

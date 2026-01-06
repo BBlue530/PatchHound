@@ -3,8 +3,9 @@ import io
 import zipfile
 import boto3
 import tempfile
-from flask import abort, send_file
+from flask import abort, send_file, request
 from botocore.exceptions import ClientError
+from logs.export_logs import log_exporter
 
 def get_resources_s3(base_dir, file_names):
     print("[+] AWS s3 enabled. Getting resources...")
@@ -40,6 +41,13 @@ def get_resources_s3(base_dir, file_names):
         ]
 
     if not keys:
+        new_entry = {
+            "message": "No files found to return",
+            "level": "error",
+            "module": "get_resources_s3",
+            "client_ip": request.remote_addr,
+        }
+        log_exporter(new_entry)
         abort(404, description="No files found to return")
 
     if len(keys) == 1:
@@ -48,6 +56,13 @@ def get_resources_s3(base_dir, file_names):
         try:
             s3.download_fileobj(bucket, key, memory_file)
         except s3.exceptions.NoSuchKey:
+            new_entry = {
+                "message": f"Requested file not found: {key}",
+                "level": "error",
+                "module": "get_resources_s3",
+                "client_ip": request.remote_addr,
+            }
+            log_exporter(new_entry)
             abort(404, description=f"Requested file not found: {key}")
 
         memory_file.seek(0)

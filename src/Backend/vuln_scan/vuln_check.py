@@ -1,7 +1,9 @@
 import json
 import os
 import requests
+from flask import request
 from logs.audit_trail import audit_trail_event
+from logs.export_logs import log_exporter
 
 def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, trivy_misconf_count, trivy_secret_count, exclusions_file_path):
     if os.path.isfile(alert_path):
@@ -74,15 +76,29 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
         })
         if response.status_code not in [200, 204]:
             alert_status = f"Failed to send {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
+            new_entry = {
+                "message": alert_status,
+                "level": "error",
+                "module": "discord_alert",
+            }
+            log_exporter(new_entry)
+
             print(f"[!] {alert_status}")
             audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "discord",
-            "message": "vulnerability severity report summary"
-        })
+                "status_code": response.status_code,
+                "webhook": "discord",
+                "message": "vulnerability severity report summary"
+            })
             alerts_list.append(f"{alert_status}")
         else:
             alert_status = f"Alert sent {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
+            new_entry = {
+                "message": alert_status,
+                "level": "info",
+                "module": "discord_alert",
+            }
+            log_exporter(new_entry)
+
             print(f"[!] {alert_status}")
             audit_trail_event(audit_trail, "ALERT_SYSTEM", {
             "status_code": response.status_code,
@@ -136,6 +152,13 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
         })
         if response.status_code not in [200, 204]:
             alert_status = f"Failed to send {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
+            new_entry = {
+                "message": alert_status,
+                "level": "error",
+                "module": "slack_alerts",
+            }
+            log_exporter(new_entry)
+
             print(f"[!] {alert_status}")
             audit_trail_event(audit_trail, "ALERT_SYSTEM", {
             "status_code": response.status_code,
@@ -145,6 +168,13 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
             alerts_list.append(f"{alert_status}")
         else:
             alert_status = f"Alert sent {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
+            new_entry = {
+                "message": alert_status,
+                "level": "info",
+                "module": "slack_alerts",
+            }
+            log_exporter(new_entry)
+
             print(f"[!] {alert_status}")
             audit_trail_event(audit_trail, "ALERT_SYSTEM", {
             "status_code": response.status_code,
@@ -155,6 +185,13 @@ def check_vuln_file(audit_trail, alerts_list, grype_path, alert_path, repo_name,
     
     else:
         alert_status = f"Failed to send alert for {repo_name}. Alert webhook not set"
+        new_entry = {
+            "message": alert_status,
+            "level": "error",
+            "module": "alerts",
+        }
+        log_exporter(new_entry)
+        
         audit_trail_event(audit_trail, "ALERT_SYSTEM", {
             "status": "fail",
             "webhook": "not found",

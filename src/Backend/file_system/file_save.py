@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 import json
 import os
 import subprocess
@@ -11,6 +11,7 @@ from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
 from validation.secrets_manager import read_secret
+from logs.export_logs import log_exporter
 from core.variables import local_bin
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
@@ -117,6 +118,12 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
                 "status": "success"
             })
     else:
+        new_entry = {
+            "message": f"Failed to save files: [{files_failed_save}]",
+            "level": "error",
+            "module": "save_files",
+        }
+        log_exporter(new_entry)
         message = f"[!] Failed to save files!"
         alert = "Workflow : Failed to save files"
         audit_trail_event(audit_trail, "KEY_GENERATION", {
@@ -145,6 +152,12 @@ def attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attes
         })
         print(f"[+] SBOM attested: {sbom_attestation_path}")
     except subprocess.CalledProcessError as e:
+        new_entry = {
+            "message": f"Failed to attest SBOM for repo: {repo_name} {e.stderr}",
+            "level": "error",
+            "module": "attest_sbom",
+        }
+        log_exporter(new_entry)
         audit_trail_event(audit_trail, "SBOM_ATTESTATION", {
             "status": "fail"
         })
@@ -172,6 +185,12 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         })
         print(f"[+] Attestation signed: {att_sig_path}")
     except subprocess.CalledProcessError as e:
+        new_entry = {
+            "message": f"Failed to sign Attestation for repo: {repo_name} {e.stderr}",
+            "level": "error",
+            "module": "attest_sbom",
+        }
+        log_exporter(new_entry)
         audit_trail_event(audit_trail, "SIGNING_ATTESTATION", {
             "status": "fail"
         })
@@ -229,6 +248,12 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
         print(f"[+] Cosign key generated for repo: {repo_name}")
 
     except subprocess.CalledProcessError as e:
+        new_entry = {
+            "message": f"Failed to generate Cosign key for repo: {repo_name} {e.stderr}",
+            "level": "error",
+            "module": "key_generating",
+        }
+        log_exporter(new_entry)
         message = f"[!] Failed to generate Cosign key for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
         audit_trail_event(audit_trail, "KEY_GENERATION", {
@@ -365,7 +390,13 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
             send_files_to_external_storage(file_filename_path, s3_bucket_dir)
     
     except subprocess.CalledProcessError as e:
-        print(f"[!] Signing or verification failed for repo {repo_name}: {e.stderr}")
+        new_entry = {
+            "message": f"Signature or verification failed for repo: {repo_name}: {e.stderr}",
+            "level": "error",
+            "module": "generate-pdf",
+        }
+        log_exporter(new_entry)
+        print(f"[!] Signing or verification failed for repo: {repo_name}: {e.stderr}")
 
     finally:
         for f in temp_files:

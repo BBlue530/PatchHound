@@ -3,6 +3,7 @@ import json
 from utils.file_hash import hash_file
 from logs.audit_trail import audit_trail_event
 from logs.alerts import alert_event_system
+from logs.export_logs import log_exporter
 
 def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     scan_dir = os.path.join(repo_path, timestamp_folder)
@@ -38,6 +39,13 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
             break
 
     if old_entry is None:
+        new_entry = {
+            "message": f"No history entry found for: {repo_name} timestamp_folder: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         print(f"[!] No history entry found for: {repo_name} {timestamp_folder}")
         audit_trail_event(audit_trail, "HASH_VERIFY", {
         "status": "fail",
@@ -60,6 +68,13 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
 
     # Syft checks
     if syft_sbom_att_hash_new != syft_sbom_att_hash_old:
+        new_entry = {
+            "message": f"SYFT_Attestation hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "SYFT_HASH_VERIFY", {
         "status": "fail",
         "reason": f"attestation hash mismatch for: {timestamp_folder}"
@@ -69,6 +84,13 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
     if syft_sbom_hash_new != syft_sbom_hash_old:
+        new_entry = {
+            "message": f"SYFT_SBOM hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "SYFT_HASH_VERIFY", {
         "status": "fail",
         "reason": f"sbom hash mismatch for: {timestamp_folder}"
@@ -80,6 +102,13 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     
     # Trivy checks
     if trivy_sbom_att_hash_new != trivy_sbom_att_hash_old:
+        new_entry = {
+            "message": f"TRIVY_Attestation hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "TRIVY_HASH_VERIFY", {
         "status": "fail",
         "reason": f"attestation hash mismatch for: {timestamp_folder}"
@@ -89,6 +118,13 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
     if trivy_sbom_hash_new != trivy_sbom_hash_old:
+        new_entry = {
+            "message": f"TRIVY_SBOM hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "TRIVY_HASH_VERIFY", {
         "status": "fail",
         "reason": f"sbom hash mismatch for: {timestamp_folder}"
@@ -100,17 +136,31 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
 
     # Audit trail check
     if audit_trail_hash_new != audit_trail_hash_old:
+        new_entry = {
+            "message": f"Audit trail hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "HASH_VERIFY", {
         "status": "fail",
         "reason": f"audit_trail hash mismatch for: {timestamp_folder}"
         })
-        message = f"[!]  Audit trail hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
+        message = f"[!] Audit trail hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}!"
         alert = "Scheduled Event : Tampering Detected"
         print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
 
     # Summary report check
     if summary_report_hash_new != summary_report_hash_old:
+        new_entry = {
+            "message": f"Summary report hash mismatch for repo: {repo_name} Timestamp: {timestamp_folder}",
+            "level": "error",
+            "module": "verify_sha",
+        }
+        log_exporter(new_entry)
+
         audit_trail_event(audit_trail, "HASH_VERIFY", {
         "status": "fail",
         "reason": f"summary_report_hash hash mismatch for: {timestamp_folder}"

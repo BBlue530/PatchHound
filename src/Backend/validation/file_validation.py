@@ -8,6 +8,7 @@ from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
 from utils.helpers import extract_cve_ids
 from logs.audit_trail import save_audit_trail, audit_trail_event
+from logs.export_logs import log_exporter
 from validation.hash_verify import verify_sha
 from validation.file_exist import verify_file_exists
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
@@ -66,6 +67,12 @@ def sbom_validation():
 
                 if not timestamp_folders:
                     print(f"[!] No scans found for repo: {repo_name}")
+                    new_entry = {
+                        "message": f"No scans found for repo: {repo_name}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
                     continue
                 
                 timestamp_folder = timestamp_folders[0]
@@ -104,6 +111,13 @@ def sbom_validation():
                 all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, exclusions_file_path, cosign_pub_path, grype_vulns_output_path, prio_output_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
 
                 if not all_files_exist:
+                    new_entry = {
+                        "message": f"Missing files in repo: {repo_name} timestamp folder: {timestamp_folder}. Files missing: [{files_missing}]",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     audit_trail_event(audit_trail, "MISSING_FILES", {
                     "status": "fail",
                     "files_missing": files_missing,
@@ -120,40 +134,6 @@ def sbom_validation():
                     save_audit_trail(audit_trail_path, audit_trail)
                     continue
 
-                # Syft checks
-                if not os.path.exists(syft_sbom_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "SYFT_SBOM_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] SYFT_SBOM missing for repo: {repo_name}"
-                    alert = "Scheduled Event : SYFT_SBOM Missing"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
-                if not os.path.exists(syft_sbom_att_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "SYFT_ATTESTATION_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] SYFT_Attestation missing for SBOM in repo: {repo_name}"
-                    alert = "Scheduled Event : SYFT_Attestation Missing"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
-                if not os.path.exists(syft_att_sig_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "SYFT_SIGNATURE_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] SYFT_Signature missing for SYFT_Attestation in repo: {repo_name}"
-                    alert = "Scheduled Event : SYFT_Signature Missing"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
                 try:
                     subprocess.run(
                         [
@@ -168,6 +148,13 @@ def sbom_validation():
                     )
                     print(f"[+] Verified SYFT_SBOM attestation for repo: {repo_name}")
                 except subprocess.CalledProcessError:
+                    new_entry = {
+                        "message": f"SYFT_Attestation verification failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     daily_scan = False
                     audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION", {
                     "status": "fail",
@@ -191,46 +178,19 @@ def sbom_validation():
                     )
                     print(f"[+] Verified SYFT_Attestation signature for repo: {repo_name}")
                 except subprocess.CalledProcessError:
+                    new_entry = {
+                        "message": f"SYFT_Signature for SYFT_Attestation failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     daily_scan = False
                     audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION_SIGNATURE", {
                     "status": "fail",
                     })
                     message = f"[!] SYFT_Signature for SYFT_Attestation failed for repo: {repo_name}!"
                     alert = "Scheduled Event : SYFT_Signature Fail"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
-                # Trivy checks
-                if not os.path.exists(trivy_report_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "TRVIY_SBOM_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] TRVIY_SBOM missing for repo: {repo_name}"
-                    alert = "Scheduled Event : TRVIY_SBOM Missing"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
-                if not os.path.exists(trivy_att_sig_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "TRVIY_ATTESTATION_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] TRVIY_Attestation missing for SBOM in repo: {repo_name}"
-                    alert = "Scheduled Event : TRVIY_Attestation Missing"
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-                    print(f"{message}")
-                    alert_event_system(audit_trail, message, alert, alert_path)
-
-                if not os.path.exists(trivy_sbom_att_path):
-                    daily_scan = False
-                    audit_trail_event(audit_trail, "TRVIY_SIGNATURE_EXISTS", {
-                    "status": "fail",
-                    })
-                    message = f"[!] TRVIY_Signature missing for TRVIY_Attestation in repo: {repo_name}"
-                    alert = "Scheduled Event : TRVIY_Signature Missing"
                     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                     print(f"{message}")
                     alert_event_system(audit_trail, message, alert, alert_path)
@@ -249,6 +209,13 @@ def sbom_validation():
                     )
                     print(f"[+] Verified TRVIY_SBOM attestation for repo: {repo_name}")
                 except subprocess.CalledProcessError:
+                    new_entry = {
+                        "message": f"TRVIY_Attestation verification failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     daily_scan = False
                     audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION", {
                     "status": "fail",
@@ -272,6 +239,13 @@ def sbom_validation():
                     )
                     print(f"[+] Verified TRVIY_Attestation signature for repo: {repo_name}")
                 except subprocess.CalledProcessError:
+                    new_entry = {
+                        "message": f"TRVIY_Signature for TRVIY_Attestation failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     daily_scan = False
                     audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION_SIGNATURE", {
                     "status": "fail",
@@ -327,6 +301,13 @@ def sbom_validation():
                     new_cves_to_alert = new_cves - excluded_ids
 
                     if new_cves_to_alert:
+                        new_entry = {
+                            "message": f"New vulnerabilities detected in repo: {repo_name} Timestamp: {timestamp_folder} [{', '.join(sorted(new_cves_to_alert))}]",
+                            "level": "error",
+                            "module": "scheduled_rescan",
+                        }
+                        log_exporter(new_entry)
+                        
                         daily_scan = False
                         audit_trail_event(audit_trail, "NEW_VULNERABILITIES_FOUND", {
                         "repo": repo_name,
@@ -380,9 +361,22 @@ def sbom_validation():
                         if os.environ.get("external_storage_enabled", "False").lower() == "true":
                             send_files_to_external_storage(audit_trail_path, s3_bucker_dir_timestamp_folder)
 
+                    new_entry = {
+                        "message": f"Scan finished for repo: {repo_name} Timestamp: {timestamp_folder}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
                     print(f"[+] Scan finished for repo: {repo_name}")
 
                 except subprocess.CalledProcessError as e:
+                    new_entry = {
+                        "message": f"Scan failed for {repo_name}: {e.stderr}",
+                        "level": "error",
+                        "module": "scheduled_rescan",
+                    }
+                    log_exporter(new_entry)
+
                     message = f"[!] Scan failed for {repo_name}: {e.stderr}"
                     alert = "Scheduled Event : Scan Fail"
                     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

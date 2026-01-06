@@ -1,6 +1,5 @@
 import json
 import datetime
-from pathlib import Path
 from logs.audit_trail import audit_trail_event
 from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
 

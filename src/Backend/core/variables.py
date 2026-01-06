@@ -10,6 +10,8 @@ all_repo_scans_folder = "all_scans"
 all_image_signature_folder = "all_image_signature"
 all_base_image_signature_folder = "all_base_image_signature"
 
+service_log_path = "log_data/service_logs.json"
+
 scheduled_event_commit_sha = "Null"
 scheduled_event_commit_author = "Daily Scan"
 
@@ -24,7 +26,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.34"
+patchhound_version = "0.1.35"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"

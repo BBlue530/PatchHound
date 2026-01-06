@@ -3,7 +3,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, PageBreak, HRFlowable, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from datetime import datetime
-from flask import abort
+from flask import abort, request
 import json
 import os
 from utils.helpers import safe_text
@@ -11,6 +11,7 @@ from external_storage.external_storage_get import get_resources_external_storage
 from core.variables import all_repo_scans_folder, all_resources_folder
 from file_system.pdf_report.pdf_table_builds import *
 from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
+from logs.export_logs import log_exporter
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     grype_exclusions_vulnerabilities_severity_rows = []
@@ -53,6 +54,13 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         summary_report = json.load(memory_file)
     else:
         if not os.path.isdir(base_dir):
+            new_entry = {
+                "message": f"Missing directory: {base_dir}",
+                "level": "error",
+                "module": "generate-pdf",
+                "client_ip": request.remote_addr,
+            }
+            log_exporter(new_entry)
             abort(404, description=f"Directory not found: {base_dir}")
 
         with open(summary_report_path, "r") as f:

@@ -3,7 +3,7 @@ import tempfile
 from utils.helpers import file_stable_check
 from file_system.file_save import sign_image, verify_image, key_generating
 from validation.secrets_manager import read_secret
-from logs.audit_trail import save_audit_trail, append_audit_trail
+from logs.audit_trail import save_audit_trail, append_audit_log
 from core.variables import all_image_signature_folder, local_bin, env, all_resources_folder, all_base_image_signature_folder
 
 def sign_image_digest(audit_trail, image_digest, organization, current_repo, timestamp):
@@ -61,7 +61,7 @@ def verify_image_digest(audit_trail, image_digest, organization, current_repo, t
 
     os.remove(image_digest_path_verify)
 
-    append_audit_trail(audit_trail_path, audit_trail)
+    append_audit_log(audit_trail_path, audit_trail)
 
     return verify_image_status
 
@@ -114,6 +114,6 @@ def verify_base_image_digest(audit_trail, image_digest, image_name):
 
     os.remove(image_digest_path_verify)
 
-    append_audit_trail(audit_trail_path, audit_trail)
+    append_audit_log(audit_trail_path, audit_trail)
 
     return verify_image_status

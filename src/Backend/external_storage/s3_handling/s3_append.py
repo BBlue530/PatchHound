@@ -3,8 +3,8 @@ import boto3
 from botocore.exceptions import ClientError
 import os
 
-def append_to_s3(new_entry, repo_history_path):
-    print("[+] AWS s3 enabled. Appending logs...")
+def append_to_s3(new_entry, append_file_path):
+    print("[+] AWS s3 enabled. Appending file...")
 
     bucket = os.environ.get("aws_s3_bucket")
     bucket_key_prefix = os.environ.get("aws_s3_bucket_key", "")
@@ -16,7 +16,7 @@ def append_to_s3(new_entry, repo_history_path):
         region_name=os.environ.get("aws_default_region")
     )
 
-    s3_key = f"{bucket_key_prefix}/{repo_history_path}".lstrip("/")
+    s3_key = f"{bucket_key_prefix}/{append_file_path}".lstrip("/")
 
     try:
         response = s3.get_object(Bucket=bucket, Key=s3_key)
@@ -35,5 +35,5 @@ def append_to_s3(new_entry, repo_history_path):
         Key=s3_key,
         Body=json.dumps(all_entries, indent=4)
     )
-    print(f"[+] History updated in s3: {repo_history_path}")
+    print(f"[+] Append done in s3: {append_file_path}")
     return
