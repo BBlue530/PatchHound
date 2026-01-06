@@ -4,8 +4,8 @@ from config.helpers.expand_env_var import expand_env
 
 def log_exporter_config(app_config):
 
-    https_log_exporter_enabled = app_config.get("backend", {}).get("storage", {}).get("export_log", {}).get("https", {}).get("enabled", False)
-    opentelemetry_log_exporter_enabled = app_config.get("backend", {}).get("storage", {}).get("export_log", {}).get("opentelemetry", {}).get("enabled", False)
+    https_log_exporter_enabled = expand_env(app_config.get("backend", {}).get("storage", {}).get("export_log", {}).get("https", {}).get("enabled", False))
+    opentelemetry_log_exporter_enabled = expand_env(app_config.get("backend", {}).get("storage", {}).get("export_log", {}).get("opentelemetry", {}).get("enabled", False))
 
     if sum([https_log_exporter_enabled, opentelemetry_log_exporter_enabled]) > 1:
         print("[!] More than 1 scan data storage is enabled: [backend.storage.export_log.]")

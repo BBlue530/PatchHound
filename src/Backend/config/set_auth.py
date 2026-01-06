@@ -3,7 +3,7 @@ import sys
 from config.helpers.expand_env_var import expand_env
 
 def aws_auth(app_config):
-    aws_auth_enabled = app_config.get("auth", {}).get("aws", {}) .get("enabled", False)
+    aws_auth_enabled = expand_env(app_config.get("auth", {}).get("aws", {}) .get("enabled", False))
 
     if sum([aws_auth_enabled]) > 1:
         print("[!] More than 1 auth is enabled: [auth.]")

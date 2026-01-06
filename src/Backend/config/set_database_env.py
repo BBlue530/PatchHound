@@ -3,9 +3,9 @@ import sys
 from config.helpers.expand_env_var import expand_env
 
 def database_storage_config(app_config):
-    local_database_enabled = app_config.get("backend", {}).get("storage", {}).get("token_key_database", {}).get("local", {}).get("enabled", False)
+    local_database_enabled = expand_env(app_config.get("backend", {}).get("storage", {}).get("token_key_database", {}).get("local", {}).get("enabled", False))
 
-    external_database_enabled = app_config.get("backend", {}).get("storage", {}).get("token_key_database", {}).get("external_database", {}).get("enabled", False)
+    external_database_enabled = expand_env(app_config.get("backend", {}).get("storage", {}).get("token_key_database", {}).get("external_database", {}).get("enabled", False))
 
     if sum([local_database_enabled, external_database_enabled]) > 1:
         print("[!] More than 1 database storage is enabled: [backend.storage.token_key_database.]")
