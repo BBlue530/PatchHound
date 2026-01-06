@@ -40,10 +40,10 @@ def log_exporter(new_entry):
             new_entry.get("message", str(new_entry)),
             extra={
                 "attributes": {
+                    "message": new_entry.get("message", None),
                     "level": new_entry.get("level", "info"),
                     "module": new_entry.get("module"),
-                    "user_id": new_entry.get("user_id"),
-                    "request_id": new_entry.get("request_id"),
+                    "client_ip": new_entry.get("client_ip", None),
                 }
             }
         )

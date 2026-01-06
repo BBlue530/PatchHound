@@ -97,6 +97,19 @@ backend:
           enabled: False
           bucket: "${BUCKET}"
           bucket_key: "${BUCKET_KEY}"
+    
+    export_log:
+      https:
+        enabled: False
+        export_url: "${EXPORT_URL}"
+        export_url_api_key: "${EXPORT_URL_API_KEY}"
+
+      opentelemetry:
+        enabled: False
+        export_url: "${EXPORT_URL}"
+        export_url_api_key: "${EXPORT_URL_API_KEY}"
+        service_name: "${SERVICE_NAME}"
+        environment: "${ENVIRONMENT}"
         
 auth:
   aws:

@@ -56,4 +56,14 @@ This document details all supported configuration keys, their purpose, and usage
 |`token_key_database.external_database.db_name`|PostgreSQL database name|
 |`token_key_database.external_database.db_host`|PostgreSQL host address.|
 
+### Log Export Config
+| Key | Description |
+|:-|:-|
+|`export_log.https.export_url`|The url that PatchHound will send service logs to.|
+|`export_log.https.export_url_api_key`|API key used to authenticate with the export url.|
+|`export_log.opentelemetry.export_url`|The OpenTelemetry url that PatchHound will send all logs to.|
+|`export_log.opentelemetry.export_url_api_key`|API key used to authenticate with OpenTelemetry.|
+|`export_log.opentelemetry.service_name`|The name of the service the logs will be under in OpenTelemetry.|
+|`export_log.opentelemetry.environment`|The environment the service will be under in OpenTelemetr.|
+
 ---
