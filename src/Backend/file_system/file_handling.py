@@ -1,9 +1,7 @@
 import os
 from flask import request
 from core.variables import all_repo_scans_folder, local_bin, env, all_resources_folder
-from vuln_scan.vuln_check import check_vuln_file
-from vuln_scan.trivy_vuln_check import check_vuln_file_trivy
-from vuln_scan.get_vulns_count import vuln_count
+from vuln_scan.get_vulns_count import check_vuln_files
 from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
 from utils.folder_lock import repo_lock
 from utils.helpers import load_json
@@ -69,8 +67,8 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     alerts_list = []
     
     syft_sbom_json = load_json(syft_sbom_file)
-    semgrep_sast_report_json = load_json(semgrep_sast_report)
     trivy_report_json = load_json(trivy_report)
+    semgrep_sast_report_json = load_json(semgrep_sast_report)
     exclusions_file_json = load_json(exclusions_file)
 
     def repo_files():
@@ -85,10 +83,8 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         trivy_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, trivy_report_path, trivy_sbom_attestation_path, trivy_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
 
         # Handles counting vulnerabilities and exclusions
-        trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count = check_vuln_file_trivy(trivy_report_path, exclusions_file_path)
-        grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count = check_vuln_file(grype_path, exclusions_file_path)
-        vulns_found = vuln_count(audit_trail, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
-        
+        vulns_found = check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
+
         check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path)
 
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
