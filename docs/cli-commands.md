@@ -46,7 +46,7 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
    # Default scan.config file
    TARGET="."
    SCAN_IMAGE=false
-   FAIL_ON_CRITICAL=true
+   FAIL_ON_VULNERABILITY=true
    FAIL_ON_SEVERITY=CRITICAL
    BASE_URL="https://<your-backend>"
    ALERT_WEBHOOK="https://<your-webhook>"
@@ -72,8 +72,8 @@ patchhound config --set-secret <KEY1> <VALUE1> <KEY2> <VALUE2>
       Set to `true` if scanning a container image.
       If false some image specific scans will be skipped.
 
-   - `FAIL_ON_CRITICAL` (default: `true`)
-      If `true` the pipeline will fail when critical vulnerabilities are found.
+   - `FAIL_ON_VULNERABILITY` (default: `true`)
+      If `true` the pipeline will fail when specific vulnerabilitie severity is found.
 
    - `FAIL_ON_SEVERITY` (default: `CRITICAL`)
       Determines which vulnerability severity will cause the pipeline to fail if detected. 

@@ -15,6 +15,7 @@ from external_storage.external_storage_get import get_resources_external_storage
 from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.summary_generator import add_new_vulns_to_summary
 from file_system.repo_history_tracking import update_repo_history
+from alerts.alert_on_severity import check_alert_on_severity
 
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -83,6 +84,7 @@ def sbom_validation():
                 latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
                 alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
+                fail_on_severity_path = os.path.join(latest_scan_dir, f"{repo_name}_fail_on_severity.json")
                 
                 syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
                 syft_att_sig_path = f"{syft_sbom_path}_att.sig"
@@ -107,6 +109,8 @@ def sbom_validation():
                 semgrep_sast_report_path = os.path.join(latest_scan_dir, f"{repo_name}_semgrep_sast_report.json")
                 old_audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}_audit_trail.json")
                 cosign_key_path = os.path.join(latest_scan_dir, f"{repo_name}.key")
+
+                alerts_list= []
 
                 all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, exclusions_file_path, cosign_pub_path, grype_vulns_output_path, prio_output_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
 
@@ -324,6 +328,8 @@ def sbom_validation():
                         alert = "Scheduled Event : New Vulnerabilities Detected"
                         print(message)
                         alert_event_system(audit_trail, message, alert, alert_path)
+
+                        check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_vulns_output_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path)
 
                         add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path)
                         update_repo_history(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder)

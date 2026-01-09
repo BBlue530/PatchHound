@@ -139,7 +139,7 @@ docker pull ghcr.io/bblue530/patchhound_cli:latest
 
 When scanning a directory (`TARGET="."`), Syft will warn about missing explicit name/version metadata. This does **not** affect scan results.
 
-If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_CRITICAL=true` to `false`
+If you dont want the workflow to fail when critical vulnerabilities are found change `FAIL_ON_VULNERABILITY=true` to `false`
 
 If you are scanning a container image make sure to add a secret named `PAT_TOKEN` to your repository.
 

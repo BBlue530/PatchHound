@@ -51,6 +51,7 @@ response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_c
   -F "commit_author=$COMMIT_AUTHOR" \
   -F "tool_versions=$tool_versions_json" \
   -F "scan_root=$scan_root_json" \
+  -F "fail_on_severity=$FAIL_ON_SEVERITY" \
   "$SBOM_SCAN_API_URL")
 
 curl_exit_code=$?

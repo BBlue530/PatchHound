@@ -14,7 +14,7 @@ from validation.secrets_manager import read_secret
 from logs.export_logs import log_exporter
 from core.variables import local_bin
 
-def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json):
+def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json, fail_on_severity_json, fail_on_severity_path):
     file_save_status = True
     files_failed_save = []
 
@@ -113,6 +113,19 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
             "exclusion_file": exclusions_file_path,
             "status": "fail"
         })
+
+    if fail_on_severity_json:
+        with open(fail_on_severity_path, "w") as f:
+            json.dump(fail_on_severity_json, f, indent=4)
+        file_stable_check(fail_on_severity_path)
+    else:
+        files_failed_save.append("fail_on_severity")
+        file_save_status = False
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "fail_on_severity": fail_on_severity_path,
+            "status": "fail"
+        })
+
     if file_save_status:
         audit_trail_event(audit_trail, "FILE_SAVE", {
                 "status": "success"

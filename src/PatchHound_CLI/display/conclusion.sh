@@ -1,10 +1,10 @@
 source "$BASE_DIR/display/check_vuln_count.sh"
 FAIL="false"
 PATH_TO_RESOURCES_TOKEN_BASE64=$(printf "%s" "$PATH_TO_RESOURCES_TOKEN" | base64 -w 0)
-FAIL_ON_CRITICAL=$(echo "$FAIL_ON_CRITICAL" | tr -d '\r' | xargs)
+FAIL_ON_VULNERABILITY=$(echo "$FAIL_ON_VULNERABILITY" | tr -d '\r' | xargs)
 FAIL_ON_SEVERITY=$(echo "$FAIL_ON_SEVERITY" | tr -d '\r' | xargs)
 
-if [ "$FAIL_ON_CRITICAL" = "true" ]; then
+if [ "$FAIL_ON_VULNERABILITY" = "true" ]; then
   if echo "$FAIL_ON_SEVERITY" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
     if [ "$CVSS_COUNT_GRYPE" -gt 0 ] || [ "$CVSS_COUNT_TRIVY" -gt 0 ]; then
       print_message "[!]" "Failing on CVSS: $FAIL_ON_SEVERITY" "Found $((CVSS_COUNT_GRYPE + CVSS_COUNT_TRIVY)) vulnerabilities above CVSS: $FAIL_ON_SEVERITY"
