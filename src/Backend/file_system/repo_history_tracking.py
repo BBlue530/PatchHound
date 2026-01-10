@@ -36,13 +36,13 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
         append_to_external_storage(new_entry, repo_history_path)
     else:
         print("[+] AWS s3 not enabled.")
-        if not os.path.exists(repo_history_path):
-            history_data = {"repo": os.path.basename(os.path.dirname(repo_history_path)), "history": []}
-        else:
+        if os.path.exists(repo_history_path):
             with open(repo_history_path, "r") as f:
                 history_data = json.load(f)
+        else:
+            history_data = []
 
-        history_data["history"].append(new_entry)
+        history_data.append(new_entry)
 
         with open(repo_history_path, "w") as f:
             json.dump(history_data, f, indent=4)

@@ -28,9 +28,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     summary_report_hash_new = hash_file(summary_report_path)
 
     with open(repo_history_path, "r") as f:
-        repo_history = json.load(f)
-
-    history_data = repo_history # TEMP NEED FIXED
+        history_data = json.load(f)
 
     old_entry = None
     for entry in history_data:
