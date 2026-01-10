@@ -16,6 +16,7 @@ from external_storage.external_storage_send import send_files_to_external_storag
 from file_system.summary_generator import add_new_vulns_to_summary
 from file_system.repo_history_tracking import update_repo_history
 from alerts.alert_on_severity import check_alert_on_severity
+from file_system.cleanup.cleanup_scan_data import cleanup_scan_data
 
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -358,6 +359,10 @@ def sbom_validation():
                         send_files_to_external_storage(prio_output_path, s3_bucker_dir_timestamp_folder)
                         send_files_to_external_storage(summary_report_path, s3_bucker_dir_timestamp_folder)
                         send_files_to_external_storage(repo_history_path, s3_bucker_dir_repo_name)
+
+                        cleanup_scan_data(audit_trail, s3_bucker_dir_repo_name)
+                    else:
+                        cleanup_scan_data(audit_trail, repo_path)
 
                     if daily_scan is False:
                         audit_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

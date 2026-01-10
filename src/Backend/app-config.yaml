@@ -55,6 +55,19 @@ backend:
         export_url_api_key: "${EXPORT_URL_API_KEY}"
         service_name: "${SERVICE_NAME}"
         environment: "${ENVIRONMENT}"
+
+    cleanup:
+      cleanup_entries:
+        enabled: False
+        max_entries: 5
+      
+      cleanup_old_entries:
+        enabled: False
+        always_keep_entries: 2
+        max_entry_age:
+          month: 0
+          week: 0
+          day: 7
         
 auth:
   aws:
