@@ -105,6 +105,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         "module": "save_scan_files",
     }
     log_exporter(new_entry)
+    print("[+] Scan completed")
 
 def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

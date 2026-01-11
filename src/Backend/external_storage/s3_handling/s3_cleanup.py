@@ -2,6 +2,7 @@ import os
 import boto3
 from datetime import datetime, timezone, timedelta
 from logs.audit_trail import audit_trail_event
+from logs.export_logs import log_exporter
 
 def cleanup_max_entries_scan_data_s3(audit_trail, scan_data_storage, cleanup_max_entries):
     print("[~] Cleanup of scan_data s3 bucket started...")
@@ -57,12 +58,33 @@ def cleanup_max_entries_scan_data_s3(audit_trail, scan_data_storage, cleanup_max
         print(f"[~] Deleting old scan_data: {timestamp_delete['key']}")
         s3.delete_object(Bucket=bucket, Key=timestamp_delete["key"])
 
-    audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
-        "to_delete": sorted(to_delete_timestamps),
-        "location": "s3",
-        "prefix": prefix,
-        "cleanup_max_entries": cleanup_max_entries,
-    })
+    if to_delete_timestamps:
+        new_entry = {
+            "message": f"Cleanup of s3 bucket 'max_entries' completed. Scan data deleted: [{to_delete}]. Cleanup max entries [{cleanup_max_entries}]",
+            "level": "info",
+            "module": "cleanup_max_entries_scan_data_s3",
+        }
+        log_exporter(new_entry)
+        audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
+            "to_delete": sorted(to_delete_timestamps),
+            "location": "s3",
+            "prefix": prefix,
+            "cleanup_max_entries": cleanup_max_entries,
+        })
+    else:
+        new_entry = {
+            "message": f"Cleanup of s3 bucket 'max_entries' not needed. Cleanup max entries [{cleanup_max_entries}]",
+            "level": "info",
+            "module": "cleanup_max_entries_scan_data_s3",
+        }
+        log_exporter(new_entry)
+        audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
+            "to_delete": "no_cleanup_needed",
+            "location": "s3",
+            "prefix": prefix,
+            "cleanup_max_entries": cleanup_max_entries,
+        })
+
     print("[+] Cleanup completed.")
 
 def cleanup_max_entries_age_scan_data_s3(audit_trail, scan_data_storage, max_entry_age_days, always_keep_entries):
@@ -115,6 +137,12 @@ def cleanup_max_entries_age_scan_data_s3(audit_trail, scan_data_storage, max_ent
     timestamps = sorted({ts["timestamp"] for ts in objects_with_timestamp}, reverse=True)
 
     if len(timestamps) < always_keep_entries:
+        new_entry = {
+            "message": f"Cleanup of s3 bucket 'max_entries_age' not needed. Currently under threshold of entries to keep: [{always_keep_entries}]. Scan data is currently under threshold.",
+            "level": "info",
+            "module": "cleanup_max_entries_age_scan_data_s3",
+        }
+        log_exporter(new_entry)
         print("[+] No cleanup needed")
         return
 
@@ -135,11 +163,32 @@ def cleanup_max_entries_age_scan_data_s3(audit_trail, scan_data_storage, max_ent
         print(f"[~] Deleting old scan_data: {timestamp_delete['key']}")
         s3.delete_object(Bucket=bucket, Key=timestamp_delete["key"])
 
-    audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
-        "to_delete": sorted(to_delete_timestamps),
-        "location": "s3",
-        "prefix": prefix,
-        "always_keep_entries": always_keep_entries,
-        "max_entry_age_days": max_entry_age_days,
-    })
+    if to_delete_timestamps:
+        new_entry = {
+            "message": f"Cleanup of s3 bucket 'max_entries_age' completed. Scan data deleted: [{to_delete_timestamps}]. Currently under threshold of entries to keep: [{always_keep_entries}]",
+            "level": "info",
+            "module": "cleanup_max_entries_age_scan_data_s3",
+        }
+        log_exporter(new_entry)
+        audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
+            "to_delete": sorted(to_delete_timestamps),
+            "location": "s3",
+            "prefix": prefix,
+            "always_keep_entries": always_keep_entries,
+            "max_entry_age_days": max_entry_age_days,
+        })
+    else:
+        new_entry = {
+            "message": f"Cleanup of s3 bucket 'max_entries_age' not needed. Currently under threshold of entries to keep: [{always_keep_entries}]",
+            "level": "info",
+            "module": "cleanup_max_entries_age_scan_data_s3",
+        }
+        log_exporter(new_entry)
+        audit_trail_event(audit_trail, "CLEANUP_SCAN_DATA", {
+            "to_delete": "no_cleanup_needed",
+            "location": "s3",
+            "prefix": prefix,
+            "always_keep_entries": always_keep_entries,
+            "max_entry_age_days": max_entry_age_days,
+        })
     print("[+] Cleanup completed.")
