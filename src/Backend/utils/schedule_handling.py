@@ -3,10 +3,26 @@ import shutil
 from pathlib import Path
 import os
 import requests
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta, timezone
 from validation.file_validation import sbom_validation
 from core.variables import kev_catalog, kev_url
 
 def scheduled_event():
+    rescan_scan_data()
+
+    scheduled_rescan_in_days_str = os.environ.get("scheduled_rescan_in_days")
+    scheduled_rescan_in_days = int(scheduled_rescan_in_days_str)
+
+    run_at = datetime.now(timezone.utc) + timedelta(days=scheduled_rescan_in_days)
+    
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(rescan_scan_data, trigger="date", run_date=run_at)
+    scheduler.start()
+
+    print(f"[+] Rescan will run again in: [{scheduled_rescan_in_days}] days at [{run_at.isoformat()}].")
+
+def rescan_scan_data():
     print("[~] Warming up (may take a few seconds)...")
     update_grype_db()
     update_kev_db()

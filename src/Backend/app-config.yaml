@@ -42,19 +42,6 @@ backend:
           enabled: False
           bucket: "${BUCKET}"
           bucket_key: "${BUCKET_KEY}"
-    
-    export_log:
-      https:
-        enabled: False
-        export_url: "${EXPORT_URL}"
-        export_url_api_key: "${EXPORT_URL_API_KEY}"
-
-      opentelemetry:
-        enabled: False
-        export_url: "${EXPORT_URL}"
-        export_url_api_key: "${EXPORT_URL_API_KEY}"
-        service_name: "${SERVICE_NAME}"
-        environment: "${ENVIRONMENT}"
 
     cleanup:
       cleanup_entries:
@@ -68,6 +55,26 @@ backend:
           month: 0
           week: 0
           day: 7
+    
+  export_log:
+    https:
+      enabled: False
+      export_url: "${EXPORT_URL}"
+      export_url_api_key: "${EXPORT_URL_API_KEY}"
+
+    opentelemetry:
+      enabled: False
+      export_url: "${EXPORT_URL}"
+      export_url_api_key: "${EXPORT_URL_API_KEY}"
+      service_name: "${SERVICE_NAME}"
+      environment: "${ENVIRONMENT}"
+    
+  scheduled_rescan:
+    enabled: True
+    rescan_interval:
+      month: 0
+      week: 0
+      day: 1
         
 auth:
   aws:

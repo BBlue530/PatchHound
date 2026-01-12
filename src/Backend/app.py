@@ -1,6 +1,5 @@
 from flask import Flask
 import os
-from apscheduler.schedulers.background import BackgroundScheduler
 from utils.schedule_handling import scheduled_event
 from database.create_db import create_database
 from core.system import install_tools
@@ -36,7 +35,4 @@ if __name__ == "__main__":
     scheduled_event()
     create_database()
 
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(scheduled_event, 'cron', hour=3, minute=0)
-    scheduler.start()
     app.run(host="0.0.0.0", port=8080, debug=False, use_reloader=False)
