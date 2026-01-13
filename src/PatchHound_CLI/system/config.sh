@@ -12,6 +12,9 @@ fi
 
 DEFAULT_SAST_RULESETS=(--config=p/security-audit --config=p/ci)
 
+TRIVY_FS_SCANNERS="vuln,secret,misconfig"
+TRIVY_IMAGE_SCANNERS="vuln,secret,misconfig"
+
 PATCHHOUND_VERSION="0.1.39"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
