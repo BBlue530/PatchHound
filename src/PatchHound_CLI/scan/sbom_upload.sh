@@ -39,10 +39,10 @@ scan_root_json=$(jq -n \
   '{scan_root: $scan_root}')
 
 response_and_status=$(curl --connect-timeout 60 --max-time 300 -s -w "\n%{http_code}" \
-  -F "sbom=@sbom.cyclonedx.json" \
-  -F "sast_report=@sast_report.json" \
+  -F "sbom=@${PATCHHOUND_SCAN_DATA}sbom.cyclonedx.json" \
+  -F "sast_report=@${PATCHHOUND_SCAN_DATA}sast_report.json" \
   -F "sast_ruleset=$SAST_RULESETS_JSON" \
-  -F "trivy_report=@trivy_report.json" \
+  -F "trivy_report=@${PATCHHOUND_SCAN_DATA}trivy_report.json" \
   -F "exclusions=@exclusions.json" \
   -F "token=$TOKEN" \
   -F "current_repo=$REPO_NAME" \
@@ -71,6 +71,6 @@ fi
 
 print_message "[+]" "Upload finished" "Upload to backend finished successfully"
 
-echo "$response_body" | jq '.vulns_cyclonedx_json' > vulns.cyclonedx.json
-echo "$response_body" | jq '.prio_vulns' > prio_vulns.json
+echo "$response_body" | jq '.vulns_cyclonedx_json' > ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
+echo "$response_body" | jq '.prio_vulns' > ${PATCHHOUND_SCAN_DATA}prio_vulns.json
 PATH_TO_RESOURCES_TOKEN=$(echo "$response_body" | jq -r '.path_to_resources_token')

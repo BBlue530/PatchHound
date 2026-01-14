@@ -15,7 +15,9 @@ DEFAULT_SAST_RULESETS=(--config=p/security-audit --config=p/ci)
 TRIVY_FS_SCANNERS="vuln,secret,misconfig"
 TRIVY_IMAGE_SCANNERS="vuln,secret,misconfig"
 
-PATCHHOUND_VERSION="0.1.39"
+PATCHHOUND_VERSION="0.1.40"
+
+PATCHHOUND_SCAN_DATA="PatchHound_Scan_Data/"
 
 SBOM_SCAN_API_URL="${BASE_URL}/v1/scan-sbom"
 HEALTH_CHECK_API_URL="${BASE_URL}/v1/health-check"

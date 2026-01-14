@@ -9,7 +9,7 @@ Severity: \(.extra.severity)
 Message: \(.extra.message)
 Location: \(.path):\(.start.line)
 ----------------------------------------------------------------------"
-  ' sast_report.json
+  ' ${PATCHHOUND_SCAN_DATA}sast_report.json
 fi
 
 if [ "$CRIT_COUNT_GRYPE" -gt 0 ]; then
@@ -42,7 +42,7 @@ Package: \($PKG.name)@\($PKG.version)
 Cause: \($DESC)
 Link: \($LINK)
 ----------------------------------------------------------------------"
-' vulns.cyclonedx.json
+' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
 fi
 
 if [ "$CRIT_COUNT_TRIVY" -gt 0 ]; then
@@ -57,7 +57,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }
 
@@ -92,7 +92,7 @@ Package: \($PKG.name)@\($PKG.version)
 Cause: \($DESC)
 Link: \($LINK)
 ----------------------------------------------------------------------"
-  ' vulns.cyclonedx.json
+  ' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
 fi
 
 if [ "$HIGH_COUNT_TRIVY" -gt 0 ]; then
@@ -107,7 +107,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }
 
@@ -122,7 +122,7 @@ if [ "$MED_COUNT_GRYPE" -gt 0 ]; then
 Severity: Medium
 Description: \(.description // "No description available")
 ----------------------------------------------------------------------"
-  ' vulns.cyclonedx.json
+  ' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
 fi
 
 if [ "$MED_COUNT_TRIVY" -gt 0 ]; then
@@ -137,7 +137,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }
 
@@ -152,7 +152,7 @@ if [ "$LOW_COUNT_GRYPE" -gt 0 ]; then
 Severity: Low
 Description: \(.description // "No description available")
 ----------------------------------------------------------------------"
-  ' vulns.cyclonedx.json
+  ' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
 fi
 
 if [ "$LOW_COUNT_TRIVY" -gt 0 ]; then
@@ -167,7 +167,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }
 
@@ -182,7 +182,7 @@ if [ "$UNKNOWN_COUNT_GRYPE" -gt 0 ]; then
 Severity: Unknown
 Description: \(.description // "No description available")
 ----------------------------------------------------------------------"
-  ' vulns.cyclonedx.json
+  ' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
 fi
 
 if [ "$UNKNOWN_COUNT_TRIVY" -gt 0 ]; then
@@ -197,7 +197,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }
 
@@ -216,7 +216,7 @@ CVSS Score: \($score)
 Severity: \(.ratings[0]?.severity // "unknown")
 Description: \(.description // "No description available")
 ----------------------------------------------------------------------"
-    ' vulns.cyclonedx.json
+    ' ${PATCHHOUND_SCAN_DATA}vulns.cyclonedx.json
   fi
 
   if [ "$CVSS_COUNT_TRIVY" -gt 0 ]; then
@@ -233,7 +233,7 @@ Package: \(.PkgName)@\(.InstalledVersion)
 Cause: \(.Title // .Description // "No description available")
 Link: \(.PrimaryURL // "No link available")
 ----------------------------------------------------------------------"
-    ' trivy_report.json
+    ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
   fi
 }
 
@@ -251,7 +251,7 @@ Check: \(.Title // .Description // "No description")
 Resolution: \(.Resolution // "No fix guidance")
 Link: \(.PrimaryURL // .References[0] // "No link available")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 
 if [ "$SECRET_COUNT_TRIVY" -gt 0 ]; then
@@ -265,6 +265,6 @@ File: \(.Target)
 Severity: \(.Severity)
 Title: \(.Title // "No title")
 ----------------------------------------------------------------------"
-  ' trivy_report.json
+  ' ${PATCHHOUND_SCAN_DATA}trivy_report.json
 fi
 }

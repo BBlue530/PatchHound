@@ -73,6 +73,8 @@ echo "          PatchHound - by BBlue530"
 echo "          Version: $PATCHHOUND_VERSION"
 echo "==============================================="
 
+mkdir -p "$PATCHHOUND_SCAN_DATA"
+
 source "$BASE_DIR/system/env_variables_scan.sh"
 source "$BASE_DIR/utils/health_check.sh"
 source "$BASE_DIR/system/deps.sh"
@@ -82,7 +84,6 @@ source "$BASE_DIR/scan/sbom_generate.sh"
 source "$BASE_DIR/scan/sbom_upload.sh"
 source "$BASE_DIR/system/vulns_found.sh"
 source "$BASE_DIR/display/scan_results.sh"
-source "$BASE_DIR/system/cleanup.sh"
 source "$BASE_DIR/display/conclusion.sh"
 
 print_message "[+]" "Scan result" "Scan finished successfully"

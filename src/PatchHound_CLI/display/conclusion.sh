@@ -42,9 +42,11 @@ if [ "$FAIL_ON_VULNERABILITY" = "true" ]; then
   fi
 fi
 
-echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > path_to_resources_token.txt
+echo "$PATH_TO_RESOURCES_TOKEN_BASE64" > ${PATCHHOUND_SCAN_DATA}path_to_resources_token.txt
 print_message "[+]" "Path token" "Path token to access resources sent to backend: 
 $PATH_TO_RESOURCES_TOKEN_BASE64"
+
+source "$BASE_DIR/system/cleanup.sh"
 
 if [ "$FAIL" = "true" ]; then
   exit 1
