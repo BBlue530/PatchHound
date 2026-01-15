@@ -8,7 +8,7 @@ import json
 import os
 from utils.helpers import safe_text
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
-from core.variables import all_repo_scans_folder, all_resources_folder
+from core.variables import *
 from file_system.pdf_report.pdf_table_builds import *
 from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
 from logs.export_logs import log_exporter
@@ -46,8 +46,8 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
     os.makedirs(base_dir, exist_ok=True)
     
-    pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}_pdf_summary_report.pdf")
-    summary_report_path = os.path.join(base_dir, f"{current_repo_decoded}_summary_report.json")
+    pdf_filename_path = os.path.join(base_dir, f"{current_repo_decoded}{pdf_filename_path_ending}")
+    summary_report_path = os.path.join(base_dir, f"{current_repo_decoded}{summary_report_path_ending}")
 
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         memory_file = get_resources_external_storage_internal_use(summary_report_path)

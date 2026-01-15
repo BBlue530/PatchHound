@@ -4,19 +4,20 @@ from utils.file_hash import hash_file
 from logs.audit_trail import audit_trail_event
 from logs.alerts import alert_event_system
 from logs.export_logs import log_exporter
+from core.variables import *
 
 def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     scan_dir = os.path.join(repo_path, timestamp_folder)
 
-    repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
-    audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
-    summary_report_path = os.path.join(scan_dir, f"{repo_name}_summary_report.json")
+    repo_history_path = os.path.join(repo_path, f"{repo_name}{repo_history_path_ending}")
+    audit_trail_path = os.path.join(scan_dir, f"{repo_name}{audit_trail_path_ending}")
+    summary_report_path = os.path.join(scan_dir, f"{repo_name}{summary_report_path_ending}")
 
-    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
-    syft_sbom_attestation_path = f"{syft_sbom_path}.att"
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}{syft_sbom_path_ending}")
+    syft_sbom_attestation_path = f"{syft_sbom_path}{attestation_path_ending}"
 
-    trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
-    trivy_sbom_attestation_path = f"{trivy_report_path}.att"
+    trivy_report_path = os.path.join(scan_dir, f"{repo_name}{trivy_report_path_ending}")
+    trivy_sbom_attestation_path = f"{trivy_report_path}{attestation_path_ending}"
 
     syft_sbom_att_hash_new = hash_file(syft_sbom_attestation_path)
     syft_sbom_hash_new = hash_file(syft_sbom_path)

@@ -1,6 +1,5 @@
 import os
-from flask import request
-from core.variables import all_repo_scans_folder, local_bin, env, all_resources_folder
+from core.variables import *
 from vuln_scan.get_vulns_count import check_vuln_files
 from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
 from utils.folder_lock import repo_lock
@@ -27,25 +26,25 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization, repo_name)
 
-    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
-    semgrep_sast_report_path = os.path.join(scan_dir, f"{repo_name}_semgrep_sast_report.json")
-    trivy_report_path = os.path.join(scan_dir, f"{repo_name}_trivy_report.json")
-    grype_path = os.path.join(scan_dir, f"{repo_name}_grype_vulns_cyclonedx.json")
-    prio_path = os.path.join(scan_dir, f"{repo_name}_prio_vuln_data.json")
-    summary_report_path = os.path.join(scan_dir, f"{repo_name}_summary_report.json")
-    audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
+    syft_sbom_path = os.path.join(scan_dir, f"{repo_name}{syft_sbom_path_ending}")
+    semgrep_sast_report_path = os.path.join(scan_dir, f"{repo_name}{semgrep_sast_report_path_ending}")
+    trivy_report_path = os.path.join(scan_dir, f"{repo_name}{trivy_report_path_ending}")
+    grype_path = os.path.join(scan_dir, f"{repo_name}{grype_path_ending}")
+    prio_path = os.path.join(scan_dir, f"{repo_name}{prio_path_ending}")
+    summary_report_path = os.path.join(scan_dir, f"{repo_name}{summary_report_path_ending}")
+    audit_trail_path = os.path.join(scan_dir, f"{repo_name}{audit_trail_path_ending}")
 
-    exclusions_file_path = os.path.join(repo_dir, f"{repo_name}_exclusions_file.json")
-    repo_history_path = os.path.join(repo_dir, f"{repo_name}_repo_history.json")
+    exclusions_file_path = os.path.join(repo_dir, f"{repo_name}{exclusions_file_path_ending}")
+    repo_history_path = os.path.join(repo_dir, f"{repo_name}{repo_history_path_ending}")
 
-    syft_att_sig_path = f"{syft_sbom_path}_att.sig"
-    syft_sbom_attestation_path = f"{syft_sbom_path}.att"
+    syft_att_sig_path = f"{syft_sbom_path}{att_sig_path_ending}"
+    syft_sbom_attestation_path = f"{syft_sbom_path}{attestation_path_ending}"
 
-    trivy_att_sig_path = f"{trivy_report_path}_att.sig"
-    trivy_sbom_attestation_path = f"{trivy_report_path}.att"
+    trivy_att_sig_path = f"{trivy_report_path}{att_sig_path_ending}"
+    trivy_sbom_attestation_path = f"{trivy_report_path}{attestation_path_ending}"
 
-    cosign_key_path = os.path.join(scan_dir, f"{repo_name}.key")
-    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
+    cosign_key_path = os.path.join(scan_dir, f"{repo_name}{cosign_key_path_ending}")
+    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}{cosign_pub_path_ending}")
     
     os.makedirs(scan_dir, exist_ok=True)
 
@@ -53,7 +52,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         alert_system_json = {
             "alert_system_webhook": alert_system_webhook
         }
-        alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
+        alert_path = os.path.join(repo_dir, f"{repo_name}{alert_path_ending}")
 
         print(f"[+] Alert system set for: {repo_name}")
 
@@ -62,7 +61,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
             "fail_on_severity": fail_on_severity
         }
         
-        fail_on_severity_path = os.path.join(scan_dir, f"{repo_name}_fail_on_severity.json")
+        fail_on_severity_path = os.path.join(scan_dir, f"{repo_name}{fail_on_severity_path_ending}")
 
     alerts_list = []
     

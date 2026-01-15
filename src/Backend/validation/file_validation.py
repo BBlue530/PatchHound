@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import subprocess
 import shutil
-from core.variables import all_resources_folder, all_repo_scans_folder, all_image_signature_folder, scheduled_event_commit_sha, scheduled_event_commit_author, local_bin, env
+from core.variables import *
 from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
 from utils.helpers import extract_cve_ids
@@ -80,36 +80,36 @@ def sbom_validation():
                 timestamp_folder = timestamp_folders[0]
                 
                 # Create the full path for the latest scan inside the repo
-                # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}_syft_sbom_cyclonedx.json
+                # repo_scans_dir, organization, repo_name, timestamp_folders, {repo_name}{syft_sbom_path_ending}
 
                 latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
-                alert_path = os.path.join(repo_path, f"{repo_name}_alert.json")
-                fail_on_severity_path = os.path.join(latest_scan_dir, f"{repo_name}_fail_on_severity.json")
+                alert_path = os.path.join(repo_path, f"{repo_name}{alert_path_ending}")
+                fail_on_severity_path = os.path.join(latest_scan_dir, f"{repo_name}{fail_on_severity_path_ending}")
                 
-                syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}_syft_sbom_cyclonedx.json")
-                syft_att_sig_path = f"{syft_sbom_path}_att.sig"
-                syft_sbom_att_path = f"{syft_sbom_path}.att"
+                syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}{syft_sbom_path_ending}")
+                syft_att_sig_path = f"{syft_sbom_path}{att_sig_path_ending}"
+                syft_sbom_att_path = f"{syft_sbom_path}{attestation_path_ending}"
 
-                trivy_report_path = os.path.join(latest_scan_dir, f"{repo_name}_trivy_report.json")
-                trivy_att_sig_path = f"{trivy_report_path}_att.sig"
-                trivy_sbom_att_path = f"{trivy_report_path}.att"
+                trivy_report_path = os.path.join(latest_scan_dir, f"{repo_name}{trivy_report_path_ending}")
+                trivy_att_sig_path = f"{trivy_report_path}{att_sig_path_ending}"
+                trivy_sbom_att_path = f"{trivy_report_path}{attestation_path_ending}"
 
-                exclusions_file_path = os.path.join(repo_path, f"{repo_name}_exclusions_file.json")
+                exclusions_file_path = os.path.join(repo_path, f"{repo_name}{exclusions_file_path_ending}")
 
-                cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}.pub")
+                cosign_pub_path = os.path.join(latest_scan_dir, f"{repo_name}{cosign_pub_path_ending}")
 
-                grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}_grype_vulns_cyclonedx.json")
-                prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}_prio_vuln_data.json")
+                grype_vulns_output_path = os.path.join(latest_scan_dir, f"{repo_name}{grype_path_ending}")
+                prio_output_path = os.path.join(latest_scan_dir, f"{repo_name}{prio_path_ending}")
 
-                summary_report_path = os.path.join(latest_scan_dir, f"{repo_name}_summary_report.json")
+                summary_report_path = os.path.join(latest_scan_dir, f"{repo_name}{summary_report_path_ending}")
 
-                repo_history_path = os.path.join(repo_path, f"{repo_name}_repo_history.json")
+                repo_history_path = os.path.join(repo_path, f"{repo_name}{repo_history_path_ending}")
 
                 # These are not used anywhere and are just here to make sure they actually exist
-                semgrep_sast_report_path = os.path.join(latest_scan_dir, f"{repo_name}_semgrep_sast_report.json")
-                old_audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}_audit_trail.json")
-                cosign_key_path = os.path.join(latest_scan_dir, f"{repo_name}.key")
+                semgrep_sast_report_path = os.path.join(latest_scan_dir, f"{repo_name}{semgrep_sast_report_path_ending}")
+                old_audit_trail_path = os.path.join(latest_scan_dir, f"{repo_name}{audit_trail_path_ending}")
+                cosign_key_path = os.path.join(latest_scan_dir, f"{repo_name}{cosign_key_path_ending}")
 
                 alerts_list= []
 

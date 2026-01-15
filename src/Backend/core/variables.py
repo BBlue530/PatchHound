@@ -67,3 +67,28 @@ SEMGREP_RULESETS = {
     "p/cwe-top-25": "Rules mapped to the CWEs (Common Weakness Enumeration) list.",
     "p/all": "(Registry identifier) Runs all public rules in the Semgrep Registry heavy and noisy.",
 }
+
+# File ending names
+syft_sbom_path_ending = "_syft_sbom_cyclonedx.json"
+semgrep_sast_report_path_ending = "_semgrep_sast_report.json"
+trivy_report_path_ending = "_trivy_report.json"
+grype_path_ending = "_grype_vulns_cyclonedx.json"
+prio_path_ending = "_prio_vuln_data.json"
+summary_report_path_ending = "_summary_report.json"
+audit_trail_path_ending = "_audit_trail.json"
+
+exclusions_file_path_ending = "_exclusions_file.json"
+repo_history_path_ending = "_repo_history.json"
+
+att_sig_path_ending = "_att.sig"
+attestation_path_ending = ".att"
+sig_path_ending = ".sig"
+
+digest_path_ending = "_digest.txt"
+
+cosign_key_path_ending = ".key"
+cosign_pub_path_ending = ".pub"
+alert_path_ending = "_alert.json"
+fail_on_severity_path_ending = "_fail_on_severity.json"
+
+pdf_filename_path_ending = "_pdf_summary_report.pdf"

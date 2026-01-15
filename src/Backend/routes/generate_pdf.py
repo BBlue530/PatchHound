@@ -9,7 +9,7 @@ from database.validate_token import validate_token
 from utils.file_hash import hash_file
 from file_system.file_save import sign_file
 from logs.export_logs import log_exporter
-from core.variables import all_repo_scans_folder, all_resources_folder
+from core.variables import *
 
 pdf_bp = Blueprint("pdf", __name__)
 
@@ -49,12 +49,12 @@ def generate_pdf():
     if valid == True:
         scan_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
 
-        cosign_key_path = os.path.join(scan_dir, f"{current_repo_decoded}.key")
-        cosign_pub_path = os.path.join(scan_dir, f"{current_repo_decoded}.pub")
+        cosign_key_path = os.path.join(scan_dir, f"{current_repo_decoded}{cosign_key_path_ending}")
+        cosign_pub_path = os.path.join(scan_dir, f"{current_repo_decoded}{cosign_pub_path_ending}")
         
         pdf_filename_path = summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded)
 
-        pdf_sig_path = f"{pdf_filename_path}.sig"
+        pdf_sig_path = f"{pdf_filename_path}{sig_path_ending}"
 
         sign_file(cosign_key_path, cosign_pub_path, pdf_sig_path, pdf_filename_path, current_repo_decoded, scan_dir)
 
@@ -71,7 +71,7 @@ def generate_pdf():
             zf.write(pdf_sig_path, arcname=os.path.basename(pdf_sig_path))
             zf.write(cosign_pub_path, arcname=os.path.basename(cosign_pub_path))
             zf.write(pdf_filename_path, arcname=os.path.basename(pdf_filename_path))
-            zf.writestr(f"{current_repo_decoded}_pdf_hash.txt", f"SHA256: {pdf_report_hash}")
+            zf.writestr(f"{current_repo_decoded}_pdf{digest_path_ending}", f"SHA256: {pdf_report_hash}")
         memory_file.seek(0)
 
         new_entry = {

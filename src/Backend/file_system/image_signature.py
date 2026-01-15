@@ -4,7 +4,7 @@ from utils.helpers import file_stable_check
 from file_system.file_save import sign_image, verify_image, key_generating
 from validation.secrets_manager import read_secret
 from logs.audit_trail import save_audit_trail, append_audit_log
-from core.variables import all_image_signature_folder, local_bin, env, all_resources_folder, all_base_image_signature_folder
+from core.variables import *
 
 def sign_image_digest(audit_trail, image_digest, organization, current_repo, timestamp):
     print("[~] Signing image...")
@@ -17,12 +17,12 @@ def sign_image_digest(audit_trail, image_digest, organization, current_repo, tim
     repo_name = current_repo.replace("/", "_")
     scan_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name)
-    image_digest_path = os.path.join(scan_dir, f"{repo_name}_image_digest.txt")
-    alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
-    cosign_key_path = os.path.join(scan_dir, f"{repo_name}.key")
-    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
-    image_sig_path = os.path.join(scan_dir, f"{repo_name}_image.sig")
-    audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
+    image_digest_path = os.path.join(scan_dir, f"{repo_name}_image{digest_path_ending}")
+    alert_path = os.path.join(repo_dir, f"{repo_name}{alert_path_ending}")
+    cosign_key_path = os.path.join(scan_dir, f"{repo_name}{cosign_key_path_ending}")
+    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}{cosign_pub_path_ending}")
+    image_sig_path = os.path.join(scan_dir, f"{repo_name}_image{sig_path_ending}")
+    audit_trail_path = os.path.join(scan_dir, f"{repo_name}{audit_trail_path_ending}")
 
     os.makedirs(scan_dir, exist_ok=True)
 
@@ -45,10 +45,10 @@ def verify_image_digest(audit_trail, image_digest, organization, current_repo, t
     repo_name = current_repo.replace("/", "_")
     scan_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name, timestamp)
     repo_dir = os.path.join(all_resources_folder, all_image_signature_folder, organization, repo_name)
-    alert_path = os.path.join(repo_dir, f"{repo_name}_alert.json")
-    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}.pub")
-    image_sig_path = os.path.join(scan_dir, f"{repo_name}_image.sig")
-    audit_trail_path = os.path.join(scan_dir, f"{repo_name}_audit_trail.json")
+    alert_path = os.path.join(repo_dir, f"{repo_name}{alert_path_ending}")
+    cosign_pub_path = os.path.join(scan_dir, f"{repo_name}{cosign_pub_path_ending}")
+    image_sig_path = os.path.join(scan_dir, f"{repo_name}_image{sig_path_ending}")
+    audit_trail_path = os.path.join(scan_dir, f"{repo_name}{audit_trail_path_ending}")
 
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
         temp_file.write(image_digest)
@@ -74,11 +74,11 @@ def sign_base_image_digest(audit_trail, image_digest, image_name):
     env["COSIGN_PASSWORD"] = cosign_key
 
     image_dir = os.path.join(all_resources_folder, all_base_image_signature_folder, image_name)
-    image_digest_path = os.path.join(image_dir, f"{image_name}_image_digest.txt")
-    cosign_key_path = os.path.join(image_dir, f"{image_name}.key")
-    cosign_pub_path = os.path.join(image_dir, f"{image_name}.pub")
-    image_sig_path = os.path.join(image_dir, f"{image_name}_image.sig")
-    audit_trail_path = os.path.join(image_dir, f"{image_name}_audit_trail.json")
+    image_digest_path = os.path.join(image_dir, f"{image_name}_image{digest_path_ending}")
+    cosign_key_path = os.path.join(image_dir, f"{image_name}{cosign_key_path_ending}")
+    cosign_pub_path = os.path.join(image_dir, f"{image_name}{cosign_pub_path_ending}")
+    image_sig_path = os.path.join(image_dir, f"{image_name}_image{sig_path_ending}")
+    audit_trail_path = os.path.join(image_dir, f"{image_name}{audit_trail_path_ending}")
 
     os.makedirs(image_dir, exist_ok=True)
 
@@ -99,9 +99,9 @@ def sign_base_image_digest(audit_trail, image_digest, image_name):
 def verify_base_image_digest(audit_trail, image_digest, image_name):
     print("[~] Verifying image...")
     image_dir = os.path.join(all_resources_folder, all_base_image_signature_folder, image_name)
-    cosign_pub_path = os.path.join(image_dir, f"{image_name}.pub")
-    image_sig_path = os.path.join(image_dir, f"{image_name}_image.sig")
-    audit_trail_path = os.path.join(image_dir, f"{image_name}_audit_trail.json")
+    cosign_pub_path = os.path.join(image_dir, f"{image_name}{cosign_pub_path_ending}")
+    image_sig_path = os.path.join(image_dir, f"{image_name}_image{sig_path_ending}")
+    audit_trail_path = os.path.join(image_dir, f"{image_name}{audit_trail_path_ending}")
 
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
         temp_file.write(image_digest)
