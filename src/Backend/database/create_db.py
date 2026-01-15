@@ -1,7 +1,7 @@
 import sqlite3
 import psycopg2
 import os
-from core.variables import db_path
+from core.variables import db_path, DB_DIR_PATH
 
 def create_database():
     if os.environ.get("external_database_enabled", "False").lower() == "true":
@@ -29,6 +29,7 @@ def create_database():
         print("[+] External PostgreSQL database and table created successfully.")
 
     else:
+        os.makedirs(DB_DIR_PATH, exist_ok=True)
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 

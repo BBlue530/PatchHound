@@ -5,12 +5,12 @@ kev_url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulner
 
 kev_catalog = "kev_catalog.json"
 
-all_resources_folder = "resources"
-all_repo_scans_folder = "all_scans"
-all_image_signature_folder = "all_image_signature"
-all_base_image_signature_folder = "all_base_image_signature"
+all_resources_folder = "resource_data"
+all_repo_scans_folder = "scan_data"
+all_image_signature_folder = "image_signature"
+all_base_image_signature_folder = "base_image_signature"
 
-service_log_path = "log_data/service_logs.json"
+service_log_path = os.path.join(all_resources_folder, "log_data", "service_logs.json")
 
 scheduled_event_commit_sha = "Null"
 scheduled_event_commit_author = "Daily Scan"
@@ -19,14 +19,15 @@ local_bin = os.path.expanduser("~/.local/bin")
 env = os.environ.copy()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "..", "database", "keys_db.sqlite")
+DB_DIR_PATH = os.path.join(BASE_DIR, "..", all_resources_folder, "database")
+DB_PATH = os.path.join(DB_DIR_PATH, "patchhound_db.sqlite")
 db_path = os.path.normpath(DB_PATH)
 
 secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.40"
+patchhound_version = "0.1.41"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"
