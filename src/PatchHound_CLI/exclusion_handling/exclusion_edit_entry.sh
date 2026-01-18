@@ -10,23 +10,23 @@ while true; do
   echo "Remove entry(D)"
   echo "Save changes(S)"
   echo "Quit(Q)"
-  read -p "Input: " COMMAND
+  read -p "Input: " ENTRY_INDEX
 
-  if [[ "$COMMAND" = "S" || "$COMMAND" = "s" ]]; then
+  if [[ "$ENTRY_INDEX" = "S" || "$ENTRY_INDEX" = "s" ]]; then
     break
   fi
 
-  if [[ "$COMMAND" = "Q" || "$COMMAND" = "q" ]]; then
+  if [[ "$ENTRY_INDEX" = "Q" || "$ENTRY_INDEX" = "q" ]]; then
     exit 0
   fi
 
-  if [[ "$COMMAND" = "A" || "$COMMAND" = "a" ]]; then
+  if [[ "$ENTRY_INDEX" = "A" || "$ENTRY_INDEX" = "a" ]]; then
     add_exclusions
     display_exclusions "$response_body"
     continue
   fi
 
-  if [[ "$COMMAND" = "D" || "$COMMAND" = "d" ]]; then
+  if [[ "$ENTRY_INDEX" = "D" || "$ENTRY_INDEX" = "d" ]]; then
     delete_exclusions
     display_exclusions "$response_body"
     continue
@@ -34,7 +34,7 @@ while true; do
 
   ENTRY_COUNT=$(echo "$response_body" | jq '.exclusions | length')
 
-  if ! [[ "$COMMAND" =~ ^[0-9]+$ ]] || [ "$COMMAND" -ge "$ENTRY_COUNT" ]; then
+  if ! [[ "$ENTRY_INDEX" =~ ^[0-9]+$ ]] || [ "$ENTRY_INDEX" -ge "$ENTRY_COUNT" ]; then
     print_message "[!]" "Invalid selection" "Index out of range"
     display_exclusions "$response_body"
     continue
