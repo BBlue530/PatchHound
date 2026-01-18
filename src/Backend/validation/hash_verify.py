@@ -1,5 +1,5 @@
 import os
-import json
+from utils.helpers import load_file_data
 from utils.file_hash import hash_file
 from logs.audit_trail import audit_trail_event
 from logs.alerts import alert_event_system
@@ -28,8 +28,7 @@ def verify_sha(audit_trail, repo_path, timestamp_folder, repo_name, alert_path):
     audit_trail_hash_new = hash_file(audit_trail_path)
     summary_report_hash_new = hash_file(summary_report_path)
 
-    with open(repo_history_path, "r") as f:
-        history_data = json.load(f)
+    history_data = load_file_data(repo_history_path)
 
     old_entry = None
     for entry in history_data:

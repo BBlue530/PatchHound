@@ -1,10 +1,9 @@
-import json
 from logs.audit_trail import audit_trail_event
+from utils.helpers import load_file_data
 from core.variables import kev_catalog
 
 def compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data):
-    with open(kev_catalog, "r") as f:
-        kev_data = json.load(f)
+    kev_data = load_file_data(kev_catalog)
 
     kev_version = kev_data["catalogVersion"]
     kev_release_date = kev_data["dateReleased"]

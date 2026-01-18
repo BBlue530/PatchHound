@@ -36,3 +36,10 @@ def safe_text(value):
     if value is None:
         return ""
     return html.escape(str(value), quote=False)
+
+def load_file_data(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            file_data = json.load(f)
+        return file_data
+    return {}

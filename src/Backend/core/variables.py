@@ -1,5 +1,4 @@
 import os
-from reportlab.lib import colors
 
 kev_url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 
@@ -27,7 +26,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.41"
+patchhound_version = "0.1.42"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"

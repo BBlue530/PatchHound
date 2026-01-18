@@ -43,8 +43,23 @@ case "$COMMAND" in
                 ;;
         esac
         ;;
-    exclude)
-        source "$BASE_DIR/commands/exclude.sh" "$@"
+    exclusion)
+        SUBCOMMAND="$1"
+        shift || true
+        case "$SUBCOMMAND" in
+            list)
+                source "$BASE_DIR/commands/exclusion/exclusion-list.sh" "$@"
+                ;;
+            edit)
+                source "$BASE_DIR/commands/exclusion/exclusion-edit.sh" "$@"
+                ;;
+            --help)
+                usage_cli_exclusion
+                ;;
+            *)
+                usage_cli_exclusion
+                ;;
+        esac
         ;;
     resource)
         SUBCOMMAND="$1"

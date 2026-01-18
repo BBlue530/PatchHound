@@ -2,7 +2,7 @@ import json
 import secrets
 import os
 import sys
-from flask import request
+from utils.helpers import load_file_data
 from config.secret_data. get_secret_data import read_external_secret
 from logs.export_logs import log_exporter
 from core.variables import secret_storage, length, secret_types
@@ -55,8 +55,7 @@ def read_secret_local(secret_type):
         return None
 
     try:
-        with open(secret_storage, "r") as f:
-            secrets_data = json.load(f)
+        secrets_data = load_file_data(secret_storage)
     except json.JSONDecodeError:
         new_entry = {
             "message": "Secret file is invalid",
@@ -87,8 +86,7 @@ def generate_secrets():
             os.makedirs(dir_path, exist_ok=True)
 
         try:
-            with open(secret_storage, "r") as f:
-                secrets_data = json.load(f)
+            secrets_data = load_file_data(secret_storage)
         except (FileNotFoundError, json.JSONDecodeError):
             secrets_data = {}
 

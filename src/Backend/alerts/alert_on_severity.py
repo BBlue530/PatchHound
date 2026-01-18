@@ -4,6 +4,7 @@ import os
 from logs.audit_trail import audit_trail_event
 from logs.export_logs import log_exporter
 from alerts.alert_helpers import check_alert_status
+from utils.helpers import load_file_data
 
 def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path):
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
@@ -26,27 +27,21 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
 
     semgrep_issue_count = 0
 
-    with open(grype_path, "r") as f:
-        grype_data = json.load(f)
+    grype_data = load_file_data(grype_path)
 
-    with open(trivy_report_path, "r") as f:
-        trivy_data = json.load(f)
+    trivy_data = load_file_data(trivy_report_path)
 
-    with open(semgrep_sast_report_path, "r") as f:
-        semgrep_data = json.load(f)
+    semgrep_data = load_file_data(semgrep_sast_report_path)
 
-    with open(exclusions_file_path, "r") as f:
-        exclusions_data = json.load(f)
+    exclusions_data = load_file_data(exclusions_file_path)
 
     if os.path.isfile(alert_path):
-        with open(alert_path, "r") as f:
-            alert_system_json = json.load(f)
+        alert_system_json = load_file_data(alert_path)
 
         alert_system_webhook = alert_system_json.get("alert_system_webhook")
 
     if os.path.isfile(fail_on_severity_path):
-        with open(alert_path, "r") as f:
-            fail_on_severity_json = json.load(f)
+        fail_on_severity_json = load_file_data(fail_on_severity_path)
 
         fail_on_severity = fail_on_severity_json.get("fail_on_severity")
 

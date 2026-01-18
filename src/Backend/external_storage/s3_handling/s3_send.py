@@ -37,7 +37,6 @@ def send_files_to_s3(files_to_send_dir, bucket_dir):
             "message": f"Path does not exist: {files_to_send_dir}",
             "level": "error",
             "module": "send_files_to_s3",
-            "client_ip": request.remote_addr,
         }
         log_exporter(new_entry)
         raise ValueError(f"Path does not exist: {files_to_send_dir}")

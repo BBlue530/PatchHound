@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from utils.helpers import load_file_data
 from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 
@@ -10,8 +11,6 @@ def alert_event_system(audit_trail, message, alert, alert_config_path):
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         memory_file = get_resources_external_storage_internal_use(alert_config_path)
         alert_system_json = json.load(memory_file)
-        print(alert_config_path)
-        print(alert_system_json)
     else:
         if alert_config_path is None:
             audit_trail_event(audit_trail, "ALERT_SYSTEM", {
@@ -21,8 +20,7 @@ def alert_event_system(audit_trail, message, alert, alert_config_path):
                 })
             return
         else:
-            with open(alert_config_path, "r") as f:
-                alert_system_json = json.load(f)
+            alert_system_json = load_file_data(alert_config_path)
 
     alert_system_webhook = alert_system_json.get("alert_system_webhook")
 

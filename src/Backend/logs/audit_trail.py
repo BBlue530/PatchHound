@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import json
 import os
-from utils.helpers import file_stable_check
+from utils.helpers import file_stable_check, load_file_data
 from utils.file_hash import hash_file
 
 def audit_trail_event(audit_trail, action, details=""):

@@ -1,9 +1,10 @@
 import json
 import datetime
 from logs.audit_trail import audit_trail_event
-from core.variables import patchhound_version, GRYPE_VERSION, COSIGN_VERSION
+from utils.helpers import load_file_data
+from file_system.file_save import save_file
 
-def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset):
+def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
@@ -21,6 +22,13 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
     vuln_counter = 0
     misconf_counter = 0
     exposed_secret_counter = 0
+
+    syft_sbom_json = load_file_data(syft_sbom_path)
+    grype_vulns_cyclonedx_json_data = load_file_data(grype_path)
+    prio_vuln_data = load_file_data(prio_path)
+    semgrep_sast_report_json = load_file_data(semgrep_sast_report_path)
+    trivy_report_json = load_file_data(trivy_report_path)
+    exclusions_file_json = load_file_data(exclusions_file_path)
 
     excluded_ids = {
         e.get("vulnerability")
@@ -337,26 +345,35 @@ def generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclone
             "vuln_counter": vuln_counter,
             "misconf_counter": misconf_counter,
             "exposed_secret_counter": exposed_secret_counter
-
         },
-        "tool_version": {
-            "syft_version": tool_versions.get("syft_version"),
-            "semgrep_version": tool_versions.get("semgrep_version"),
-            "trivy_version": tool_versions.get("trivy_version"),
-            "grype_version": GRYPE_VERSION,
-            "cosign_version": COSIGN_VERSION,
-            "patchhound_version": patchhound_version
-        },
-        "ruleset": {
-            "semgrep": semgrep_sast_ruleset
-        }
+        "tool_version": tool_versions,
+#        {
+#            "syft_version": tool_versions.get("syft_version"),
+#            "semgrep_version": tool_versions.get("semgrep_version"),
+#            "trivy_version": tool_versions.get("trivy_version"),
+#            "grype_version": GRYPE_VERSION,
+#            "cosign_version": COSIGN_VERSION,
+#            "patchhound_version": patchhound_version
+#        },
+        "ruleset": rulesets,
+#        {
+#            "semgrep": semgrep_sast_ruleset
+#        }
     }
 
     audit_trail_event(audit_trail, "SUMMARY_GENERATION", {
             "status": "success"
         })
+    
+    if summary_report:
+        save_file(summary_report_path, summary_report)
+    else:
+        audit_trail_event(audit_trail, "FILE_SAVE", {
+            "summary_report": summary_report_path,
+            "status": "fail"
+        })
 
-    return summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter
+    return excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter
 
 def get_vulnerability_link(key, vuln, vuln_url_key):
     if key.startswith("GHSA"):
@@ -447,8 +464,8 @@ def add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data,
             "vuln_found_timestamp": timestamp
         })
 
-    with open(summary_report_path, "r") as f:
-        summary_report_json = json.load(f)
+    summary_report_json = load_file_data(summary_report_path)
+    
     summary_report_json["new_vulnerabilities"] = new_vulns
     with open(summary_report_path, "w") as f:
         json.dump(summary_report_json, f, indent=2)

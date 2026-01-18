@@ -13,7 +13,7 @@ from logs.export_logs import log_exporter
 from external_storage.external_storage_send import send_files_to_external_storage
 from alerts.alert_on_severity import check_alert_on_severity
 
-def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file, semgrep_sast_ruleset, fail_on_severity):
+def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity):
     secret_type = "cosign_key"
     cosign_key = read_secret(secret_type)
 
@@ -45,6 +45,15 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
 
     cosign_key_path = os.path.join(scan_dir, f"{repo_name}{cosign_key_path_ending}")
     cosign_pub_path = os.path.join(scan_dir, f"{repo_name}{cosign_pub_path_ending}")
+
+    rulesets = {}
+
+    tool_versions["grype_version"] = GRYPE_VERSION
+    tool_versions["cosign_version"] = COSIGN_VERSION
+    tool_versions["patchhound_version"] = patchhound_version
+    
+    rulesets["semgrep"] = semgrep_sast_ruleset
+
     
     os.makedirs(scan_dir, exist_ok=True)
 
@@ -68,15 +77,15 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     syft_sbom_json = load_json(syft_sbom_file)
     trivy_report_json = load_json(trivy_report)
     semgrep_sast_report_json = load_json(semgrep_sast_report)
-    exclusions_file_json = load_json(exclusions_file)
 
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
             key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_path, cosign_pub_path, alert_path)
         
-        summary_report, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_json, grype_vulns_cyclonedx_json_data, prio_vuln_data, semgrep_sast_report_json, trivy_report_json, exclusions_file_json, tool_versions, scan_root, semgrep_sast_ruleset)
-        save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json, fail_on_severity_json, fail_on_severity_path)
-        
+        save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, fail_on_severity_json, fail_on_severity_path)
+
+        excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets)
+
         # Handles attestation of syft and trivy SBOMs
         syft_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, syft_sbom_path, syft_sbom_attestation_path, syft_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         trivy_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, trivy_report_path, trivy_sbom_attestation_path, trivy_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
@@ -93,10 +102,9 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         send_files_to_external_storage(scan_dir, scan_dir)
-        send_files_to_external_storage(exclusions_file_path, repo_dir)
         send_files_to_external_storage(alert_path, repo_dir)
 
-    cleanup_scan_data()
+    #cleanup_scan_data()
 
     new_entry = {
         "message": "Scan completed",

@@ -15,7 +15,7 @@ DEFAULT_SAST_RULESETS=(--config=p/security-audit --config=p/ci)
 TRIVY_FS_SCANNERS="vuln,secret,misconfig"
 TRIVY_IMAGE_SCANNERS="vuln,secret,misconfig"
 
-PATCHHOUND_VERSION="0.1.41"
+PATCHHOUND_VERSION="0.1.42"
 
 PATCHHOUND_SCAN_DATA="PatchHound_Scan_Data/"
 
@@ -40,3 +40,7 @@ IMAGE_VERIFY_API_URL="${BASE_URL}/v1/verify-image"
 # Base image command endpoints
 BASE_IMAGE_SIGN_API_URL="${BASE_URL}/v1/sign-base-image"
 BASE_IMAGE_VERIFY_API_URL="${BASE_URL}/v1/verify-base-image"
+
+# Exclusion command enndpoints
+EXCLUSIONN_GET_API_URL="${BASE_URL}/v1/exclusion-get"
+EXCLUSIONN_POST_API_URL="${BASE_URL}/v1/exclusion-post"

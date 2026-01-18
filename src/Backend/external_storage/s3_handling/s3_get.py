@@ -99,10 +99,13 @@ def get_resource_s3_internal_use(resource_to_get):
     try:
         s3.download_fileobj(bucket, key, memory_file)
     except ClientError as e:
-        if e.response['Error']['Code'] == 'NoSuchKey':
-            raise FileNotFoundError(f"Requested file not found: {key}") from e
-        else:
-            raise RuntimeError(f"S3 download error: {e}") from e
+        error_code = e.response.get("Error", {}).get("Code")
+        status_code = e.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+
+        if error_code in ("NoSuchKey", "404", "NotFound") or status_code == 404:
+            return None
+
+        raise RuntimeError(f"S3 download error: {e}") from e
 
     memory_file.seek(0)
 

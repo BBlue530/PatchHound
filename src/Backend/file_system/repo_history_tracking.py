@@ -1,6 +1,7 @@
 import json
 import os
 from utils.file_hash import hash_file
+from utils.helpers import load_file_data
 from external_storage.external_storage_append import append_to_external_storage
 from logs.audit_trail import audit_trail_event
 from logs.alerts import alert_event_system
@@ -37,8 +38,7 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
     else:
         print("[+] AWS s3 not enabled.")
         if os.path.exists(repo_history_path):
-            with open(repo_history_path, "r") as f:
-                history_data = json.load(f)
+            history_data = load_file_data(repo_history_path)
         else:
             history_data = []
 
@@ -52,8 +52,7 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
 def update_repo_history(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder):
     summary_report_hash_updated = hash_file(summary_report_path)
 
-    with open(repo_history_path, "r") as f:
-        repo_history = json.load(f)
+    repo_history = load_file_data(repo_history_path)
 
     timestamp_repo_history_entry = repo_history[timestamp_folder]
 

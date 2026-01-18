@@ -14,14 +14,12 @@ from validation.secrets_manager import read_secret
 from logs.export_logs import log_exporter
 from core.variables import local_bin
 
-def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, summary_report_path, summary_report, exclusions_file_path, exclusions_file_json, fail_on_severity_json, fail_on_severity_path):
+def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, fail_on_severity_json, fail_on_severity_path):
     file_save_status = True
     files_failed_save = []
 
     if alert_system_json:
-        with open(alert_path, "w") as f:
-            json.dump(alert_system_json, f, indent=4)
-        file_stable_check(alert_path)
+        save_file(alert_path, alert_system_json)
     else:
         files_failed_save.append("alert_system")
         file_save_status = False
@@ -31,9 +29,7 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
 
     if syft_sbom_json:
-        with open(syft_sbom_path, "w") as f:
-            json.dump(syft_sbom_json, f, indent=4)
-        file_stable_check(syft_sbom_path)
+        save_file(syft_sbom_path, syft_sbom_json)
     else:
         files_failed_save.append("syft_sbom")
         file_save_status = False
@@ -43,9 +39,7 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
     
     if semgrep_sast_report_json:
-        with open(semgrep_sast_report_path, "w") as f:
-            json.dump(semgrep_sast_report_json, f, indent=4)
-        file_stable_check(semgrep_sast_report_path)
+        save_file(semgrep_sast_report_path, semgrep_sast_report_json)
     else:
         files_failed_save.append("semgrep_sast_report")
         file_save_status = False
@@ -55,9 +49,7 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
 
     if trivy_report_json:
-        with open(trivy_report_path, "w") as f:
-            json.dump(trivy_report_json, f, indent=4)
-        file_stable_check(trivy_report_path)
+        save_file(trivy_report_path, trivy_report_json)
     else:
         files_failed_save.append("trivy_report")
         file_save_status = False
@@ -67,9 +59,7 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
 
     if grype_vulns_cyclonedx_json_data:
-        with open(grype_path, "w") as f:
-            json.dump(grype_vulns_cyclonedx_json_data, f, indent=4)
-        file_stable_check(grype_path)
+        save_file(grype_path, grype_vulns_cyclonedx_json_data)
     else:
         files_failed_save.append("grype_vulns_cyclonedx")
         file_save_status = False
@@ -79,9 +69,7 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
 
     if prio_vuln_data:
-        with open(prio_path, "w") as f:
-            json.dump(prio_vuln_data, f, indent=4)
-        file_stable_check(prio_path)
+        save_file(prio_path, prio_vuln_data)
     else:
         files_failed_save.append("prio_vuln_data")
         file_save_status = False
@@ -90,34 +78,8 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
             "status": "fail"
         })
 
-    if summary_report:
-        with open(summary_report_path, "w") as f:
-            json.dump(summary_report, f, indent=4)
-        file_stable_check(summary_report_path)
-    else:
-        files_failed_save.append("summary_report")
-        file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "summary_report": summary_report_path,
-            "status": "fail"
-        })
-
-    if exclusions_file_json:
-        with open(exclusions_file_path, "w") as f:
-            json.dump(exclusions_file_json, f, indent=4)
-        file_stable_check(exclusions_file_path)
-    else:
-        files_failed_save.append("exclusions_file")
-        file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "exclusion_file": exclusions_file_path,
-            "status": "fail"
-        })
-
     if fail_on_severity_json:
-        with open(fail_on_severity_path, "w") as f:
-            json.dump(fail_on_severity_json, f, indent=4)
-        file_stable_check(fail_on_severity_path)
+        save_file(fail_on_severity_path, fail_on_severity_json)
     else:
         files_failed_save.append("fail_on_severity")
         file_save_status = False
@@ -144,6 +106,12 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
         })
         print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
+
+def save_file(file_path, file_json):
+    print(f"[+] Saving: [{file_path}]")
+    with open(file_path, "w") as f:
+        json.dump(file_json, f, indent=4)
+    file_stable_check(file_path)
 
 def attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     try:

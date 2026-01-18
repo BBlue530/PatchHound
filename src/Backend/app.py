@@ -14,6 +14,7 @@ from routes.image_handling import image_bp
 from routes.resource_handling import resource_bp
 from routes.scan_sbom import scan_sbom_bp
 from routes.token_key_handling import token_key_bp
+from routes.exclusion_handling import exclusion_bp
 
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ app.register_blueprint(image_bp)
 app.register_blueprint(resource_bp)
 app.register_blueprint(scan_sbom_bp)
 app.register_blueprint(token_key_bp)
+app.register_blueprint(exclusion_bp)
 
 if __name__ == "__main__":
     install_tools()

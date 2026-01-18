@@ -7,6 +7,7 @@ from flask import abort, request
 import json
 import os
 from utils.helpers import safe_text
+from utils.helpers import load_file_data
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from core.variables import *
 from file_system.pdf_report.pdf_table_builds import *
@@ -63,8 +64,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
             log_exporter(new_entry)
             abort(404, description=f"Directory not found: {base_dir}")
 
-        with open(summary_report_path, "r") as f:
-            summary_report = json.load(f)
+        summary_report = load_file_data(summary_report_path)
     
     current_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 

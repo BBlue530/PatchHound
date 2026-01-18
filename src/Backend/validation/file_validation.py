@@ -6,7 +6,7 @@ import shutil
 from core.variables import *
 from vuln_scan.kev_catalog import compare_kev_catalog
 from logs.alerts import alert_event_system
-from utils.helpers import extract_cve_ids
+from utils.helpers import extract_cve_ids, load_file_data
 from logs.audit_trail import save_audit_trail, audit_trail_event
 from logs.export_logs import log_exporter
 from validation.hash_verify import verify_sha
@@ -18,6 +18,7 @@ from file_system.repo_history_tracking import update_repo_history
 from alerts.alert_on_severity import check_alert_on_severity
 from file_system.cleanup.cleanup_scan_data import cleanup_scan_data
 
+# SOME WEIRD STUFF NEED FIXED HERE WITH S3
 def sbom_validation():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
 
@@ -29,8 +30,6 @@ def sbom_validation():
 
             repo_scans_dir = os.path.join(temp_resources_root, all_repo_scans_folder)
             image_sign_dir = os.path.join(temp_resources_root, all_image_signature_folder)
-
-            print(repo_scans_dir)
 
             if not os.path.isdir(repo_scans_dir):
                 print(f"[!] AWS s3 missing resource file: {temp_resources_root}")
@@ -85,6 +84,7 @@ def sbom_validation():
                 latest_scan_dir = os.path.join(repo_path, timestamp_folder)
 
                 alert_path = os.path.join(repo_path, f"{repo_name}{alert_path_ending}")
+                print(alert_path)
                 fail_on_severity_path = os.path.join(latest_scan_dir, f"{repo_name}{fail_on_severity_path_ending}")
                 
                 syft_sbom_path = os.path.join(latest_scan_dir, f"{repo_name}{syft_sbom_path_ending}")
@@ -113,7 +113,7 @@ def sbom_validation():
 
                 alerts_list= []
 
-                all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, exclusions_file_path, cosign_pub_path, grype_vulns_output_path, prio_output_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
+                all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, cosign_pub_path, grype_vulns_output_path, prio_output_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
 
                 if not all_files_exist:
                     new_entry = {
@@ -294,8 +294,7 @@ def sbom_validation():
                             except json.JSONDecodeError:
                                 trivy_report_data = None
 
-                    with open(exclusions_file_path, "r") as f:
-                        exclusions_data = json.load(f)
+                    exclusions_data = load_file_data(exclusions_file_path)
                     excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
 
                     current_cve_ids = extract_cve_ids(grype_vulns_cyclonedx_json_data)

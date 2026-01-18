@@ -15,9 +15,9 @@ from vuln_scan.kev_catalog import compare_kev_catalog
 
 scan_sbom_bp = Blueprint("scan_sbom", __name__)
 
-def threading_save_scan_files(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file_content, semgrep_sast_ruleset, fail_on_severity):
+def threading_save_scan_files(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity):
     syft_sbom_file_obj = io.BytesIO(syft_sbom_content)
-    save_scan_files(audit_trail, current_repo, syft_sbom_file_obj, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file_content, semgrep_sast_ruleset, fail_on_severity)
+    save_scan_files(audit_trail, current_repo, syft_sbom_file_obj, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity)
 
 @scan_sbom_bp.route('/v1/scan-sbom', methods=['POST'])
 def scan_sbom():
@@ -54,8 +54,6 @@ def scan_sbom():
         missing_fields.append("sast report")
     if 'trivy_report' not in request.files:
         missing_fields.append("trivy report")
-    if 'exclusions' not in request.files:
-        missing_fields.append("exclusions file")
     if not request.form.get("current_repo"):
         missing_fields.append("current repo")
     if not request.form.get("commit_sha"):
@@ -81,7 +79,6 @@ def scan_sbom():
     semgrep_sast_report = request.files['sast_report']
     semgrep_sast_ruleset_str = request.form.get("sast_ruleset")
     trivy_report = request.files['trivy_report']
-    exclusions_file = request.files['exclusions']
     current_repo = request.form.get("current_repo")
     commit_sha = request.form.get("commit_sha")
     commit_author = request.form.get("commit_author")
@@ -189,8 +186,6 @@ def scan_sbom():
     semgrep_sast_report_content = semgrep_sast_report.read()
     trivy_report.seek(0)
     trivy_report_content = trivy_report.read()
-    exclusions_file.seek(0)
-    exclusions_file_content = exclusions_file.read()
 
     audit_trail_event(audit_trail, "RETURN_FILE_TO_CLIENT", {
         "returned": ["vulns_cyclonedx_json", "prio_vulns", "path_to_resources_token"],
@@ -199,7 +194,7 @@ def scan_sbom():
 
     threading.Thread(
         target=threading_save_scan_files,
-        args=(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, exclusions_file_content, semgrep_sast_ruleset, fail_on_severity)
+        args=(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity)
     ).start()
 
     new_entry = {
