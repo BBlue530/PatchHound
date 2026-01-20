@@ -5,7 +5,7 @@ import os
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta, timezone
-from validation.file_validation import sbom_validation
+from vuln_scan.rescan.rescan_organizer import rescan_latest_scan_data
 from core.variables import kev_catalog, kev_url
 
 def scheduled_event():
@@ -26,7 +26,7 @@ def rescan_scan_data():
     print("[~] Warming up (may take a few seconds)...")
     update_grype_db()
     update_kev_db()
-    sbom_validation()
+    rescan_latest_scan_data()
 
 def update_grype_db():
     cache_path = Path.home() / ".cache" / "grype"

@@ -10,7 +10,7 @@ from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
-from validation.secrets_manager import read_secret
+from utils.secrets_manager import read_secret
 from logs.export_logs import log_exporter
 from core.variables import local_bin
 

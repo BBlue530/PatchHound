@@ -3,7 +3,7 @@ import os
 from utils.schedule_handling import scheduled_event
 from database.create_db import create_database
 from core.system import install_tools
-from validation.secrets_manager import generate_secrets, verify_secrets
+from utils.secrets_manager import generate_secrets, verify_secrets
 from config.read_app_config import read_app_config
 from logs.export_logs import setup_opentelemetry_logging
 

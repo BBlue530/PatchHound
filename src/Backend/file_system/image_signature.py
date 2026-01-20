@@ -2,7 +2,7 @@ import os
 import tempfile
 from utils.helpers import file_stable_check
 from file_system.file_save import sign_image, verify_image, key_generating
-from validation.secrets_manager import read_secret
+from utils.secrets_manager import read_secret
 from logs.audit_trail import save_audit_trail, append_audit_log
 from core.variables import *
 

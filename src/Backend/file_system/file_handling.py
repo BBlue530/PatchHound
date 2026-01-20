@@ -4,8 +4,8 @@ from vuln_scan.get_vulns_count import check_vuln_files
 from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
 from utils.folder_lock import repo_lock
 from utils.helpers import load_json
-from utils.cleanup import cleanup_scan_data
-from validation.secrets_manager import read_secret
+from utils.cleanup import cleanup
+from utils.secrets_manager import read_secret
 from file_system.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
@@ -104,7 +104,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         send_files_to_external_storage(scan_dir, scan_dir)
         send_files_to_external_storage(alert_path, repo_dir)
 
-    #cleanup_scan_data()
+    #cleanup()
 
     new_entry = {
         "message": "Scan completed",

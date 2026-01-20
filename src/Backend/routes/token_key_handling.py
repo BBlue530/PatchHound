@@ -3,7 +3,7 @@ from database.create_key import create_key
 from database.remove_key import remove_key
 from database.key_status import enable_key, disable_key
 from database.list_key import list_all_keys
-from validation.secrets_manager import verify_api_key
+from utils.secrets_manager import verify_api_key
 from logs.export_logs import log_exporter
 
 token_key_bp = Blueprint("token_key", __name__)

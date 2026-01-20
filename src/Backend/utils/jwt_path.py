@@ -1,6 +1,6 @@
 import jwt
 from jwt import InvalidTokenError
-from validation.secrets_manager import read_secret
+from utils.secrets_manager import read_secret
 from logs.audit_trail import audit_trail_event
 
 def jwt_path_to_resources(audit_trail, organization ,current_repo, timestamp):
