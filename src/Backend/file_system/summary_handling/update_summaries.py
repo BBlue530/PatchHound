@@ -1,7 +1,7 @@
 import os
 import json
 import shutil
-from file_system.summary_generator import generate_summary
+from file_system.summary_handling.summary_generator import generate_summary
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
 from external_storage.external_storage_send import send_files_to_external_storage
 from utils.helpers import load_file_data

@@ -21,11 +21,16 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     trivy_misconfiguration_exclusions_vulnerabilities_severity_rows = []
     trivy_secret_exclusions_vulnerabilities_severity_rows = []
     exclusions_vulnerabilities_severity_rows = []
+
     kev_vulnerabilities_severity_rows = []
+
     new_vulnerabilities_severity_rows = []
+    new_kev_vulnerabilities_severity_rows = []
+
     vulnerabilities_grype_severity_rows = []
     vulnerabilities_semgrep_severity_rows = []
     vulnerabilities_trivy_severity_rows = []
+
     misconfigurations_trivy_severity_rows = []
     secrets_trivy_severity_rows = []
 
@@ -35,13 +40,19 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     trivy_misconfiguration_exclusions_vulnerabilities_table_data = fetch_trivy_misconfiguration_exclusions_vulnerabilities_table_data()
     trivy_secret_exclusions_vulnerabilities_table_data = fetch_trivy_secret_exclusions_vulnerabilities_table_data()
     exclusions_vulnerabilities_table_data = fetch_exclusions_vulnerabilities_table_data()
+
     kev_vulnerabilities_table_data = fetch_kev_vulnerabilities_table_data()
+
     new_vulnerabilities_table_data = fetch_new_vulnerabilities_table_data()
+    new_kev_vulnerabilities_table_data = fetch_new_vulnerabilities_table_data()
+
     vulnerabilities_grype_table_data = fetch_vulnerabilities_grype_table_data()
     vulnerabilities_semgrep_table_data = fetch_vulnerabilities_semgrep_table_data()
     vulnerabilities_trivy_table_data = fetch_vulnerabilities_trivy_table_data()
+
     misconfigurations_trivy_table_data = fetch_misconfigurations_trivy_table_data()
     secrets_trivy_table_data = fetch_secrets_trivy_table_data()
+
     packages_table_data = fetch_packages_table_data()
 
     base_dir = os.path.join(all_resources_folder, all_repo_scans_folder, organization_decoded, current_repo_decoded, timestamp_decoded)
@@ -70,6 +81,7 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
 
     report_generated_date = datetime.strptime(current_timestamp, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d")
     scan_generated_date = datetime.strptime(timestamp_decoded, "%Y%m%d_%H%M%S").strftime("%Y-%m-%d")
+    rescan_date = datetime.strptime(summary_report.get("rescan_timestamp"), "%Y%m%d_%H%M%S").strftime("%Y-%m-%d")
 
     styles = getSampleStyleSheet()
 
@@ -97,6 +109,8 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Scan date:</b> {scan_generated_date}", wrap_style))
     elements.append(Paragraph(f"<b>Report generated date:</b> {report_generated_date}", wrap_style))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
+    elements.append(Paragraph(f"<b>Rescan date:</b> {rescan_date}", wrap_style))
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
 
     counters = summary_report.get("counters")
@@ -119,6 +133,14 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
     elements.append(Paragraph(f"<b>Excluded exposed secrets found:</b> {counters.get('excluded_exposed_secret_counter')}", wrap_style))
     elements.append(Paragraph(f"<b>Exposed secrets found:</b> {counters.get('exposed_secret_counter')}", wrap_style))
+
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=6))
+    elements.append(Paragraph(f"<b>New Vulnerabilities:</b> {counters.get('new_vulnerabilities')}", wrap_style))
+    elements.append(Paragraph(f"<b>New Excluded Vulnerabilities:</b> {counters.get('new_excluded_vulnerabilities')}", wrap_style))
+
+    elements.append(Paragraph(f"<b>New Kev Vulnerabilities:</b> {counters.get('new_kev_vulnerabilities')}", wrap_style))
+    elements.append(Paragraph(f"<b>New Excluded Kev Vulnerabilities:</b> {counters.get('new_excluded_kev_vulnerabilities')}", wrap_style))
+
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey, spaceBefore=6, spaceAfter=12))
     elements.append(Spacer(1, 12))
 
@@ -363,6 +385,34 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
                 ])
 
                 new_vulnerabilities_severity_rows.append((new_vulnerabilities_row_index, new_vulnerabilities_severity))
+    
+    new_kev_vulnerabilities = summary_report.get("new_kev_vulnerabilities")
+
+    if new_kev_vulnerabilities:
+            for new_kev_vuln in summary_report.get("new_kev_vulnerabilities", []):
+                if new_kev_vuln:
+                    new_kev_vulnerabilities_row_index = len(new_kev_vulnerabilities_table_data)
+
+                    new_kev_vulnerabilities_severity = safe_text(new_kev_vuln.get("severity"))
+
+                    new_kev_vulnerabilities_table_data.append([
+                        Paragraph(safe_text(new_kev_vuln.get("id")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("source")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("description")), table_style),
+
+                        Paragraph(new_kev_vulnerabilities_severity, table_style),
+
+                        Paragraph(safe_text(new_kev_vuln.get("type")), table_style),
+
+                        Paragraph(safe_text(new_kev_vuln.get("score")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("cvss_vector")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("vuln_found_timestamp")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("package")), table_style),
+                        Paragraph(safe_text(new_kev_vuln.get("source")), table_style),
+                        Paragraph(f"<link href='{safe_text(new_kev_vuln.get('link'))}'>{safe_text(new_kev_vuln.get('link'))}</link>", table_style),
+                    ])
+
+                    new_kev_vulnerabilities_severity_rows.append((new_kev_vulnerabilities_row_index, new_kev_vulnerabilities_severity))
 
     vulnerabilities = summary_report.get("vulnerabilities")
 
@@ -517,12 +567,17 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
     exclusions_vulnerabilities_table = build_data_table(exclusions_vulnerabilities_table_data, exclusions_vulnerabilities_severity_rows, excl_col_widths)
 
     kev_vulnerabilities_table = build_data_table(kev_vulnerabilities_table_data, kev_vulnerabilities_severity_rows, kev_col_widths)
+
     new_vulnerabilities_table = build_data_table(new_vulnerabilities_table_data, new_vulnerabilities_severity_rows, new_vuln_col_widths)
+    new_kev_vulnerabilities_table = build_data_table(new_kev_vulnerabilities_table_data, new_kev_vulnerabilities_severity_rows, new_vuln_col_widths)
+
     vulnerabilities_grype_table = build_data_table(vulnerabilities_grype_table_data, vulnerabilities_grype_severity_rows, grype_vuln_col_widths)
     vulnerabilities_semgrep_table = build_data_table(vulnerabilities_semgrep_table_data, vulnerabilities_semgrep_severity_rows, semgrep_col_widths)
     vulnerabilities_trivy_table = build_data_table(vulnerabilities_trivy_table_data, vulnerabilities_trivy_severity_rows, trivy_vuln_col_widths)
+
     misconfigurations_trivy_table = build_data_table(misconfigurations_trivy_table_data, misconfigurations_trivy_severity_rows, trivy_misconfig_col_widths)
     secrets_trivy_table = build_data_table(secrets_trivy_table_data, secrets_trivy_severity_rows, trivy_secrets_col_widths)
+
     packages_table = build_data_table(packages_table_data, None, packages_col_widths)
 
     if not exclusions:
@@ -571,6 +626,12 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         elements.append(PageBreak())
         elements.append(Paragraph("<b>New Found Vulnerabilities</b>", styles["Heading2"]))
         elements.append(new_vulnerabilities_table)
+        elements.append(Spacer(1, 12))
+
+    if new_kev_vulnerabilities:
+        elements.append(PageBreak())
+        elements.append(Paragraph("<b>New Found CISA KEV Vulnerabilities</b>", styles["Heading2"]))
+        elements.append(new_kev_vulnerabilities_table)
         elements.append(Spacer(1, 12))
 
     if not vulnerabilities:

@@ -284,7 +284,7 @@ new_vulnerabilities_table_data_headers = [
     
     "Score",
     "CVSS vector",
-    "Found timestamp",
+    "Discovered",
     "Package",
     "Version",
     "Link",
@@ -301,7 +301,7 @@ new_vuln_col_widths = [
 
     25,  # Score
     50,  # CVSS vector
-    50,  # Found timestamp
+    50,  # Discovered
     50,  # Package
     25,  # Version
     100, # Link

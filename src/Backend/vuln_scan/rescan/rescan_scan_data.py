@@ -11,7 +11,7 @@ from logs.export_logs import log_exporter
 from validation.hash_verify import verify_sha
 from validation.file_exist import verify_file_exists
 from external_storage.external_storage_send import send_files_to_external_storage
-from file_system.summary_generator import update_summary_rescan
+from file_system.summary_handling.summary_generator import update_summary_rescan
 from file_system.repo_history_tracking import update_repo_history_rescan
 from alerts.alert_on_severity import check_alert_on_severity
 from file_system.cleanup.cleanup_scan_data import cleanup_scan_data
@@ -256,7 +256,7 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
 
         alert_kev_vuln, kev_cves_to_alert, all_new_kev_cves, not_excluded_all_new_kev_cves = alert_rescan(current_prio_cve_ids, previous_prio_cve_ids, excluded_ids, os.environ.get("rescan_alert_kev_vulns"))
 
-        update_summary_rescan(all_new_cves, not_excluded_all_new_cves, all_new_kev_cves, not_excluded_all_new_kev_cves, grype_vulns_cyclonedx_json_data, current_prio_vuln_data, summary_report_path)
+        update_summary_rescan(all_new_cves, not_excluded_all_new_cves, not_excluded_all_new_kev_cves, grype_vulns_cyclonedx_json_data, summary_report_path)
         update_repo_history_rescan(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder)
 
         if alert_grype_vuln:

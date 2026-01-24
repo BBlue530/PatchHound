@@ -5,7 +5,7 @@ from database.validate_token import validate_token
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.file_save import save_file
-from file_system.exclusion.update_summaries import update_repo_summaries
+from file_system.summary_handling.update_summaries import update_repo_summaries
 from utils.helpers import load_file_data
 from logs.export_logs import log_exporter
 from core.variables import *
