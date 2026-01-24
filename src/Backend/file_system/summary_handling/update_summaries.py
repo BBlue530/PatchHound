@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 from file_system.summary_handling.summary_generator import generate_summary
+from file_system.repo_history_tracking import update_repo_history_rescan
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
 from external_storage.external_storage_send import send_files_to_external_storage
 from utils.helpers import load_file_data
@@ -26,6 +27,12 @@ def update_repo_summaries(audit_trail, repo_dir, repo_name):
         repo_exclusion_file_name = f"{repo_name}{exclusions_file_path_ending}"
         repo_exclusions_file_path = os.path.join(repo_scans_dir, repo_exclusion_file_name)
 
+        repo_alert_file_name = f"{repo_name}{alert_path_ending}"
+        repo_alert__file_path = os.path.join(repo_scans_dir, repo_alert_file_name)
+
+        repo_history_file_name = f"{repo_name}{repo_history_path_ending}"
+        repo_history_file_path = os.path.join(repo_scans_dir, repo_history_file_name)
+
         for timestamp_scan_data in os.listdir(repo_scans_dir):
             timestamp_scan_data_dir = os.path.join(repo_scans_dir, timestamp_scan_data) 
             if not os.path.isdir(timestamp_scan_data_dir):
@@ -41,10 +48,12 @@ def update_repo_summaries(audit_trail, repo_dir, repo_name):
             tool_versions, rulesets, tmp_dict_summary_data = summary_data(summary_report_path)
 
             generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, repo_exclusions_file_path, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data)
-        
+            update_repo_history_rescan(audit_trail, repo_name, repo_alert__file_path, summary_report_path, repo_history_file_path, timestamp_scan_data)
+
             if os.environ.get("external_storage_enabled", "False").lower() == "true":
                 s3_timestamp_dir = os.path.join(repo_dir, timestamp_scan_data)
                 send_files_to_external_storage(summary_report_path, s3_timestamp_dir)
+                send_files_to_external_storage(repo_history_file_path, repo_dir)
 
     finally:
         if temp_resources_root:
