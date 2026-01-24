@@ -38,9 +38,9 @@ def update_repo_summaries(audit_trail, repo_dir, repo_name):
             trivy_report_path = os.path.join(timestamp_scan_data_dir, f"{repo_name}{trivy_report_path_ending}")
             summary_report_path = os.path.join(timestamp_scan_data_dir, f"{repo_name}{summary_report_path_ending}")
 
-            tool_versions, rulesets = summary_data(summary_report_path)
+            tool_versions, rulesets, tmp_dict_summary_data = summary_data(summary_report_path)
 
-            generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, repo_exclusions_file_path, summary_report_path, tool_versions, rulesets)
+            generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, repo_exclusions_file_path, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data)
         
             if os.environ.get("external_storage_enabled", "False").lower() == "true":
                 s3_timestamp_dir = os.path.join(repo_dir, timestamp_scan_data)
@@ -56,4 +56,36 @@ def summary_data(summary_report_path):
     tool_versions = summary_report_data.get("tool_version")
     rulesets = summary_report_data.get("ruleset")
 
-    return tool_versions, rulesets
+    new_vulnerabilities = summary_report_data.get("new_vulnerabilities", [])
+    new_excluded_vulnerabilities = summary_report_data.get("new_excluded_vulnerabilities", [])
+
+    new_kev_vulnerabilities = summary_report_data.get("new_kev_vulnerabilities", [])
+    new_excluded_kev_vulnerabilities = summary_report_data.get("new_excluded_kev_vulnerabilities", [])
+
+    rescan_timestamp = summary_report_data.get("rescan_timestamp", None)
+
+    counters = summary_report_data.get("counters", {})
+
+    new_vulnerabilities_counter = counters.get("new_vulnerabilities_counter", 0)
+    new_excluded_vulnerabilities_counter = counters.get("new_excluded_vulnerabilities_counter", 0)
+
+    new_kev_vulnerabilities_counter = counters.get("new_kev_vulnerabilities_counter", 0)
+    new_excluded_kev_vulnerabilities_counter = counters.get("new_excluded_kev_vulnerabilities_counter", 0)
+
+    tmp_dict_summary_data = {
+        "new_vulnerabilities": new_vulnerabilities,
+        "new_excluded_vulnerabilities": new_excluded_vulnerabilities,
+
+        "new_kev_vulnerabilities": new_kev_vulnerabilities,
+        "new_excluded_kev_vulnerabilities": new_excluded_kev_vulnerabilities,
+
+        "rescan_timestamp": rescan_timestamp,
+
+        "new_vulnerabilities_counter": new_vulnerabilities_counter,
+        "new_excluded_vulnerabilities_counter": new_excluded_vulnerabilities_counter,
+
+        "new_kev_vulnerabilities_counter": new_kev_vulnerabilities_counter,
+        "new_excluded_kev_vulnerabilities_counter": new_excluded_kev_vulnerabilities_counter,
+    }
+
+    return tool_versions, rulesets, tmp_dict_summary_data

@@ -4,13 +4,13 @@ from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data, excluded_ids_list
 from file_system.file_save import save_file
 
-def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets):
+def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data):
     summary_dict = {}
     packages_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}
 
-    rescan_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    current_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     package_counter = 0
 
@@ -328,7 +328,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
             })
 
     summary_report = {
-        "rescan_timestamp": rescan_timestamp,
+        "rescan_timestamp": tmp_dict_summary_data.get("rescan_timestamp", current_timestamp),
         "repo_name": repo_name,
         "packages": list(packages_dict.values()),
         "vulnerabilities": list(summary_dict.values()),
@@ -343,7 +343,13 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
             "excluded_exposed_secret_counter": excluded_exposed_secret_counter,
             "vuln_counter": vuln_counter,
             "misconf_counter": misconf_counter,
-            "exposed_secret_counter": exposed_secret_counter
+            "exposed_secret_counter": exposed_secret_counter,
+
+            "new_vulnerabilities_counter": tmp_dict_summary_data.get("new_vulnerabilities_counter", 0),
+            "new_excluded_vulnerabilities_counter": tmp_dict_summary_data.get("new_excluded_vulnerabilities_counter", 0),
+
+            "new_kev_vulnerabilities_counter": tmp_dict_summary_data.get("new_kev_vulnerabilities_counter", 0),
+            "new_excluded_kev_vulnerabilities_counter": tmp_dict_summary_data.get("new_excluded_kev_vulnerabilities_counter", 0),
         },
         "tool_version": tool_versions,
 #        {
@@ -358,6 +364,11 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
 #        {
 #            "semgrep": semgrep_sast_ruleset
 #        }
+        "new_vulnerabilities": tmp_dict_summary_data.get("new_vulnerabilities", []),
+        "new_excluded_vulnerabilities": tmp_dict_summary_data.get("new_excluded_vulnerabilities", []),
+
+        "new_kev_vulnerabilities": tmp_dict_summary_data.get("new_kev_vulnerabilities", []),
+        "new_excluded_kev_vulnerabilities": tmp_dict_summary_data.get("new_excluded_kev_vulnerabilities", []),
     }
 
     audit_trail_event(audit_trail, "SUMMARY_GENERATION", {

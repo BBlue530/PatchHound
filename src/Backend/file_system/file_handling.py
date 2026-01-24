@@ -84,7 +84,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         
         save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, fail_on_severity_json, fail_on_severity_path)
 
-        excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets)
+        excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets, {})
 
         # Handles attestation of syft and trivy SBOMs
         syft_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, syft_sbom_path, syft_sbom_attestation_path, syft_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
