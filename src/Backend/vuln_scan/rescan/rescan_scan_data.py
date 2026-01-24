@@ -5,7 +5,7 @@ import subprocess
 from core.variables import *
 from vuln_scan.kev_catalog import compare_kev_catalog
 from alerts.alerts import alert_event_system
-from utils.helpers import extract_cve_ids, extract_kev_cve_ids, load_file_data
+from utils.helpers import extract_cve_ids, extract_kev_cve_ids, load_file_data, excluded_ids_list
 from logs.audit_trail import save_audit_trail, audit_trail_event
 from logs.export_logs import log_exporter
 from validation.hash_verify import verify_sha
@@ -242,7 +242,7 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
                     previous_prio_vuln_data = None
 
         exclusions_data = load_file_data(exclusions_file_path)
-        excluded_ids = {item["vulnerability"] for item in exclusions_data.get("exclusions", [])}
+        excluded_ids = excluded_ids_list(exclusions_data)
 
         current_cve_ids = extract_cve_ids(grype_vulns_cyclonedx_json_data)
         previous_cve_ids = extract_cve_ids(previous_vulns_data) if previous_vulns_data else set()

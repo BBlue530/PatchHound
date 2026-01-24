@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from logs.audit_trail import audit_trail_event
-from utils.helpers import load_file_data
+from utils.helpers import load_file_data, excluded_ids_list
 from file_system.file_save import save_file
 
 def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets):
@@ -32,11 +32,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
     trivy_report_json = load_file_data(trivy_report_path)
     exclusions_file_json = load_file_data(exclusions_file_path)
 
-    excluded_ids = {
-        e.get("vulnerability")
-        for e in exclusions_file_json.get("exclusions", [])
-        if e.get("vulnerability")
-    }
+    excluded_ids = excluded_ids_list(exclusions_file_json)
 
     def add_vuln(key, data):
         nonlocal excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter
@@ -397,10 +393,10 @@ def get_vulnerability_link(key, vuln, vuln_url_key):
 
 def exclusion_lookup(exclusions_file_json, key, data):
     for e in exclusions_file_json.get("exclusions", []):
-        if e.get("vulnerability") == key:
+        if e.get("vulnerability_id") == key:
             data["scope"] = e.get("scope")
             data["public_comment"] = e.get("public_comment")
-            data["internal_comment"] = e.get("internal_comment")
+            data["private_comment"] = e.get("private_comment")
             return data
     return data
 

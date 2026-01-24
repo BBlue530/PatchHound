@@ -41,18 +41,18 @@ while true; do
   fi
 
   echo "Select field to edit:"
-  echo "1) vulnerability"
+  echo "1) vulnerability_id"
   echo "2) scope"
   echo "3) public_comment"
-  echo "4) internal_comment"
+  echo "4) private_comment"
 
   read -p "Choice: " FIELD_CHOICE
 
   case "$FIELD_CHOICE" in
-    1) FIELD="vulnerability" ;;
+    1) FIELD="vulnerability_id" ;;
     2) FIELD="scope" ;;
     3) FIELD="public_comment" ;;
-    4) FIELD="internal_comment" ;;
+    4) FIELD="private_comment" ;;
     *)
       print_message "[!]" "Invalid selection" "Unknown field"
       display_exclusions "$response_body"

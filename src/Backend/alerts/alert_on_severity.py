@@ -4,7 +4,7 @@ import os
 from logs.audit_trail import audit_trail_event
 from logs.export_logs import log_exporter
 from alerts.alert_helpers import check_alert_status
-from utils.helpers import load_file_data
+from utils.helpers import load_file_data, excluded_ids_list
 
 def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path):
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
@@ -45,11 +45,7 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
         fail_on_severity_json = load_file_data(fail_on_severity_path)
         fail_on_severity = fail_on_severity_json.get("fail_on_severity")
 
-    excluded_ids = {
-        e.get("vulnerability")
-        for e in exclusions_data.get("exclusions", [])
-        if e.get("vulnerability")
-    }
+    excluded_ids = excluded_ids_list(exclusions_data)
 
     # These severities counters respect the exclusions
     for vuln in grype_data.get("vulnerabilities", []):

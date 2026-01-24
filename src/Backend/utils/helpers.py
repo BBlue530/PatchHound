@@ -63,3 +63,12 @@ def load_file_data(file_path):
             file_data = json.load(f)
         return file_data
     return {}
+
+def excluded_ids_list(exclusion_data):
+    excluded_ids = set()
+    for entry in exclusion_data.get("exclusions", []):
+        vuln_id = entry.get("vulnerability_id")
+        if vuln_id:
+            excluded_ids.add(vuln_id)
+    
+    return excluded_ids
