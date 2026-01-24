@@ -66,4 +66,25 @@ This document details all supported configuration keys, their purpose, and usage
 |`export_log.opentelemetry.service_name`|The name of the service the logs will be under in OpenTelemetry.|
 |`export_log.opentelemetry.environment`|The environment the service will be under in OpenTelemetr.|
 
+### Rescan Alert Config
+| Key | Description |
+|:-|:-|
+|`alert.rescan_alert.kev_vulns`|The threshold at which the backend should alert via the webhook when vulnerabilities are found in KEV.|
+|`alert.rescan_alert.vulns`|The threshold at which the backend should alert via the webhook when vulnerabilities are found.|
+|`alert.webhook`|The global webhook that will be used if no webhook is found in the repository scan data.|
+
+### Cleanup Config
+| Key | Description |
+|:-|:-|
+|`cleanup.cleanup_entries`|Cleanup of old scan data, keeping only the newest entries up to a specified threshold.|
+|`cleanup.cleanup_entries.max_entries`|The number of newest entries the cleanup will keep.|
+|`cleanup.cleanup_old_entries`|Cleanup of scan data that has reached a specific age.|
+|`cleanup.cleanup_old_entries.always_keep_entries`|The number of scan data entries the cleanup will always keep.|
+|`cleanup.cleanup_old_entries.max_entry_age`|The age threshold at which entries can be removed.|
+
+### Rescan Config
+| Key | Description |
+|:-|:-|
+|`scheduled_rescan.rescan_interval`|The interval at which rescans will be triggered. By default rescans are daily.|
+
 ---

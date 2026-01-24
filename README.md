@@ -50,7 +50,7 @@ The CLI is a core part of the communication between the backend and user. Read m
 
 ## Config
 
-The backend currently supports the AWS ecosystem for storing secrets, S3 buckets for external scan data storage, and PostgreSQL for database management. All configurations are done in [app-config.yaml](https://github.com/BBlue530/PatchHound/blob/main/src/Backend/app-config.yaml) Support for additional storage backends may be added in the future.
+The backend currently supports the AWS ecosystem for storing secrets, S3 buckets for external scan data storage and PostgreSQL for database management. All configurations are done in [app-config.yaml](https://github.com/BBlue530/PatchHound/blob/main/src/Backend/app-config.yaml) Support for additional storage backends may be added in the future.
 
 ```
 backend:
@@ -97,19 +97,49 @@ backend:
           enabled: False
           bucket: "${BUCKET}"
           bucket_key: "${BUCKET_KEY}"
-    
-    export_log:
-      https:
-        enabled: False
-        export_url: "${EXPORT_URL}"
-        export_url_api_key: "${EXPORT_URL_API_KEY}"
 
-      opentelemetry:
+    cleanup:
+      cleanup_entries:
         enabled: False
-        export_url: "${EXPORT_URL}"
-        export_url_api_key: "${EXPORT_URL_API_KEY}"
-        service_name: "${SERVICE_NAME}"
-        environment: "${ENVIRONMENT}"
+        max_entries: 5
+      
+      cleanup_old_entries:
+        enabled: False
+        always_keep_entries: 2
+        max_entry_age:
+          month: 0
+          week: 0
+          day: 7
+    
+  export_log:
+    https:
+      enabled: False
+      export_url: "${EXPORT_URL}"
+      export_url_api_key: "${EXPORT_URL_API_KEY}"
+
+    opentelemetry:
+      enabled: False
+      export_url: "${EXPORT_URL}"
+      export_url_api_key: "${EXPORT_URL_API_KEY}"
+      service_name: "${SERVICE_NAME}"
+      environment: "${ENVIRONMENT}"
+    
+  scheduled_rescan:
+    enabled: True
+    rescan_interval:
+      month: 0
+      week: 0
+      day: 1
+
+  alert:
+    rescan_alert:
+      # 'all_not_excluded_vulnerabilities' Will not alert if vulnerabilities found are in exclusion list
+      # 'all_new_vulnerabilities' Will alert on all new vulnerabilities found even if on exclusion list
+      # 'all_vulnerabilities' Will alert all vulnerabilities
+      kev_vulns: "all_not_excluded_vulnerabilities"
+      vulns: "all_not_excluded_vulnerabilities"
+    # This webhook will be secondary to the webhook inside of repo dir
+    webhook: "${ALERT_WEBHOOK}"
         
 auth:
   aws:

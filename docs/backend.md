@@ -15,6 +15,7 @@ PatchHound Backend is the heart of the system. It handles ingesting SBOMs, scann
 - Sign and verify container images in workflows
 - Send alerts using webhooks
 - Log all backend events
+- Log exporter using opentelemetry
 - Automatically update vulnerability databases and rescan for new issues
 - Generate JSON and PDF summary reports for workflows
 - Manage exclusions of vulnerabilities across versions
@@ -317,5 +318,42 @@ Cron Trigger: scheduled_event()
    ├─ Trigger alerts if new vulns found
    └─ Save updated reports + logs
 ```
+
+---
+
+## Logging and Alerts
+
+### Logs
+
+The backend will log all interactions and failures that happen on the backend and will save them either locally or in externally configured storage. It is possible to export the logs to a third party service either through OpenTelemetry or standard HTTPS requests. 
+The structure of the logs:
+
+```
+"message": "Missing authentication token", # Human readable message
+"level": "error", # What the log level is
+"module": "generate-pdf", # Which module that the log comes from
+"client_ip": request.remote_addr, # The IP of the client that interacted with the module
+```
+
+### Alerts
+
+Alerts get sent to the webhook that is currently configured either through the global webhook in `app-config.yaml` in `backend.alert.webhook` or one found in the repository scan data. 
+The webhook that exists in the repository scan data will take priority to be used but if it cant be found the global webhook will instead be used.
+
+Alerts will be sent out on detection of tampering, internal failure of rescan, severity threshold of vulnerability has been reached and similar actions.
+
+---
+
+## Cleanup
+
+**All cleanup is disabled by default**
+
+### Cleanup Max Entries
+
+In `app-config.yaml` you can configure cleanup of old scan data by a max entries threshold. When this threshold is reached the backend will remove the oldest entries it can find but will keep a set amount of the newest entries which can be configured by `cleanup.cleanup_entries.max_entries`.
+
+### Cleanup Old Entries
+
+This cleanup setting will remove all entries that are older than a specific age but will always keep a certain amount of the newest entries which can be configured by `cleanup.cleanup_old_entries.always_keep_entries`.
 
 ---

@@ -178,22 +178,82 @@ patchhound token-key remove --api-key <API_KEY> --token <TOKEN_KEY>
 ---
 
 ## Exclusions
-You can exclude CVEs found in your workflow and attach a comment explaining the exclusion:
+
+You can exclude vulnerabilities in your repository and attach both a public and private comment explaining the exclusion, along with its scope:
+
+### List Exclusions
+To view all current exclusions in a specific repository:
 ```
-patchhound exclude --cve <CVE_ID> --comment <COMMENT_FOR_EXCLUSION>
+                                              # Optional flag. if not set the repository in scan_profile.config will be use
+patchhound exclusion list --token <TOKEN_KEY> --repo <REPOSITORY>
 ```
-### List Exclusions List
-To view all current exclusions in the `exclusions.json` file in the current directory:
+
+Example output:
+
 ```
-patchhound exclude --list
+$ patchhound exclusion list --token <TOKEN_KEY> --repo <REPOSITORY>
+----------------------------------------------------------------------
+Index            : 0
+Vulnerability ID : DS026
+Scope            : Dockerfile
+Public Comment   : No HEALTHCHECK instruction. Operational risk is low, not a security risk.
+Internal Comment : Container monitored via orchestration system, healthcheck not critical for security.
+
+----------------------------------------------------------------------
 ```
-### Remove Exclusion
-To remove an exclusion by CVE ID:
+
+### Edit Exclusions
+To edit the current exclusions list in a specific repository:
 ```
-patchhound exclude --remove <CVE_ID>
+                                              # Optional flag. if not set the repository in scan_profile.config will be use
+patchhound exclusion edit --token <TOKEN_KEY> --repo <REPOSITORY>
 ```
-Excluding a CVE means that if it is found, it will not trigger alerts and will appear in a separate part of the summary.
-Exclusions affect the entire repository and persist across versions. To update the exclusion file, simply edit the existing file and replace it with the updated version.
+
+Example output:
+
+After running the command to edit the exclusion file, the backend will attempt to display the current exclusion file. If it is not found a `404` will be returned. This is expected behavior and you can proceed normally.
+```
+$ patchhound exclusion edit --token <TOKEN_KEY> --repo <REPOSITORY>
+
+[+] No exclusions found
+Status Code: 404
+
+Select entry to edit(index)
+Add a new entry(A)
+Remove entry(D)
+Save changes(S)
+Quit(Q)
+Input: a
+```
+
+After you have selected to add an entry you will be prompted to provide a vulnerability ID, scope, public comment (this will appear on the PDF report), and internal comment (this will not be displayed on the PDF report).
+```
+Vulnerability ID: DS026
+Scope: Dockerfile
+Public Comment: No HEALTHCHECK instruction. Operational risk is low, not a security risk.
+Internal Comment : Container monitored via orchestration system, healthcheck not critical for security.
+----------------------------------------------------------------------
+Index            : 0
+Vulnerability ID : DS026
+Scope            : Dockerfile
+Public Comment   : No HEALTHCHECK instruction. Operational risk is low, not a security risk.
+Internal Comment : Container monitored via orchestration system, healthcheck not critical for security.
+
+----------------------------------------------------------------------
+
+Select entry to edit(index)
+Add a new entry(A)
+Remove entry(D)
+Save changes(S)
+Quit(Q)
+Input: s
+
+[+] Exclusions updated
+Response from backend: {"info":"exclusion file updated"}
+```
+
+Excluding a vulnerability means that if it is found, it will not trigger alerts and will appear in a separate part of the summary. 
+Exclusions affect the entire repository and persist across versions.
 
 ---
 
