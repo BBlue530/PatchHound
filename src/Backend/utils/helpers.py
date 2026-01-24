@@ -15,7 +15,27 @@ def file_stable_check(file_path, timeout=10):
     return False
 
 def extract_cve_ids(vuln_data):
-    return set(vuln.get("id") for vuln in vuln_data.get("vulnerabilities", []) if vuln.get("id"))
+    cve_ids = set()
+
+    for vuln in vuln_data.get("vulnerabilities", []):
+        cve_id = vuln.get("id")
+        if cve_id:
+            cve_ids.add(cve_id)
+
+    return cve_ids
+
+def extract_kev_cve_ids(vuln_data):
+    kev_cve_ids = set()
+
+    prioritized = vuln_data.get("prioritized_vulns", {})
+
+    for vuln_list in prioritized.values():
+        for vuln in vuln_list:
+            cve_id = vuln.get("cveID")
+            if cve_id:
+                kev_cve_ids.add(cve_id)
+
+    return kev_cve_ids
 
 def load_json(file):
     if hasattr(file, 'read'):

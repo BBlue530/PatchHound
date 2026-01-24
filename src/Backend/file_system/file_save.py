@@ -5,7 +5,7 @@ import subprocess
 import json
 import tempfile
 from core.variables import env
-from logs.alerts import alert_event_system
+from alerts.alerts import alert_event_system
 from utils.helpers import file_stable_check
 from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use

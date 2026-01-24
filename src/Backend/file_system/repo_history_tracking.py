@@ -4,7 +4,7 @@ from utils.file_hash import hash_file
 from utils.helpers import load_file_data
 from external_storage.external_storage_append import append_to_external_storage
 from logs.audit_trail import audit_trail_event
-from logs.alerts import alert_event_system
+from alerts.alerts import alert_event_system
 
 def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list):
     syft_sbom_att_hash = hash_file(syft_sbom_attestation_path)
@@ -49,14 +49,18 @@ def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sh
 
         print(f"[+] History updated: {repo_history_path}")
 
-def update_repo_history(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder):
+def update_repo_history_rescan(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder):
     summary_report_hash_updated = hash_file(summary_report_path)
 
     repo_history = load_file_data(repo_history_path)
 
-    timestamp_repo_history_entry = repo_history[timestamp_folder]
+    timestamp_repo_history_entry = None
+    for timestamp_entry in repo_history:
+        if str(timestamp_folder) in timestamp_entry:
+            timestamp_repo_history_entry = timestamp_entry[timestamp_folder]
+            break
 
-    if timestamp_repo_history_entry:
+    if timestamp_repo_history_entry is not None:
         timestamp_repo_history_entry["summary_report_hash"] = summary_report_hash_updated
 
         with open(repo_history_path, "w") as f:

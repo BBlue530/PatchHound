@@ -2,7 +2,7 @@ import os
 from utils.helpers import load_file_data
 from utils.file_hash import hash_file
 from logs.audit_trail import audit_trail_event
-from logs.alerts import alert_event_system
+from alerts.alerts import alert_event_system
 from logs.export_logs import log_exporter
 from core.variables import *
 

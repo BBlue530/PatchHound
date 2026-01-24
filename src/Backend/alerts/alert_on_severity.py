@@ -37,12 +37,12 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
 
     if os.path.isfile(alert_path):
         alert_system_json = load_file_data(alert_path)
-
         alert_system_webhook = alert_system_json.get("alert_system_webhook")
+    else:
+        alert_system_webhook = os.environ.get("global_alert_webhook")
 
     if os.path.isfile(fail_on_severity_path):
         fail_on_severity_json = load_file_data(fail_on_severity_path)
-
         fail_on_severity = fail_on_severity_json.get("fail_on_severity")
 
     excluded_ids = {

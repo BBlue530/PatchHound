@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data
 from file_system.file_save import save_file
@@ -9,6 +9,8 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
     packages_dict = {}
     kev_prio_dict = {}
     exclusions_dict = {}
+
+    rescan_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     package_counter = 0
 
@@ -330,6 +332,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
             })
 
     summary_report = {
+        "rescan_timestamp": rescan_timestamp,
         "repo_name": repo_name,
         "packages": list(packages_dict.values()),
         "vulnerabilities": list(summary_dict.values()),
@@ -401,15 +404,31 @@ def exclusion_lookup(exclusions_file_json, key, data):
             return data
     return data
 
-def add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data, summary_report_path):
-    new_vulns = []
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+def update_summary_rescan(all_new_cves, not_excluded_all_new_cves, all_new_kev_cves, not_excluded_all_new_kev_cves, grype_vulns_cyclonedx_json_data, current_prio_vuln_data, summary_report_path):
+    new_not_excluded_vulns_counter = 0
+    new_excluded_vulns_counter = 0
 
+    new_not_excluded_kev_vulns_counter = 0
+    new_excluded_kev_vulns_counter = 0
+    
+    new_not_excluded_vulns = []
+    new_excluded_vulns = []
+
+    new_not_excluded_kev_vulns = []
+    new_excluded_kev_vulns = []
+
+    rescan_timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    excluded_all_new_cves = all_new_cves - not_excluded_all_new_cves
+    excluded_all_new_kev_cves = all_new_kev_cves - not_excluded_all_new_kev_cves
+
+
+    # This part will handle all new not excluded CVEs found
     for vuln in grype_vulns_cyclonedx_json_data.get("vulnerabilities", []):
         key = vuln.get("id")
         if not key:
             continue
-        elif key not in new_cves_to_alert:
+        elif key not in all_new_cves:
             continue
 
         severity = None
@@ -450,22 +469,121 @@ def add_new_vulns_to_summary(new_cves_to_alert, grype_vulns_cyclonedx_json_data,
 
         link = get_vulnerability_link(key, vuln, "url")
 
-        new_vulns.append({
-            "source": "grype",
-            "id": key,
-            "type": "vulnerability",
-            "description": vuln.get("description")  or "No description available",
-            "severity": severity,
-            "score": score,
-            "cvss_vector": vector,
-            "package": pkg_name,
-            "version": pkg_version,
-            "link": link,
-            "vuln_found_timestamp": timestamp
-        })
+        if key in not_excluded_all_new_cves:
+            new_not_excluded_vulns.append({
+                "source": "grype",
+                "id": key,
+                "type": "vulnerability",
+                "description": vuln.get("description")  or "No description available",
+                "severity": severity,
+                "score": score,
+                "cvss_vector": vector,
+                "package": pkg_name,
+                "version": pkg_version,
+                "link": link,
+                "vuln_found_timestamp": rescan_timestamp
+            })
+            new_not_excluded_vulns_counter += 1
+
+        elif key in excluded_all_new_cves:
+            new_excluded_vulns.append({
+                "source": "grype",
+                "id": key,
+                "type": "vulnerability",
+                "description": vuln.get("description")  or "No description available",
+                "severity": severity,
+                "score": score,
+                "cvss_vector": vector,
+                "package": pkg_name,
+                "version": pkg_version,
+                "link": link,
+                "vuln_found_timestamp": rescan_timestamp
+            })
+            new_excluded_vulns_counter += 1
+        
+        if key in not_excluded_all_new_kev_cves:
+            new_not_excluded_kev_vulns.append({
+                "source": "grype",
+                "id": key,
+                "type": "vulnerability",
+                "description": vuln.get("description")  or "No description available",
+                "severity": severity,
+                "score": score,
+                "cvss_vector": vector,
+                "package": pkg_name,
+                "version": pkg_version,
+                "link": link,
+                "vuln_found_timestamp": rescan_timestamp
+            })
+            new_not_excluded_kev_vulns_counter += 1
+
+        elif key in excluded_all_new_kev_cves:
+            new_excluded_kev_vulns.append({
+                "source": "grype",
+                "id": key,
+                "type": "vulnerability",
+                "description": vuln.get("description")  or "No description available",
+                "severity": severity,
+                "score": score,
+                "cvss_vector": vector,
+                "package": pkg_name,
+                "version": pkg_version,
+                "link": link,
+                "vuln_found_timestamp": rescan_timestamp
+            })
+            new_excluded_kev_vulns_counter += 1
 
     summary_report_json = load_file_data(summary_report_path)
     
-    summary_report_json["new_vulnerabilities"] = new_vulns
+    # Normal vulns
+    append_json_data(summary_report_json, "new_vulnerabilities", list(new_not_excluded_vulns))
+    append_json_data(summary_report_json, "counters.new_vulnerabilities_counter", new_not_excluded_vulns_counter)
+
+    append_json_data(summary_report_json, "new_excluded_vulnerabilities", list(new_excluded_vulns))
+    append_json_data(summary_report_json, "counters.new_excluded_vulnerabilities_counter", new_excluded_vulns_counter)
+    
+    # Kev vulns
+    append_json_data(summary_report_json, "new_kev_vulnerabilities", list(not_excluded_all_new_kev_cves))
+    append_json_data(summary_report_json, "counters.new_kev_vulnerabilities_counter", new_not_excluded_kev_vulns_counter)
+
+    append_json_data(summary_report_json, "new_excluded_kev_vulnerabilities", list(new_excluded_kev_vulns))
+    append_json_data(summary_report_json, "counters.new_excluded_kev_vulnerabilities_counter", new_excluded_kev_vulns_counter)
+
+    summary_report_json["rescan_timestamp"] = rescan_timestamp
+
     with open(summary_report_path, "w") as f:
         json.dump(summary_report_json, f, indent=2)
+
+def append_json_data(json_data, json_nest, new_entry_json_data):
+    json_keys = json_nest.split(".")
+    current_json = json_data
+
+    for json_key in json_keys[:-1]:
+        if json_key not in current_json or not isinstance(current_json[json_key], dict):
+            current_json[json_key] = {}
+        current_json = current_json[json_key]
+
+    final_json_key = json_keys[-1]
+
+    # Counter will get the new value added on top of the existing one
+    if isinstance(new_entry_json_data, int):
+        existing_value = current_json.get(final_json_key)
+
+        if existing_value is None:
+            current_json[final_json_key] = new_entry_json_data
+        elif isinstance(existing_value, int):
+            current_json[final_json_key] += new_entry_json_data
+        else:
+            raise TypeError(f"[!] Cannot add '{json_nest}': existing value is not int")
+        return
+
+    # This will append the new entry
+    if isinstance(new_entry_json_data, list):
+        current_json.setdefault(final_json_key, [])
+        if not isinstance(current_json[final_json_key], list):
+            raise TypeError(f"[!] Cannot append '{json_nest}': existing value is not list")
+        current_json[final_json_key].extend(new_entry_json_data)
+        return
+
+    # Replacement fallback
+    current_json[final_json_key] = new_entry_json_data

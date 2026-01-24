@@ -75,6 +75,16 @@ backend:
       month: 0
       week: 0
       day: 1
+
+  alert:
+    rescan_alert:
+      # 'all_not_excluded_vulnerabilities' Will not alert if vulnerabilities found are in exclusion list
+      # 'all_new_vulnerabilities' Will alert on all new vulnerabilities found even if on exclusion list
+      # 'all_vulnerabilities' Will alert all vulnerabilities
+      kev_vulns: "all_not_excluded_vulnerabilities"
+      vulns: "all_not_excluded_vulnerabilities"
+    # This webhook will be secondary to the webhook inside of repo dir
+    webhook: "${ALERT_WEBHOOK}"
         
 auth:
   aws:

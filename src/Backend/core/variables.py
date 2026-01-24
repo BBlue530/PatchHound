@@ -26,7 +26,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.42"
+patchhound_version = "0.1.43"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"
@@ -91,3 +91,8 @@ alert_path_ending = "_alert.json"
 fail_on_severity_path_ending = "_fail_on_severity.json"
 
 pdf_filename_path_ending = "_pdf_summary_report.pdf"
+
+# Rule names for rescan alert threshold
+all_not_excluded_vulnerabilities = "all_not_excluded_vulnerabilities"
+all_new_vulnerabilities = "all_new_vulnerabilities"
+all_vulnerabilities = "all_vulnerabilities"

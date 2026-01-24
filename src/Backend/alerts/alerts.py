@@ -11,27 +11,21 @@ def alert_event_system(audit_trail, message, alert, alert_config_path):
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         memory_file = get_resources_external_storage_internal_use(alert_config_path)
         alert_system_json = json.load(memory_file)
+        alert_system_webhook = alert_system_json.get("alert_system_webhook")
     else:
-        if alert_config_path is None:
-            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-                    "status": "fail",
-                    "alert_config": "not found",
-                    "message": message
-                })
-            return
+        if not os.path.isfile(alert_config_path):
+            alert_system_webhook = os.environ.get("global_alert_webhook")
+            if not alert_system_webhook:
+                print("[!] Webhook URL missing")
+                audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+                        "status": "fail",
+                        "alert_config": "not found",
+                        "message": message
+                    })
+                return
         else:
             alert_system_json = load_file_data(alert_config_path)
-
-    alert_system_webhook = alert_system_json.get("alert_system_webhook")
-
-    if not alert_system_webhook:
-        print("[!] Webhook URL missing")
-        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status": "fail",
-            "webhook": "not found",
-            "message": message
-        })
-        return
+            alert_system_webhook = alert_system_json.get("alert_system_webhook")
 
     if "discord" in alert_system_webhook:
         payload = {
