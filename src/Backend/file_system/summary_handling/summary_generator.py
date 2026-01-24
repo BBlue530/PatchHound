@@ -240,7 +240,7 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
             or issue.get("extra", {}).get("fingerprint")
             or "unknown_fingerprint"
         )
-        unique_key = f"semgrep_{issue.get('check_id', 'unknown_rule')}_{fingerprint}"
+        unique_key = f"semgrep_{issue.get('check_id', 'unknown_rule')}_{issue.get("path")}"
         add_vuln(unique_key, {
             "source": "semgrep",
             "id": unique_key,

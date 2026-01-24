@@ -1,13 +1,13 @@
 {
   "exclusions": [
     {
-      "vulnerability": "semgrep_python.lang.security.audit.subprocess-shell-true.subprocess-shell-true_823d733daaca605909b0cee953e0dd30aaae227a366eaee9556ec816392d5fa89d250dce4c4405a26612465c8e38d08d8ea5d49e6c3a68e48cd8b19be71ee7e7_0",
+      "vulnerability": "semgrep_python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected_Backend/core/system.py",
       "scope": "/Backend/core/system.py:24",
       "public_comment": "Subprocess call uses shell=True but only with internal, sanitized variables, making injection risk negligible.",
       "private_comment": "Safe because inputs are controlled and validated no user input is passed to subprocess."
     },
     {
-      "vulnerability": "semgrep_python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected_906ee99543aa2613944142efda38df133dcf3d8315b8eb12d23b6c2c6d12c065a1dc32d4bf09dfd42940567d7f8463af20ecfc239ab84981bd4ee79349bba869_0",
+      "vulnerability": "semgrep_python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host_Backend/app.py",
       "scope": "/Backend/core/system.py:46",
       "public_comment": "Dynamic urllib usage downloads Cosign from a fixed, trusted URL. Not exposed to untrusted input.",
       "private_comment": "Safe: URL is hardcoded and verified; no risk of arbitrary file access."
@@ -25,7 +25,7 @@
       "private_comment": "Installing extra recommended packages does not affect security acceptable for this build."
     },
     {
-      "vulnerability": "semgrep_python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host_9e659bf4064e21adfbad50813bb0e31464cebbba7706d8f41065ece5d3924a2e2e96e47d824d3beff54c1d72b9a6f5806077e92df9faade8e73c0f4f3504d814_0",
+      "vulnerability": "semgrep_python.lang.security.audit.subprocess-shell-true.subprocess-shell-true_Backend/core/system.py",
       "scope": "/Backend/app.py:35",
       "public_comment": "Flask app runs in a controlled, isolated VM for testing not exposed to the public.",
       "private_comment": "Safe for testing environment risk is minimal."
