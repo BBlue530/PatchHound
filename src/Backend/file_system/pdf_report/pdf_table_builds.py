@@ -398,11 +398,11 @@ trivy_vuln_col_widths = [
     50,  # Severity
 
     50,  # Type
-    
-    25,  # Score
-    100, # CVSS vector
+
+    50,  # Score
+    50,  # CVSS vector
     50,  # Package
-    25,  # Version
+    50,  # Version
     100, # Link
 ]
 
