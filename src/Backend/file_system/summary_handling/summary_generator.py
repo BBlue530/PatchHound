@@ -1,8 +1,10 @@
 import json
+import os
 from datetime import datetime
 from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data, excluded_ids_list
 from file_system.file_save import save_file
+from external_storage.external_storage_get import get_resources_external_storage_internal_use
 
 def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data):
     summary_dict = {}
@@ -30,7 +32,12 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
     prio_vuln_data = load_file_data(prio_path)
     semgrep_sast_report_json = load_file_data(semgrep_sast_report_path)
     trivy_report_json = load_file_data(trivy_report_path)
-    exclusions_file_json = load_file_data(exclusions_file_path)
+
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        memory_file = get_resources_external_storage_internal_use(exclusions_file_path)
+        exclusions_file_json = json.load(memory_file)
+    else:
+        exclusions_file_json = load_file_data(exclusions_file_path)
 
     excluded_ids = excluded_ids_list(exclusions_file_json)
 
