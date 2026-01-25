@@ -6,7 +6,7 @@ from logs.export_logs import log_exporter
 from alerts.alert_helpers import check_alert_status
 from utils.helpers import load_file_data, excluded_ids_list
 
-def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path):
+def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_data):
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
     severity_counts_trivy = {level: 0 for level in severity_levels}
     severity_counts_grype = {level: 0 for level in severity_levels}
@@ -32,8 +32,6 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
     trivy_data = load_file_data(trivy_report_path)
 
     semgrep_data = load_file_data(semgrep_sast_report_path)
-
-    exclusions_data = load_file_data(exclusions_file_path)
 
     if os.path.isfile(alert_path):
         alert_system_json = load_file_data(alert_path)

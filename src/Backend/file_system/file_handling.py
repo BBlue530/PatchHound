@@ -1,9 +1,10 @@
 import os
+import json
 from core.variables import *
 from vuln_scan.get_vulns_count import check_vuln_files
 from file_system.file_save import save_files, attest_sbom, sign_attest, key_generating
 from utils.folder_lock import repo_lock
-from utils.helpers import load_json
+from utils.helpers import load_json, load_file_data
 from utils.cleanup import cleanup
 from utils.secrets_manager import read_secret
 from file_system.summary_handling.summary_generator import generate_summary
@@ -12,6 +13,7 @@ from logs.audit_trail import save_audit_trail
 from logs.export_logs import log_exporter
 from external_storage.external_storage_send import send_files_to_external_storage
 from alerts.alert_on_severity import check_alert_on_severity
+from external_storage.external_storage_get import get_resources_external_storage_internal_use
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity):
     secret_type = "cosign_key"
@@ -77,6 +79,12 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     syft_sbom_json = load_json(syft_sbom_file)
     trivy_report_json = load_json(trivy_report)
     semgrep_sast_report_json = load_json(semgrep_sast_report)
+    
+    if os.environ.get("external_storage_enabled", "False").lower() == "true":
+        memory_file = get_resources_external_storage_internal_use(exclusions_file_path)
+        exclusions_file_json = json.load(memory_file)
+    else:
+        exclusions_file_json = load_file_data(exclusions_file_path)
 
     def repo_files():
         if not os.path.exists(cosign_key_path) or not os.path.exists(cosign_pub_path):
@@ -84,16 +92,16 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         
         save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, fail_on_severity_json, fail_on_severity_path)
 
-        excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_path, summary_report_path, tool_versions, rulesets, {})
+        excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter = generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_json, summary_report_path, tool_versions, rulesets, {})
 
         # Handles attestation of syft and trivy SBOMs
         syft_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, syft_sbom_path, syft_sbom_attestation_path, syft_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
         trivy_attestation_verified = handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, trivy_report_path, trivy_sbom_attestation_path, trivy_att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)
 
         # Handles counting vulnerabilities and exclusions
-        vulns_found = check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
+        vulns_found = check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
 
-        check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path)
+        check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_json)
 
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
         track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list)

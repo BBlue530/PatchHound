@@ -2,7 +2,7 @@ import json
 from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data, excluded_ids_list
 
-def check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_path, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter):
+def check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_data, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter):
     vulns_found = {}
 
     with open(grype_path) as f:
@@ -11,9 +11,6 @@ def check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_re
     trivy_vuln_data = load_file_data(trivy_report_path)
 
     semgrep_sast_vuln_data = load_file_data(semgrep_sast_report_path)
-
-# Keeping this for now. If i want the exclusions to get respected just uncomment in the methods.
-    exclusions_file_data = load_file_data(exclusions_file_path)
 
     excluded_ids = excluded_ids_list(exclusions_file_data)
 

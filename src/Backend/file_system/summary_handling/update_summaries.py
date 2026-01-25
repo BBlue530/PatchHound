@@ -33,6 +33,8 @@ def update_repo_summaries(audit_trail, repo_dir, repo_name):
         repo_history_file_name = f"{repo_name}{repo_history_path_ending}"
         repo_history_file_path = os.path.join(repo_scans_dir, repo_history_file_name)
 
+        exclusions_file_json = load_file_data(repo_exclusions_file_path)
+
         for timestamp_scan_data in os.listdir(repo_scans_dir):
             timestamp_scan_data_dir = os.path.join(repo_scans_dir, timestamp_scan_data) 
             if not os.path.isdir(timestamp_scan_data_dir):
@@ -47,7 +49,7 @@ def update_repo_summaries(audit_trail, repo_dir, repo_name):
 
             tool_versions, rulesets, tmp_dict_summary_data = summary_data(summary_report_path)
 
-            generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, repo_exclusions_file_path, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data)
+            generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_json, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data)
             update_repo_history_rescan(audit_trail, repo_name, repo_alert__file_path, summary_report_path, repo_history_file_path, timestamp_scan_data)
 
             if os.environ.get("external_storage_enabled", "False").lower() == "true":
