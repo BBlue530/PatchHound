@@ -1,40 +1,40 @@
 {
-  "exclusions": [
-    {
-      "vulnerability": "semgrep_python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected_Backend/core/system.py",
-      "scope": "/Backend/core/system.py:24",
-      "public_comment": "Subprocess call uses shell=True but only with internal, sanitized variables, making injection risk negligible.",
-      "private_comment": "Safe because inputs are controlled and validated no user input is passed to subprocess."
-    },
-    {
-      "vulnerability": "semgrep_python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host_Backend/app.py",
-      "scope": "/Backend/core/system.py:46",
-      "public_comment": "Dynamic urllib usage downloads Cosign from a fixed, trusted URL. Not exposed to untrusted input.",
-      "private_comment": "Safe: URL is hardcoded and verified; no risk of arbitrary file access."
-    },
-    {
-      "vulnerability": "DS026",
-      "scope": "Dockerfile",
-      "public_comment": "No HEALTHCHECK instruction. Operational risk is low, not a security risk.",
-      "private_comment": "Container monitored via orchestration system, healthcheck not critical for security."
-    },
-    {
-      "vulnerability": "DS029",
-      "scope": "Dockerfile",
-      "public_comment": "apt-get missing --no-install-recommends. Minimal impact on image size not a security risk.",
-      "private_comment": "Installing extra recommended packages does not affect security acceptable for this build."
-    },
-    {
-      "vulnerability": "semgrep_python.lang.security.audit.subprocess-shell-true.subprocess-shell-true_Backend/core/system.py",
-      "scope": "/Backend/app.py:35",
-      "public_comment": "Flask app runs in a controlled, isolated VM for testing not exposed to the public.",
-      "private_comment": "Safe for testing environment risk is minimal."
-    },
-    {
-      "vulnerability": "DS002",
-      "scope": "Dockerfile",
-      "public_comment": "Container runs as root in isolated test VM no exposure to untrusted networks or sensitive data.",
-      "private_comment": "High-severity in production, but acceptable in controlled test environment. Must be fixed before deployment."
-    }
-  ]
+    "exclusions": [
+        {
+            "private_comment": "Safe: the URL is controlled, verified, and not derived from untrusted input. No risk of arbitrary file access or SSRF.",
+            "public_comment": "Dynamic urllib usage downloads Cosign from a fixed, trusted URL. The URL is hardcoded and not influenced by user input.",
+            "scope": "/Backend/core/system.py",
+            "vulnerability_id": "semgrep_python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected_Backend/core/system.py"
+        },
+        {
+            "private_comment": "Acceptable for local testing only. Must be reconfigured for production deployments.",
+            "public_comment": "Flask application is run with non-production parameters in a controlled environment and is not exposed to public networks.",
+            "scope": "/Backend/core/app.py",
+            "vulnerability_id": "semgrep_python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host_Backend/app.py"
+        },
+        {
+            "private_comment": "Container monitored via orchestration system, healthcheck not critical for security.",
+            "public_comment": "No HEALTHCHECK instruction. Operational risk is low, not a security risk.",
+            "scope": "Dockerfile",
+            "vulnerability_id": "DS026"
+        },
+        {
+            "private_comment": "Installing extra recommended packages does not affect security acceptable for this build.",
+            "public_comment": "apt-get missing --no-install-recommends. Minimal impact on image size not a security risk.",
+            "scope": "Dockerfile",
+            "vulnerability_id": "DS029"
+        },
+        {
+            "private_comment": "Safe because all inputs are controlled and validated; no user-supplied data reaches the subprocess call.",
+            "public_comment": "Subprocess call uses shell=True but only with internal, sanitized variables, making injection risk negligible.",
+            "scope": "/Backend/core/system.py",
+            "vulnerability_id": "semgrep_python.lang.security.audit.subprocess-shell-true.subprocess-shell-true_Backend/core/system.py"
+        },
+        {
+            "private_comment": "High-severity in production, but acceptable in controlled test environment. Must be fixed before deployment.",
+            "public_comment": "Container runs as root in isolated test VM no exposure to untrusted networks or sensitive data.",
+            "scope": "Dockerfile",
+            "vulnerability_id": "DS002"
+        }
+    ]
 }

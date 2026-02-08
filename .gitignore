@@ -3,3 +3,4 @@ src/Backend/secrets.json
 src/Backend/find_deps.sh
 dev-app-config.yaml
 tmp.json
+exclusions.json
