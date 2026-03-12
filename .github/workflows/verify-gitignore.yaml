@@ -3,6 +3,10 @@ name: Verify Git Ignore
 on:
   workflow_call:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   gitignore-check:
     runs-on: ubuntu-latest
@@ -58,7 +62,7 @@ jobs:
           fi
 
       - name: Upload violations file
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: violations
           path: violations.txt
@@ -68,7 +72,7 @@ jobs:
 
     env:
       GH_TOKEN: ${{ github.token }}
-      CURRENT_BRANCH: ${{ needs.rebase-check.outputs.current_branch }}
+      CURRENT_BRANCH: ${{ needs.gitignore-check.outputs.current_branch }}
 
     needs: gitignore-check
     if: needs.gitignore-check.outputs.violation_status == 'true'
@@ -79,7 +83,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download violations file
-        uses: actions/download-artifact@v4.3.1
+        uses: actions/download-artifact@v4
         with:
           name: violations
           path: .
@@ -109,12 +113,3 @@ jobs:
           git commit -m "bot: auto fix .gitignore violations"
           git push origin bot/fix_gitignore_auto/$CURRENT_BRANCH --force
           echo "[+] Push and stage of changes done"
-    
-      - name: Create PR
-        run: |
-          gh pr create \
-            --repo "${{ github.repository }}" \
-            --title "bot: auto fix gitignore violations" \
-            --body "Automated fix for gitignore violations detected in template sync" \
-            --base "$CURRENT_BRANCH" \
-            --head "bot/fix_gitignore_auto/$CURRENT_BRANCH"
