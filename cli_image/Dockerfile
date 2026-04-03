@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /cli_image
 
 ENV SYFT_VERSION=1.38.0
-ENV TRIVY_VERSION=0.56.2
+ENV TRIVY_VERSION=0.69.3
 ENV SEMGREP_VERSION=1.95.0
 
 ENV PATH="/cli_image/PatchHound_CLI:$PATH"

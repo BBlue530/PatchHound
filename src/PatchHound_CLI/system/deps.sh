@@ -1,7 +1,7 @@
 print_message "[~]" "Installing dependencies..." ""
 
 SYFT_VERSION="1.38.0"
-TRIVY_VERSION="0.56.2"
+TRIVY_VERSION="0.69.3"
 SEMGREP_VERSION="1.95.0"
 
 BASE_DIR_DEPS="$HOME/local/bin/patchhound"
@@ -12,12 +12,12 @@ SYFT_OUTPUT=$("$BASE_DIR_BIN/syft" version 2>/dev/null | tr -d 'v' || echo "")
 TRIVY_OUTPUT=$("$BASE_DIR_BIN/trivy" version 2>/dev/null | awk '{print $2}' || echo "")
 SEMGREP_OUTPUT=$(semgrep --version 2>/dev/null | awk '{print $2}' || echo "")
 
-sudo mkdir -p "$BASE_DIR_BIN"
-sudo mkdir -p "$BASE_DIR_VENV"
+mkdir -p "$BASE_DIR_BIN"
+mkdir -p "$BASE_DIR_VENV"
 
 if [[ "$SYFT_OUTPUT" != *"$SYFT_VERSION"* ]]; then
   print_message "[~]" "Installing syft $SYFT_VERSION..." ""
-  sudo apt-get update && sudo apt-get install -y jq curl
+  apt-get update && apt-get install -y jq curl
 
   curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$BASE_DIR_BIN" "v$SYFT_VERSION"
 fi
@@ -35,8 +35,8 @@ fi
 if [ "$SAST_SCAN" = "true" ]; then
   if ! check_command pipx; then
     print_message "[~]" "Installing pipx..." ""
-    sudo apt update
-    sudo apt install -y pipx
+    apt update
+    apt install -y pipx
     python3 -m pipx ensurepath
   fi
   if [[ "$SEMGREP_OUTPUT" != *"$SEMGREP_VERSION" ]]; then
