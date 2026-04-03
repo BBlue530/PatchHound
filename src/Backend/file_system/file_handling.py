@@ -82,7 +82,10 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
     
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         memory_file = get_resources_external_storage_internal_use(exclusions_file_path)
-        exclusions_file_json = json.load(memory_file)
+        if memory_file:
+            exclusions_file_json = json.load(memory_file)
+        else:
+            exclusions_file_json = {}
     else:
         exclusions_file_json = load_file_data(exclusions_file_path)
 
