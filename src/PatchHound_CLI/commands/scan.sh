@@ -36,6 +36,7 @@ while [[ $# -gt 0 ]]; do
                 fi
                 shift 2
             done
+            source "$BASE_DIR/system/set_endpoints.sh"
             ;;
         --sast-ruleset)
             shift
