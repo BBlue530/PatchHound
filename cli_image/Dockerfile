@@ -2,6 +2,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
     python3 python3-pip pipx \
+    python3-setuptools python3-venv \
     curl wget jq tar \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,7 +29,8 @@ RUN curl -fL -o trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz \
     mv trivy "$BASE_DIR_BIN/trivy" && \
     rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
 
-RUN PIPX_BIN_DIR=/usr/local/bin pipx install "semgrep==${SEMGREP_VERSION}"
+RUN PIPX_BIN_DIR=/usr/local/bin pipx install "semgrep==${SEMGREP_VERSION}" && \
+    pipx runpip semgrep install --force-reinstall "setuptools<75"
 
 COPY ./PatchHound_CLI /cli_image/PatchHound_CLI
 
