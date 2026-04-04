@@ -27,10 +27,10 @@ grype_excl_col_widths = [
     50,  # Type
 
     25,  # Score
-    35,  # CVSS Vector
-    30,  # Package
+    50,  # CVSS Vector
+    50,  # Package
     25,  # Version
-    35,  # Link
+    50,  # Link
     
     50,  # Scope
     50,  # Comment
@@ -68,10 +68,10 @@ trivy_vulnerability_excl_col_widths = [
     50,  # Type
 
     25,  # Score
-    35,  # CVSS Vector
-    30,  # Package
+    50,  # CVSS Vector
+    50,  # Package
     25,  # Version
-    35,  # Link
+    50,  # Link
     
     50,  # Scope
     50,  # Comment

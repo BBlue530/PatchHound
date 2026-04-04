@@ -18,7 +18,7 @@ local_bin = os.path.expanduser("~/.local/bin")
 env = os.environ.copy()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_DIR_PATH = os.path.join(BASE_DIR, "..", all_resources_folder, "database")
+DB_DIR_PATH = os.path.join(BASE_DIR, "..", "database")
 DB_PATH = os.path.join(DB_DIR_PATH, "patchhound_db.sqlite")
 db_path = os.path.normpath(DB_PATH)
 
