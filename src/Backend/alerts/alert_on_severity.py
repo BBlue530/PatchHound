@@ -162,7 +162,7 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
             "message": "vulnerability severity report summary"
         })
         if response.status_code not in [200, 204]:
-            alert_status = f"Failed to send {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
+            alert_status = f"Failed to send alert over Discord webhook. Status code: {response.status_code}"
             new_entry = {
                 "message": alert_status,
                 "level": "error",
@@ -178,7 +178,7 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
             })
             alerts_list.append(f"{alert_status}")
         else:
-            alert_status = f"Alert sent {alert_system_webhook} alert over Discord. Status code: {response.status_code}"
+            alert_status = f"Alert sent alert over Discord webhook. Status code: {response.status_code}"
             new_entry = {
                 "message": alert_status,
                 "level": "info",
@@ -245,7 +245,7 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
             "message": "vulnerability severity report summary",
         })
         if response.status_code not in [200, 204]:
-            alert_status = f"Failed to send {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
+            alert_status = f"Failed to send alert over Slack webhook. Status code: {response.status_code}"
             new_entry = {
                 "message": alert_status,
                 "level": "error",
@@ -261,7 +261,7 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
         })
             alerts_list.append(f"{alert_status}")
         else:
-            alert_status = f"Alert sent {alert_system_webhook} alert over Slack. Status code: {response.status_code}"
+            alert_status = f"Alert sent alert over Slack webhook. Status code: {response.status_code}"
             new_entry = {
                 "message": alert_status,
                 "level": "info",
