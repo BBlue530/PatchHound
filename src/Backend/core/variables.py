@@ -26,7 +26,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.48"
+patchhound_version = "0.1.49"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"
@@ -96,3 +96,12 @@ pdf_filename_path_ending = "_pdf_summary_report.pdf"
 all_not_excluded_vulnerabilities = "all_not_excluded_vulnerabilities"
 all_new_vulnerabilities = "all_new_vulnerabilities"
 all_vulnerabilities = "all_vulnerabilities"
+
+log_type_info = "INFO"
+log_type_debug = "DEBUG"
+log_type_error = "ERROR"
+
+log_message_key = "message"
+log_level_key = "level"
+log_module_key = "module"
+log_details_key = "details"

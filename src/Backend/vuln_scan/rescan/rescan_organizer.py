@@ -3,10 +3,11 @@ from datetime import datetime
 import shutil
 from core.variables import *
 from logs.audit_trail import save_audit_trail
-from logs.export_logs import log_exporter
 from external_storage.external_storage_get import get_resources_external_storage_internal_use_tmp
 from external_storage.external_storage_send import send_files_to_external_storage
 from vuln_scan.rescan.rescan_scan_data import rescan_scan_data
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def rescan_latest_scan_data():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -56,13 +57,14 @@ def rescan_latest_scan_data():
                 timestamp_folders = sorted([f for f in os.listdir(repo_path) if os.path.isdir(os.path.join(repo_path, f))],reverse=True)
 
                 if not timestamp_folders:
-                    print(f"[!] No scans found for repo: {repo_name}")
-                    new_entry = {
-                        "message": f"No scans found for repo: {repo_name}",
-                        "level": "error",
-                        "module": "scheduled_rescan",
-                    }
-                    log_exporter(new_entry)
+                    event(audit_trail, {
+                        log_message_key: "no scans found for repo",
+                        log_level_key: log_type_error,
+                        log_module_key: "scheduled_rescan",
+                        log_details_key: {
+                            "repo_name": repo_name
+                        }
+                    })
                     continue
                 
                 timestamp_folder = timestamp_folders[0]
@@ -83,13 +85,15 @@ def rescan_latest_scan_data():
                     if os.environ.get("external_storage_enabled", "False").lower() == "true":
                         send_files_to_external_storage(audit_trail_path, s3_bucker_dir_timestamp_folder)
 
-                new_entry = {
-                    "message": f"Scan finished for repo: {repo_name} Timestamp: {timestamp_folder}",
-                    "level": "error",
-                    "module": "scheduled_rescan",
-                }
-                log_exporter(new_entry)
-                print(f"[+] Scan finished for repo: {repo_name}")
+                event(audit_trail, {
+                    log_message_key: "scan finished",
+                    log_level_key: log_type_error,
+                    log_module_key: "scheduled_rescan",
+                    log_details_key: {
+                        "repo_name": repo_name,
+                        "timestamp_folder": timestamp_folder
+                    }
+                })
                 
     finally:
         if temp_resources_root:

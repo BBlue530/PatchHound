@@ -1,12 +1,12 @@
 import json
 import requests
 import os
-from logs.audit_trail import audit_trail_event
-from logs.export_logs import log_exporter
+from logs.event_handler import event
 from alerts.alert_helpers import check_alert_status
 from utils.helpers import load_file_data, excluded_ids_list
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
-def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_data):
+def check_alert_on_severity(audit_trail, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_data):
     severity_levels = ["critical", "high", "medium", "low", "unknown"]
     severity_counts_trivy = {level: 0 for level in severity_levels}
     severity_counts_grype = {level: 0 for level in severity_levels}
@@ -120,8 +120,6 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
     alert_status = check_alert_status(alert_on_severity, grype_critical_count, grype_high_count, grype_medium_count, grype_low_count, grype_unknown_count, trivy_crit_count, trivy_high_count, trivy_medium_count, trivy_low_count, trivy_unknown_count)
 
     if alert_status and "discord" in alert_system_webhook:
-        print("[!] Sending Discord alert with severity breakdown...")
-
         message = {
             "embeds": [{
                 "title": "🚨 Vulnerability Severity Report",
@@ -156,48 +154,39 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
             data=json.dumps(message),
             headers={"Content-Type": "application/json"}
         )
-        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "discord",
-            "message": "vulnerability severity report summary"
-        })
-        if response.status_code not in [200, 204]:
-            alert_status = f"Failed to send alert over Discord webhook. Status code: {response.status_code}"
-            new_entry = {
-                "message": alert_status,
-                "level": "error",
-                "module": "discord_alert",
-            }
-            log_exporter(new_entry)
-
-            print(f"[!] {alert_status}")
-            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
+        event(audit_trail, {
+            log_message_key: "vulnerability severity report summary sent",
+            log_level_key: log_type_info,
+            log_module_key: "discord_alert",
+            log_details_key: {
                 "status_code": response.status_code,
                 "webhook": "discord",
-                "message": "vulnerability severity report summary"
-            })
-            alerts_list.append(f"{alert_status}")
-        else:
-            alert_status = f"Alert sent alert over Discord webhook. Status code: {response.status_code}"
-            new_entry = {
-                "message": alert_status,
-                "level": "info",
-                "module": "discord_alert",
             }
-            log_exporter(new_entry)
-
-            print(f"[!] {alert_status}")
-            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "discord",
-            "message": "vulnerability severity report summary",
-            "status_code": response.status_code
         })
-            alerts_list.append(f"{alert_status}")
+
+        if response.status_code not in [200, 204]:
+            event(audit_trail, {
+                log_message_key: "failed to send alert over discord webhook",
+                log_level_key: log_type_error,
+                log_module_key: "discord_alert",
+                log_details_key: {
+                    "status_code": response.status_code,
+                    "webhook": "discord",
+                }
+            })
+            
+        else:
+            event(audit_trail, {
+                log_message_key: "alert sent alert over discord webhook",
+                log_level_key: log_type_info,
+                log_module_key: "discord_alert",
+                log_details_key: {
+                    "status_code": response.status_code,
+                    "webhook": "discord",
+                }
+            })
 
     elif alert_status and "slack" in alert_system_webhook:
-        print("[!] Sending Slack alert with severity breakdown...")
-
         message = {
             "text": ":rotating_light: *Vulnerability Severity Report*",
             "attachments": [
@@ -239,56 +228,45 @@ def check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severi
             data=json.dumps(message),
             headers={"Content-Type": "application/json"}
         )
-        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "slack",
-            "message": "vulnerability severity report summary",
+        event(audit_trail, {
+            log_message_key: "vulnerability severity report summary",
+            log_level_key: log_type_info,
+            log_module_key: "slack_alerts",
+            log_details_key: {
+                "status_code": response.status_code,
+                "webhook": "discord",
+            }
         })
+
         if response.status_code not in [200, 204]:
-            alert_status = f"Failed to send alert over Slack webhook. Status code: {response.status_code}"
-            new_entry = {
-                "message": alert_status,
-                "level": "error",
-                "module": "slack_alerts",
-            }
-            log_exporter(new_entry)
+            event(audit_trail, {
+                log_message_key: "failed to send alert over slack webhook",
+                log_level_key: log_type_error,
+                log_module_key: "slack_alerts",
+                log_details_key: {
+                    "status_code": response.status_code,
+                    "webhook": "slack",
+                }
+            })
 
-            print(f"[!] {alert_status}")
-            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "slack",
-            "message": "vulnerability severity report summary",
-        })
-            alerts_list.append(f"{alert_status}")
         else:
-            alert_status = f"Alert sent alert over Slack webhook. Status code: {response.status_code}"
-            new_entry = {
-                "message": alert_status,
-                "level": "info",
-                "module": "slack_alerts",
-            }
-            log_exporter(new_entry)
+            event(audit_trail, {
+                log_message_key: "alert sent alert over slack webhook",
+                log_level_key: log_type_info,
+                log_module_key: "slack_alerts",
+                log_details_key: {
+                    "status_code": response.status_code,
+                    "webhook": "slack",
+                }
+            })
 
-            print(f"[!] {alert_status}")
-            audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status_code": response.status_code,
-            "webhook": "slack",
-            "message": "vulnerability severity report summary",
-        })
-            alerts_list.append(f"{alert_status}")
-    
     else:
-        alert_status = f"Failed to send alert for {repo_name}. Alert webhook not set"
-        new_entry = {
-            "message": alert_status,
-            "level": "error",
-            "module": "alerts",
-        }
-        log_exporter(new_entry)
-        
-        audit_trail_event(audit_trail, "ALERT_SYSTEM", {
-            "status": "fail",
-            "webhook": "not found",
-            "message": "vulnerability severity report summary",
+        event(audit_trail, {
+            log_message_key: f"failed to send alert for {repo_name}. alert webhook not set",
+            log_level_key: log_type_error,
+            log_module_key: "alerts",
+            log_details_key: {
+                "status_code": "fail",
+                "webhook": "not found",
+            }
         })
-        alerts_list.append(f"{alert_status}")

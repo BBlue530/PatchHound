@@ -5,7 +5,8 @@ import boto3
 import tempfile
 from flask import abort, send_file, request
 from botocore.exceptions import ClientError
-from logs.export_logs import log_exporter
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def get_resources_s3(base_dir, file_names):
     print("[+] AWS s3 enabled. Getting resources...")
@@ -41,13 +42,14 @@ def get_resources_s3(base_dir, file_names):
         ]
 
     if not keys:
-        new_entry = {
-            "message": "No files found to return",
-            "level": "error",
-            "module": "get_resources_s3",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(False, {
+            log_message_key: "no files found to return",
+            log_level_key: log_type_error,
+            log_module_key: "get_resources_s3",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         abort(404, description="No files found to return")
 
     if len(keys) == 1:
@@ -56,13 +58,15 @@ def get_resources_s3(base_dir, file_names):
         try:
             s3.download_fileobj(bucket, key, memory_file)
         except s3.exceptions.NoSuchKey:
-            new_entry = {
-                "message": f"Requested file not found: {key}",
-                "level": "error",
-                "module": "get_resources_s3",
-                "client_ip": request.remote_addr,
-            }
-            log_exporter(new_entry)
+            event(False, {
+                log_message_key: "requested file not found",
+                log_level_key: log_type_error,
+                log_module_key: "get_resources_s3",
+                log_details_key: {
+                    "client_ip": request.remote_addr,
+                    "key": key
+                }
+            })
             abort(404, description=f"Requested file not found: {key}")
 
         memory_file.seek(0)

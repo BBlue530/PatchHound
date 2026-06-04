@@ -4,8 +4,8 @@ import os
 import sys
 from utils.helpers import load_file_data
 from config.secret_data. get_secret_data import read_external_secret
-from logs.export_logs import log_exporter
-from core.variables import secret_storage, length, secret_types
+from logs.event_handler import event
+from core.variables import secret_storage, length, secret_types, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
     
 def read_secret(secret_type):
     if os.environ.get("secret_in_env_enabled", "False").lower() == "true":
@@ -45,36 +45,39 @@ def verify_api_key(api_key):
 
 def read_secret_local(secret_type):
     if not os.path.isfile(secret_storage):
-        print("[!] Secrets file not found")
-        new_entry = {
-            "message": "Secret file not found",
-            "level": "error",
-            "module": "secrets",
-        }
-        log_exporter(new_entry)
+        event(False, {
+            log_message_key: "secret file not found",
+            log_level_key: log_type_error,
+            log_module_key: "read_secret_local",
+            log_details_key: {
+                "": ""
+            }
+        })
         return None
 
     try:
         secrets_data = load_file_data(secret_storage)
     except json.JSONDecodeError:
-        new_entry = {
-            "message": "Secret file is invalid",
-            "level": "error",
-            "module": "secrets",
-        }
-        log_exporter(new_entry)
-        print("[!] Secrets file is invalid")
+        event(False, {
+            log_message_key: "secret file is invalid",
+            log_level_key: log_type_error,
+            log_module_key: "read_secret_local",
+            log_details_key: {
+                "": ""
+            }
+        })
         return None
 
     secret_value = secrets_data.get(secret_type)
     if not secret_value:
-        new_entry = {
-            "message": f"Secret does not exist {secret_type}",
-            "level": "error",
-            "module": "secrets",
-        }
-        log_exporter(new_entry)
-        print(f"[!] Secret '{secret_type}' not found in file")
+        event(False, {
+            log_message_key: "secret does not exist",
+            log_level_key: log_type_error,
+            log_module_key: "read_secret_local",
+            log_details_key: {
+                "secret_type": "secret_type"
+            }
+        })
         return None
 
     return secret_value

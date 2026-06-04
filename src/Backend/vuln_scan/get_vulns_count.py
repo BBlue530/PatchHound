@@ -1,6 +1,7 @@
 import json
-from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data, excluded_ids_list
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_data, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter):
     vulns_found = {}
@@ -23,19 +24,34 @@ def check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_re
 
     vulns_found = check_vuln_file_semgrep(semgrep_sast_vuln_data, excluded_ids, vulns_found)
 
-    audit_trail_event(audit_trail, "VULN_COUNT", {
+    event(audit_trail, {
+        log_message_key: "vulnerabilities counted",
+        log_level_key: log_type_debug,
+        log_module_key: "check_vuln_files",
+        log_details_key: {
             "vulnerabilities_count": vulns_found
-        })
+        }
+    })
 
     if semgrep_sast_vuln_data.get("SAST_SCAN") is False:
-        audit_trail_event(audit_trail, "SAST_SCAN", {
-            "status": "skipped"
+        event(audit_trail, {
+            log_message_key: "sast scan skipped",
+            log_level_key: log_type_debug,
+            log_module_key: "discord_alert",
+            log_details_key: {
+                "status": "skipped"
+            }
         })
         vulns_found["sast_scan_skipped"] = True
 
     if trivy_vuln_data.get("TRIVY_SCAN") is False:
-        audit_trail_event(audit_trail, "TRIVY_SCAN", {
-            "status": "skipped"
+        event(audit_trail, {
+            log_message_key: "trivy scan skipped",
+            log_level_key: log_type_debug,
+            log_module_key: "discord_alert",
+            log_details_key: {
+                "status": "skipped"
+            }
         })
         vulns_found["trivy_scan_skipped"] = True
 

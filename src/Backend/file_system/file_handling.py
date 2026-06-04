@@ -10,10 +10,12 @@ from utils.secrets_manager import read_secret
 from file_system.summary_handling.summary_generator import generate_summary
 from file_system.repo_history_tracking import track_repo_history
 from logs.audit_trail import save_audit_trail
-from logs.export_logs import log_exporter
 from external_storage.external_storage_send import send_files_to_external_storage
 from alerts.alert_on_severity import check_alert_on_severity
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
+
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity):
     secret_type = "cosign_key"
@@ -104,7 +106,7 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
         # Handles counting vulnerabilities and exclusions
         vulns_found = check_vuln_files(audit_trail, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_json, excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter)
 
-        check_alert_on_severity(audit_trail, alerts_list, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_json)
+        check_alert_on_severity(audit_trail, alert_path, fail_on_severity_path, repo_name, grype_path, trivy_report_path, semgrep_sast_report_path, exclusions_file_json)
 
         audit_trail_hash = save_audit_trail(audit_trail_path, audit_trail)
         track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list)
@@ -117,13 +119,14 @@ def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_repo
 
     cleanup()
 
-    new_entry = {
-        "message": "Scan completed",
-        "level": "info",
-        "module": "save_scan_files",
-    }
-    log_exporter(new_entry)
-    print("[+] Scan completed")
+    event(audit_trail, {
+        log_message_key: "scan completed",
+        log_level_key: log_type_info,
+        log_module_key: "save_scan_files",
+        log_details_key: {
+            "": ""
+        }
+    })
 
 def handle_ingested_data(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, sbom_path, sbom_attestation_path, att_sig_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author):
     attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attestation_path, repo_name, alert_path, repo_dir, timestamp, commit_sha, commit_author)

@@ -56,6 +56,8 @@ backend:
           week: 0
           day: 7
     
+  log_level: "DEBUG"
+
   export_log:
     https:
       enabled: False

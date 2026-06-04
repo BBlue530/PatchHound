@@ -6,7 +6,6 @@ from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
 import logging
-from datetime import datetime, timezone
 from external_storage.external_storage_append import append_to_external_storage
 from logs.audit_trail import append_audit_log
 from core.variables import service_log_path
@@ -14,7 +13,6 @@ from core.variables import service_log_path
 logger = logging.getLogger("application")
 
 def log_exporter(new_entry):
-    new_entry["service_timestamp"] = datetime.now(timezone.utc).isoformat()
 
     if os.environ.get("external_storage_enabled", "False").lower() == "true":
         append_to_external_storage(new_entry, service_log_path)

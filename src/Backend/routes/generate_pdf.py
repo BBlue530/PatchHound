@@ -8,7 +8,7 @@ from utils.jwt_path import decode_jwt_path_to_resources
 from database.validate_token import validate_token
 from utils.file_hash import hash_file
 from file_system.file_save import sign_file
-from logs.export_logs import log_exporter
+from logs.event_handler import event
 from core.variables import *
 
 pdf_bp = Blueprint("pdf", __name__)
@@ -18,13 +18,14 @@ def generate_pdf():
     
     token_key = request.args.get("token")
     if not token_key:
-        new_entry = {
-            "message": "Missing authentication token",
-            "level": "error",
-            "module": "generate-pdf",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "missing authentication token",
+            log_level_key: log_type_info,
+            log_module_key: "generate_pdf",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": "Token missing"}), 401
     
     audit_trail = False
@@ -36,13 +37,14 @@ def generate_pdf():
 
     path_to_resources_token = request.args.get("path_to_resources_token")
     if not path_to_resources_token:
-        new_entry = {
-            "message": "Missing path_to_resources_token",
-            "level": "error",
-            "module": "generate-pdf",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "missing path_to_resources_token",
+            log_level_key: log_type_info,
+            log_module_key: "generate_pdf",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": "path_to_resources_token missing"}), 404
     organization_decoded, current_repo_decoded, timestamp_decoded, valid = decode_jwt_path_to_resources(path_to_resources_token, organization)
     
@@ -74,21 +76,25 @@ def generate_pdf():
             zf.writestr(f"{current_repo_decoded}_pdf{digest_path_ending}", f"SHA256: {pdf_report_hash}")
         memory_file.seek(0)
 
-        new_entry = {
-            "message": f"Generate pdf endpoint called path_to_resources_token: {path_to_resources_token}",
-            "level": "info",
-            "module": "generate-pdf",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "generate pdf endpoint called path_to_resources_token",
+            log_level_key: log_type_info,
+            log_module_key: "generate_pdf",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+                "path_to_resources_token": path_to_resources_token
+            }
+        })
 
         return send_file(memory_file, download_name='pdf_report_bundle.zip', as_attachment=True)
     else:
-        new_entry = {
-            "message": f"Invalid path_to_resources_token: {path_to_resources_token}",
-            "level": "error",
-            "module": "generate-pdf",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "invalid path_to_resources_token",
+            log_level_key: log_type_info,
+            log_module_key: "generate_pdf",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+                "path_to_resources_token": path_to_resources_token
+            }
+        })
         return jsonify({"error": "invalid jwt token"}), 404

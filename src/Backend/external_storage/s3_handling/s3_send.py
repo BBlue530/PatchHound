@@ -1,7 +1,8 @@
 import os
 import boto3
 from flask import request
-from logs.export_logs import log_exporter
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def send_files_to_s3(files_to_send_dir, bucket_dir):
     print("[+] AWS s3 enabled. Sending files...")
@@ -33,12 +34,14 @@ def send_files_to_s3(files_to_send_dir, bucket_dir):
                 s3.upload_file(local_path, bucket, s3_key)
 
     else:
-        new_entry = {
-            "message": f"Path does not exist: {files_to_send_dir}",
-            "level": "error",
-            "module": "send_files_to_s3",
-        }
-        log_exporter(new_entry)
+        event(False, {
+            log_message_key: "path does not exist",
+            log_level_key: log_type_error,
+            log_module_key: "send_files_to_s3",
+            log_details_key: {
+                "files_to_send_dir": files_to_send_dir
+            }
+        })
         raise ValueError(f"Path does not exist: {files_to_send_dir}")
     
     print(f"[+] Sending '{files_to_send_dir}' to S3 bucket '{bucket}' completed.")

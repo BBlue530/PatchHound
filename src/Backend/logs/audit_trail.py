@@ -1,16 +1,10 @@
-from datetime import datetime, timezone
 import json
 import os
-from utils.helpers import file_stable_check, load_file_data
+from utils.helpers import file_stable_check
 from utils.file_hash import hash_file
 
-def audit_trail_event(audit_trail, action, details=""):
-    event = {
-        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "action": action,
-        "details": details
-    }
-    audit_trail.append(event)
+def audit_trail_event(audit_trail, new_event):
+    audit_trail.append(new_event)
     return audit_trail
 
 def save_audit_trail(audit_trail_path, audit_trail):

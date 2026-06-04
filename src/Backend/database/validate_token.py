@@ -2,8 +2,8 @@ import sqlite3
 import psycopg2
 import os
 from datetime import datetime
-from logs.audit_trail import audit_trail_event
-from core.variables import db_path
+from logs.event_handler import event
+from core.variables import db_path, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def validate_token(audit_trail, token_key):
     if os.environ.get("external_database_enabled", "False").lower() == "true":
@@ -28,27 +28,67 @@ def validate_token(audit_trail, token_key):
             conn.close()
 
             if result is None:
+                event(audit_trail, {
+                    log_message_key: "token missing",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                    }
+                })
                 return "Token validation: TokenKey Not Found", False
 
             expiration_date, enabled, organization = result
 
             if not enabled:
+                event(audit_trail, {
+                    log_message_key: "token disabled",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
+                })
                 return "Token validation: TokenKey Disabled", False
 
             if datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now():
+                event(audit_trail, {
+                    log_message_key: "token expired",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
+                })
                 return "Token validation: TokenKey Expired", False
 
             if audit_trail is not False:
-                audit_trail_event(audit_trail, "TOKEN_VALIDATION", {
-                    "status": "valid",
-                    "expiration_date": expiration_date,
-                    "organization": organization
+                event(audit_trail, {
+                    log_message_key: "token is valid",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "valid",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
                 })
-
             return organization, True
 
         except Exception as e:
-            print(f"Error: {str(e)}")
+            event(audit_trail, {
+                log_message_key: "internal error",
+                log_level_key: log_type_info,
+                log_module_key: "token_validation",
+                log_details_key: {
+                    "status": "failed",
+                    "error": str(e)
+                }
+            })
             return f"Token validation: Internal error {str(e)}", False
         
     else:
@@ -66,24 +106,66 @@ def validate_token(audit_trail, token_key):
             conn.close()
 
             if result is None:
+                event(audit_trail, {
+                    log_message_key: "token missing",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                    }
+                })
                 return "Token validation: TokenKey Not Found", False
 
             expiration_date, enabled, organization = result
 
             if not enabled:
+                event(audit_trail, {
+                    log_message_key: "token disabled",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
+                })
                 return "Token validation: TokenKey Disabled", False
 
             if datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now():
+                event(audit_trail, {
+                    log_message_key: "token expired",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "failed",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
+                })
                 return "Token validation: TokenKey Expired", False
+            
             if audit_trail is not False:
-                audit_trail_event(audit_trail, "TOKEN_VALIDATION", {
-                    "status": "valid",
-                    "expiration_date": expiration_date,
-                    "organization": organization
+                event(audit_trail, {
+                    log_message_key: "token is valid",
+                    log_level_key: log_type_info,
+                    log_module_key: "token_validation",
+                    log_details_key: {
+                        "status": "valid",
+                        "expiration_date": expiration_date,
+                        "organization": organization
+                    }
                 })
 
             return organization, True
 
         except Exception as e:
-            print(f"Error: {str(e)}")
+            event(audit_trail, {
+                log_message_key: "internal error",
+                log_level_key: log_type_info,
+                log_module_key: "token_validation",
+                log_details_key: {
+                    "status": "failed",
+                    "error": str(e)
+                }
+            })
             return f"Token validation: Internal error {str(e)}", False

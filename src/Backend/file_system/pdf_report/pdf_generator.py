@@ -12,7 +12,8 @@ from external_storage.external_storage_get import get_resources_external_storage
 from core.variables import *
 from file_system.pdf_report.pdf_table_builds import *
 from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
-from logs.export_logs import log_exporter
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     grype_exclusions_vulnerabilities_severity_rows = []
@@ -66,13 +67,15 @@ def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded
         summary_report = json.load(memory_file)
     else:
         if not os.path.isdir(base_dir):
-            new_entry = {
-                "message": f"Missing directory: {base_dir}",
-                "level": "error",
-                "module": "generate-pdf",
-                "client_ip": request.remote_addr,
-            }
-            log_exporter(new_entry)
+            event(False, {
+                log_message_key: "missing directory",
+                log_level_key: log_type_error,
+                log_module_key: "generate_pdf",
+                log_details_key: {
+                    "client_ip": request.remote_addr,
+                    "base_dir": base_dir
+                }
+            })
             abort(404, description=f"Directory not found: {base_dir}")
 
         summary_report = load_file_data(summary_report_path)

@@ -7,12 +7,11 @@ import tempfile
 from core.variables import env
 from alerts.alerts import alert_event_system
 from utils.helpers import file_stable_check
-from logs.audit_trail import audit_trail_event
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
 from utils.secrets_manager import read_secret
-from logs.export_logs import log_exporter
-from core.variables import local_bin
+from logs.event_handler import event
+from core.variables import local_bin, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_path, prio_vuln_data, alert_path, alert_system_json, syft_sbom_path, syft_sbom_json, semgrep_sast_report_path, semgrep_sast_report_json, trivy_report_path, trivy_report_json, fail_on_severity_json, fail_on_severity_path):
     file_save_status = True
@@ -23,9 +22,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("alert_system")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "alert_system": alert_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "alert system failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "alert_system": alert_path,
+            }
         })
 
     if syft_sbom_json:
@@ -33,9 +36,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("syft_sbom")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "syft_sbom": syft_sbom_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "sbom failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "syft_sbom": syft_sbom_path,
+            }
         })
     
     if semgrep_sast_report_json:
@@ -43,9 +50,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("semgrep_sast_report")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "semgrep_sast_report": semgrep_sast_report_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "semgrep report failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "semgrep_sast_report": semgrep_sast_report_path,
+            }
         })
 
     if trivy_report_json:
@@ -53,9 +64,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("trivy_report")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "trivy_report": trivy_report_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "trivy report failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "trivy_report": trivy_report_path,
+            }
         })
 
     if grype_vulns_cyclonedx_json_data:
@@ -63,9 +78,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("grype_vulns_cyclonedx")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "grype_vulns_cyclonedx": grype_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "grype vulnerability report failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "grype_vulns_cyclonedx": grype_path,
+            }
         })
 
     if prio_vuln_data:
@@ -73,9 +92,13 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("prio_vuln_data")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "pyio_vuln_data": prio_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "prio vulnerabilities report failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "pyio_vuln_data": prio_path,
+            }
         })
 
     if fail_on_severity_json:
@@ -83,32 +106,39 @@ def save_files(audit_trail, grype_path, grype_vulns_cyclonedx_json_data, prio_pa
     else:
         files_failed_save.append("fail_on_severity")
         file_save_status = False
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "fail_on_severity": fail_on_severity_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "fail on severity failed to save",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "fail_on_severity": fail_on_severity_path,
+            }
         })
 
     if file_save_status:
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-                "status": "success"
-            })
+        event(audit_trail, {
+            log_message_key: "all files saved",
+            log_level_key: log_type_info,
+            log_module_key: "save_files",
+            log_details_key: {
+                "": ""
+            }
+        })
+
     else:
-        new_entry = {
-            "message": f"Failed to save files: [{files_failed_save}]",
-            "level": "error",
-            "module": "save_files",
-        }
-        log_exporter(new_entry)
         message = f"[!] Failed to save files!"
         alert = "Workflow : Failed to save files"
-        audit_trail_event(audit_trail, "KEY_GENERATION", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "failed to save files and reports",
+            log_level_key: log_type_error,
+            log_module_key: "save_files",
+            log_details_key: {
+                "": ""
+            }
         })
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
 
 def save_file(file_path, file_json):
-    print(f"[+] Saving: [{file_path}]")
     with open(file_path, "w") as f:
         json.dump(file_json, f, indent=4)
     file_stable_check(file_path)
@@ -128,23 +158,33 @@ def attest_sbom(audit_trail, alerts_list, cosign_key_path, sbom_path, sbom_attes
             check=True,
             env=env
         )
-        audit_trail_event(audit_trail, "SBOM_ATTESTATION", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "sbom attested",
+            log_level_key: log_type_debug,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
-        print(f"[+] SBOM attested: {sbom_attestation_path}")
+
     except subprocess.CalledProcessError as e:
-        new_entry = {
-            "message": f"Failed to attest SBOM for repo: {repo_name} {e.stderr}",
-            "level": "error",
-            "module": "attest_sbom",
-        }
-        log_exporter(new_entry)
-        audit_trail_event(audit_trail, "SBOM_ATTESTATION", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "failed to attest sbom",
+            log_level_key: log_type_error,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "error": str(e),
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
         message = f"[!] Failed to attest SBOM for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
 
@@ -161,23 +201,33 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
             check=True,
             env=env
         )
-        audit_trail_event(audit_trail, "SIGNING_ATTESTATION", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "attestation signed",
+            log_level_key: log_type_debug,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
         print(f"[+] Attestation signed: {att_sig_path}")
     except subprocess.CalledProcessError as e:
-        new_entry = {
-            "message": f"Failed to sign Attestation for repo: {repo_name} {e.stderr}",
-            "level": "error",
-            "module": "attest_sbom",
-        }
-        log_exporter(new_entry)
-        audit_trail_event(audit_trail, "SIGNING_ATTESTATION", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "signing attestation failed",
+            log_level_key: log_type_error,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "error": str(e),
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
         message = f"[!] Failed to sign Attestation for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
     
@@ -194,19 +244,35 @@ def sign_attest(audit_trail, alerts_list, cosign_key_path, cosign_pub_path, att_
         )
         syft_attestation_verified = True
         message = f"[+] Verified Attestation signature for repo: {repo_name}"
-        audit_trail_event(audit_trail, "VERIFY_SIGNATURE_ATTESTATION", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "attestation signature verified",
+            log_level_key: log_type_debug,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
-        print(f"{message}")
         return syft_attestation_verified
+
     except subprocess.CalledProcessError:
         syft_attestation_verified = False
         message = f"[!] Signature for Attestation failed for repo: {repo_name}!"
         alert = "Scheduled Event : Signature Fail"
-        audit_trail_event(audit_trail, "VERIFY_SIGNATURE_ATTESTATION", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "",
+            log_level_key: log_type_error,
+            log_module_key: "attest_sbom",
+            log_details_key: {
+                "error": str(e),
+                "repo_dir": repo_dir,
+                "timestamp": timestamp,
+                "commit_sha": commit_sha,
+                "commit_author": commit_author
+            }
         })
-        print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)
         alerts_list.append(f"{message}")
         return syft_attestation_verified
@@ -223,24 +289,27 @@ def key_generating(audit_trail, alerts_list, repo_name, scan_dir, cosign_key_pat
         # Its fine to have the priv key saved since its encrypted by the COSIGN_PASSWORD
         os.rename(os.path.join(scan_dir, "cosign.key"), cosign_key_path)
         os.rename(os.path.join(scan_dir, "cosign.pub"), cosign_pub_path)
-        audit_trail_event(audit_trail, "KEY_GENERATION", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "cosign signature keys generated",
+            log_level_key: log_type_debug,
+            log_module_key: "key_generating",
+            log_details_key: {
+                "repo_name": repo_name
+            }
         })
-        print(f"[+] Cosign key generated for repo: {repo_name}")
 
     except subprocess.CalledProcessError as e:
-        new_entry = {
-            "message": f"Failed to generate Cosign key for repo: {repo_name} {e.stderr}",
-            "level": "error",
-            "module": "key_generating",
-        }
-        log_exporter(new_entry)
         message = f"[!] Failed to generate Cosign key for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        audit_trail_event(audit_trail, "KEY_GENERATION", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "failed to generate cosign keys",
+            log_level_key: log_type_error,
+            log_module_key: "key_generating",
+            log_details_key: {
+                "error": str(e),
+                "repo_name": repo_name
+            }
         })
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         if alerts_list is not None:
             alerts_list.append(f"{message}")
@@ -258,20 +327,30 @@ def sign_image(audit_trail, cosign_key_path, image_sig_path, image_digest_path, 
             check=True,
             env=env
         )
-        print(f"[+] Image signed: {image_sig_path}")
-        audit_trail_event(audit_trail, "IMAGE_SIGNING", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "image signed",
+            log_level_key: log_type_debug,
+            log_module_key: "sign_image",
+            log_details_key: {
+                "repo_name": repo_name
+            }
         })
         result = "image signed"
         status_code = 200
         return result, status_code
+
     except subprocess.CalledProcessError as e:
         message = f"[!] Failed to sign image for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Signature Fail"
-        audit_trail_event(audit_trail, "IMAGE_SIGNING", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "failed to sign image",
+            log_level_key: log_type_error,
+            log_module_key: "sign_image",
+            log_details_key: {
+                "error": str(e),
+                "repo_name": repo_name
+            }
         })
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         result = "image signing failed"
         status_code = 500
@@ -289,19 +368,29 @@ def verify_image(audit_trail, cosign_pub_path, image_sig_path, image_digest_path
             check=True,
             env=env
         )
-        print(f"[+] Image verified: {image_sig_path}")
-        audit_trail_event(audit_trail, "IMAGE_SIGNING_VERIFY", {
-            "status": "success"
+        event(audit_trail, {
+            log_message_key: "image verified",
+            log_level_key: log_type_debug,
+            log_module_key: "verify_image",
+            log_details_key: {
+                "repo_name": repo_name
+            }
         })
         verify_image_status = jsonify({"verify_image_status": "image verified and is trusted"}), 200
         return verify_image_status
+
     except subprocess.CalledProcessError as e:
         message = f"[!] Failed to verify image for repo: {repo_name} {e.stderr}!"
         alert = "Workflow : Verification Fail"
-        audit_trail_event(audit_trail, "IMAGE_SIGNING_VERIFY", {
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "failed to verifiy image signature",
+            log_level_key: log_type_error,
+            log_module_key: "verify_image",
+            log_details_key: {
+                "error": str(e),
+                "repo_name": repo_name
+            }
         })
-        print(message)
         alert_event_system(audit_trail, message, alert, alert_path)
         verify_image_status = jsonify({"verify_image_status": "image verification mismatch and is not trusted"}), 422
         return verify_image_status
@@ -371,13 +460,15 @@ def sign_file(cosign_key_path, cosign_pub_path, file_sig_path, file_filename_pat
             send_files_to_external_storage(file_filename_path, s3_bucket_dir)
     
     except subprocess.CalledProcessError as e:
-        new_entry = {
-            "message": f"Signature or verification failed for repo: {repo_name}: {e.stderr}",
-            "level": "error",
-            "module": "generate-pdf",
-        }
-        log_exporter(new_entry)
-        print(f"[!] Signing or verification failed for repo: {repo_name}: {e.stderr}")
+        event(False, {
+            log_message_key: "signature or verification failed for repo",
+            log_level_key: log_type_error,
+            log_module_key: "generate_pdf",
+            log_details_key: {
+                "repo_name": repo_name,
+                "error": e.stderr
+            }
+        })
 
     finally:
         for f in temp_files:

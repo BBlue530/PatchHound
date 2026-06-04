@@ -1,6 +1,6 @@
-from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data
-from core.variables import kev_catalog
+from logs.event_handler import event
+from core.variables import kev_catalog, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data):
     kev_data = load_file_data(kev_catalog)
@@ -28,12 +28,17 @@ def compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_repo
             trivy_matched_vulns.append(vuln)
     
     if grype_matched_vulns or trivy_matched_vulns:
-        audit_trail_event(audit_trail, "KEV_CATALOG", {
+        event(audit_trail, {
+            log_message_key: "vulnerabilities found in kev catalog",
+            log_level_key: log_type_info,
+            log_module_key: "compare_kev_catalog",
+            log_details_key: {
                 "kev_version": kev_version,
                 "kev_release_date": kev_release_date,
                 "matched_grype_vulnerabilities": grype_matched_vulns,
                 "matched_trivy_vulnerabilities": trivy_matched_vulns
-            })
+            }
+        })
 
     prio_vuln_data = {
         "version": kev_version,

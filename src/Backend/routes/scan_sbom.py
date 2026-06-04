@@ -8,10 +8,11 @@ import io
 from datetime import datetime
 from file_system.file_handling import save_scan_files
 from utils.jwt_path import jwt_path_to_resources
-from logs.audit_trail import audit_trail_event
-from logs.export_logs import log_exporter
+from logs.event_handler import event
 from database.validate_token import validate_token
 from vuln_scan.kev_catalog import compare_kev_catalog
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 scan_sbom_bp = Blueprint("scan_sbom", __name__)
 
@@ -24,26 +25,28 @@ def scan_sbom():
     
     token_key = request.form.get("token")
     if not token_key:
-        new_entry = {
-            "message": "Missing authentication token",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "missing authentication token",
+            log_level_key: log_type_info,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": "Token missing"}), 401
     
     audit_trail = []
     
     response, valid_token = validate_token(audit_trail, token_key)
     if valid_token == False:
-        new_entry = {
-            "message": "Invalid authentication token",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "invalid authentication token",
+            log_level_key: log_type_info,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": f"{response}"}), 401
     organization = response
 
@@ -66,13 +69,15 @@ def scan_sbom():
         missing_fields.append("scan root")
 
     if missing_fields:
-        new_entry = {
-            "message": f"Missing fields: {missing_fields}",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "missing fields",
+            log_level_key: log_type_error,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+                "missing_fields": missing_fields
+            }
+        })
         return jsonify({"error": f"Missing: {', '.join(missing_fields)}"}), 400
 
     syft_sbom_file = request.files['sbom']
@@ -108,13 +113,14 @@ def scan_sbom():
         json.load(syft_sbom_file)
         syft_sbom_file.seek(0)
     except json.JSONDecodeError:
-        new_entry = {
-            "message": "SBOM file not valid json",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "sbom file not valid json",
+            log_level_key: log_type_error,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": "SBOM file must be valid JSON"}), 400
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
@@ -123,11 +129,16 @@ def scan_sbom():
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
-    audit_trail_event(audit_trail, "SCAN_START", {
-        "timestamp_id": timestamp,
-        "repo": current_repo,
-        "commit_sha": commit_sha,
-        "commit_author": commit_author
+    event(audit_trail, {
+        log_message_key: "scan started",
+        log_level_key: log_type_info,
+        log_module_key: "scan_sbom",
+        log_details_key: {
+            "timestamp_id": timestamp,
+            "repo": current_repo,
+            "commit_sha": commit_sha,
+            "commit_author": commit_author
+        }
     })
 
     try:
@@ -137,19 +148,28 @@ def scan_sbom():
         text=True,
         check=True
         )
-        audit_trail_event(audit_trail, "GRYPE_SCAN", {
-            "status": "success",
-            "output_format": "cyclonedx"
+        event(audit_trail, {
+            log_message_key: "grype scan finished",
+            log_level_key: log_type_debug,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "status": "success",
+                "output_format": "cyclonedx"
+            }
         })
 
     except subprocess.CalledProcessError as e:
-        new_entry = {
-            "message": f"Grype scan failed. stderr: {e.stderr} stdout: {e.stdout} return_code: {e.returncode} cmd: {e.cmd}",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "grype scan failed",
+            log_level_key: log_type_error,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+                "e.stderr": e.stderr,
+                "e.returncode": e.returncode,
+                "e.cmd": e.cmd
+            }
+        })
         return jsonify({"error": "Grype scan failed", "stderr": e.stderr, "stdout": e.stdout, "return_code": e.returncode, "cmd": e.cmd}), 500
     finally:
         os.unlink(tmp_path)
@@ -161,13 +181,14 @@ def scan_sbom():
         trivy_report_data = json.load(trivy_report)
         trivy_report.seek(0)
     except json.JSONDecodeError:
-        new_entry = {
-            "message": "Trivy scan is not valid json",
-            "level": "error",
-            "module": "scan-sbom",
-            "client_ip": request.remote_addr,
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "trivy scan is not valid json",
+            log_level_key: log_type_error,
+            log_module_key: "scan_sbom",
+            log_details_key: {
+                "client_ip": request.remote_addr,
+            }
+        })
         return jsonify({"error": "Trivy report is not valid JSON"}), 400
     
     prio_vuln_data = compare_kev_catalog(audit_trail, grype_vulns_cyclonedx_json_data, trivy_report_data)
@@ -187,9 +208,14 @@ def scan_sbom():
     trivy_report.seek(0)
     trivy_report_content = trivy_report.read()
 
-    audit_trail_event(audit_trail, "RETURN_FILE_TO_CLIENT", {
-        "returned": ["vulns_cyclonedx_json", "prio_vulns", "path_to_resources_token"],
-        "client": request.remote_addr
+    event(audit_trail, {
+        log_message_key: "data returned to client",
+        log_level_key: log_type_debug,
+        log_module_key: "scan_sbom",
+        log_details_key: {
+            "returned": ["vulns_cyclonedx_json", "prio_vulns", "path_to_resources_token"],
+            "client": request.remote_addr
+        }
     })
 
     threading.Thread(
@@ -197,11 +223,12 @@ def scan_sbom():
         args=(audit_trail, current_repo, syft_sbom_content, semgrep_sast_report_content, trivy_report_content, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity)
     ).start()
 
-    new_entry = {
-        "message": "Scan SBOM endpoint called",
-        "level": "info",
-        "module": "scan-sbom",
-        "client_ip": request.remote_addr,
-    }
-    log_exporter(new_entry)
+    event(audit_trail, {
+        log_message_key: "scan sbom endpoint called",
+        log_level_key: log_type_info,
+        log_module_key: "scan_sbom",
+        log_details_key: {
+            "client_ip": request.remote_addr,
+        }
+    })
     return jsonify(result_parsed)

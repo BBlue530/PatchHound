@@ -1,8 +1,17 @@
 import os
 import sys
 from config.helpers.expand_env_var import expand_env
+from core.variables import log_type_debug, log_type_info
 
 def log_exporter_config(app_config):
+
+    log_level = expand_env(app_config.get("backend", {}).get("log_level", None))
+
+    if log_level in [log_type_info, log_type_debug]:
+        os.environ["log_level"] = log_level
+    else:
+        print(f"[!] Log level invalid. Allowed log levels [{log_type_info}] [{log_type_debug}]: [backend.export_log.]")
+        sys.exit(1)
 
     https_log_exporter_enabled = expand_env(app_config.get("backend", {}).get("export_log", {}).get("https", {}).get("enabled", False))
     opentelemetry_log_exporter_enabled = expand_env(app_config.get("backend", {}).get("export_log", {}).get("opentelemetry", {}).get("enabled", False))

@@ -7,14 +7,14 @@ from vuln_scan.kev_catalog import compare_kev_catalog
 from alerts.alerts import alert_event_system
 from utils.helpers import extract_cve_ids, extract_kev_cve_ids, load_file_data, excluded_ids_list
 from logs.audit_trail import save_audit_trail, audit_trail_event
-from logs.export_logs import log_exporter
 from validation.hash_verify import verify_sha
 from validation.file_exist import verify_file_exists
 from external_storage.external_storage_send import send_files_to_external_storage
 from file_system.summary_handling.summary_generator import update_summary_rescan
 from file_system.repo_history_tracking import update_repo_history_rescan
-from alerts.alert_on_severity import check_alert_on_severity
 from file_system.cleanup.cleanup_scan_data import cleanup_scan_data
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organization):
     rescan_success = True
@@ -52,12 +52,16 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
     all_files_exist, files_missing = verify_file_exists([alert_path, syft_sbom_path, syft_att_sig_path, syft_sbom_att_path, trivy_report_path, trivy_att_sig_path, trivy_sbom_att_path, cosign_pub_path, grype_vulns_output_path, prio_vuln_path, summary_report_path, repo_history_path, semgrep_sast_report_path, old_audit_trail_path, cosign_key_path])
 
     if not all_files_exist:
-        new_entry = {
-            "message": f"Missing files in repo: {repo_name} timestamp folder: {timestamp_folder}. Files missing: [{files_missing}]",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "missing files in repo",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder,
+                "files_missing": files_missing
+            }
+        })
 
         audit_trail_event(audit_trail, "MISSING_FILES", {
         "status": "fail",
@@ -89,12 +93,15 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
         )
         print(f"[+] Verified SYFT_SBOM attestation for repo: {repo_name}")
     except subprocess.CalledProcessError:
-        new_entry = {
-            "message": f"SYFT_Attestation verification failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "syft attestation verification failed",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder
+            }
+        })
 
         rescan_success = False
         audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION", {
@@ -120,12 +127,15 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
         )
         print(f"[+] Verified SYFT_Attestation signature for repo: {repo_name}")
     except subprocess.CalledProcessError:
-        new_entry = {
-            "message": f"SYFT_Signature for SYFT_Attestation failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "signature for syft attestation failed",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder
+            }
+        })
 
         rescan_success = False
         audit_trail_event(audit_trail, "SYFT_VERIFY_ATTESTATION_SIGNATURE", {
@@ -152,12 +162,15 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
         )
         print(f"[+] Verified TRVIY_SBOM attestation for repo: {repo_name}")
     except subprocess.CalledProcessError:
-        new_entry = {
-            "message": f"TRVIY_Attestation verification failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "trivy attestation verification failed",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder
+            }
+        })
 
         rescan_success = False
         audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION", {
@@ -183,12 +196,15 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
         )
         print(f"[+] Verified TRVIY_Attestation signature for repo: {repo_name}")
     except subprocess.CalledProcessError:
-        new_entry = {
-            "message": f"TRVIY_Signature for TRVIY_Attestation failed for repo: {repo_name} timestamp_folder: {timestamp_folder}",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "signature for trivy attestation failed",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder
+            }
+        })
 
         rescan_success = False
         audit_trail_event(audit_trail, "TRVIY_VERIFY_ATTESTATION_SIGNATURE", {
@@ -260,12 +276,16 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
         update_repo_history_rescan(audit_trail, repo_name, alert_path, summary_report_path, repo_history_path, timestamp_folder)
 
         if alert_grype_vuln:
-            new_entry = {
-                "message": f"Vulnerabilities detected in repo: {repo_name} Timestamp: {timestamp_folder} [{', '.join(sorted(cves_to_alert))}]",
-                "level": "error",
-                "module": "scheduled_rescan",
-            }
-            log_exporter(new_entry)
+            event(audit_trail, {
+                log_message_key: "vulnerabilities detected",
+                log_level_key: log_type_info,
+                log_module_key: "scheduled_rescan",
+                log_details_key: {
+                    "repo_name": repo_name,
+                    "timestamp_folder": timestamp_folder,
+                    "cves_to_alert": cves_to_alert
+                }
+            })
             
             rescan_success = False
             audit_trail_event(audit_trail, "VULNERABILITIES_FOUND", {
@@ -284,12 +304,16 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
             print(f"[+] No vulnerabilities found in SBOM for repo: {repo_name}")
 
         if alert_kev_vuln:
-            new_entry = {
-                "message": f"Kev vulnerabilities detected in repo: {repo_name} Timestamp: {timestamp_folder} [{', '.join(sorted(kev_cves_to_alert))}]",
-                "level": "error",
-                "module": "scheduled_rescan",
-            }
-            log_exporter(new_entry)
+            event(audit_trail, {
+                log_message_key: "vulnerabilities detected in kev catalog",
+                log_level_key: log_type_info,
+                log_module_key: "scheduled_rescan",
+                log_details_key: {
+                   "repo_name": repo_name,
+                    "timestamp_folder": timestamp_folder,
+                    "kev_cves_to_alert": kev_cves_to_alert
+                }
+            })
             
             rescan_success = False
             audit_trail_event(audit_trail, "KEV_VULNERABILITIES_FOUND", {
@@ -335,12 +359,16 @@ def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organi
 
     except subprocess.CalledProcessError as e:
         rescan_success = False
-        new_entry = {
-            "message": f"Scan failed for {repo_name}: {e.stderr}",
-            "level": "error",
-            "module": "scheduled_rescan",
-        }
-        log_exporter(new_entry)
+        event(audit_trail, {
+            log_message_key: "scan failed",
+            log_level_key: log_type_error,
+            log_module_key: "scheduled_rescan",
+            log_details_key: {
+                "repo_name": repo_name,
+                "timestamp_folder": timestamp_folder,
+                "e.stderr": e.stderr
+            }
+        })
 
         message = f"[!] Scan failed for {repo_name}: {e.stderr}"
         alert = "Scheduled Event : Scan Fail"

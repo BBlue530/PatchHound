@@ -3,8 +3,9 @@ import os
 from utils.file_hash import hash_file
 from utils.helpers import load_file_data
 from external_storage.external_storage_append import append_to_external_storage
-from logs.audit_trail import audit_trail_event
 from alerts.alerts import alert_event_system
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def track_repo_history(audit_trail_hash, repo_history_path, timestamp, commit_sha, vulns_found, syft_sbom_attestation_path, syft_sbom_path, syft_attestation_verified, trivy_sbom_attestation_path, trivy_report_path, trivy_attestation_verified, summary_report_path, alerts_list):
     syft_sbom_att_hash = hash_file(syft_sbom_attestation_path)
@@ -66,11 +67,17 @@ def update_repo_history_rescan(audit_trail, repo_name, alert_path, summary_repor
         with open(repo_history_path, "w") as f:
             json.dump(repo_history, f, indent=2)
     else:
-        audit_trail_event(audit_trail, "HASH_UPDATE", {
-        "status": "fail",
-        "reason": f"summary_report_hash hash failed to update for: {timestamp_folder}"
+        event(audit_trail, {
+            log_message_key: "summary_report_hash hash failed to update",
+            log_level_key: log_type_error,
+            log_module_key: "summary_report_hash",
+            log_details_key: {
+                "status": "no entry exist for repo history",
+                "repo": repo_name,
+                "timestamp_folder": timestamp_folder
+            }
         })
+
         message = f"[!]  Summary report hash failed to update for repo: {repo_name} Timestamp: {timestamp_folder}! No such entry exist repo history!"
         alert = "Scheduled Event : Internal Error"
-        print(f"{message}")
         alert_event_system(audit_trail, message, alert, alert_path)

@@ -1,8 +1,9 @@
 import json
 from datetime import datetime
-from logs.audit_trail import audit_trail_event
 from utils.helpers import load_file_data, excluded_ids_list
 from file_system.file_save import save_file
+from logs.event_handler import event
+from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_path, semgrep_sast_report_path, trivy_report_path, exclusions_file_json, summary_report_path, tool_versions, rulesets, tmp_dict_summary_data):
     summary_dict = {}
@@ -363,17 +364,26 @@ def generate_summary(audit_trail, repo_name, syft_sbom_path, grype_path, prio_pa
         "new_vulnerabilities": tmp_dict_summary_data.get("new_vulnerabilities", []), # Holds all new vulnerabilities found even if in exclusions
         "new_kev_vulnerabilities": tmp_dict_summary_data.get("new_kev_vulnerabilities", []), # Holds all new kev vulnerabilities found even if in exclusions
     }
-
-    audit_trail_event(audit_trail, "SUMMARY_GENERATION", {
-            "status": "success"
-        })
+    
+    event(audit_trail, {
+        log_message_key: "summary generation finished",
+        log_level_key: log_type_info,
+        log_module_key: "summary_generation",
+        log_details_key: {
+            "summary_report": summary_report_path,
+        }
+    })
     
     if summary_report:
         save_file(summary_report_path, summary_report)
     else:
-        audit_trail_event(audit_trail, "FILE_SAVE", {
-            "summary_report": summary_report_path,
-            "status": "fail"
+        event(audit_trail, {
+            log_message_key: "summary generation failed",
+            log_level_key: log_type_error,
+            log_module_key: "summary_generation",
+            log_details_key: {
+                "summary_report": summary_report_path,
+            }
         })
 
     return excluded_vuln_counter, excluded_misconf_counter, excluded_exposed_secret_counter, vuln_counter, misconf_counter, exposed_secret_counter, excluded_kev_vuln_counter, kev_vuln_counter
