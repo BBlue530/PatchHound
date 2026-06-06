@@ -41,10 +41,10 @@ PatchHound is an open-source **SBOM (Software Bill of Materials) vulnerability s
 The backend handles file ingestion, vulnerability scanning, prioritization, and storage.
 It receives SBOMs, SAST reports, and Trivy results from the CLI or CI/CD pipelines, processes them, signs results, compares vulnerabilities against the CISA KEV catalog, and triggers alerts when needed.
 
-For installation, setup, and detailed API documentation, see the [Backend README](https://github.com/BBlue530/PatchHound/blob/master/docs/backend.md#backend-patchhound).
+For installation, setup, and detailed API documentation, see the [Backend README](https://github.com/BBlue530/PatchHound/blob/main/docs/backend/backend.md#backend-patchhound).
 
 ### CLI
-The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound).
+The CLI is a core part of the communication between the backend and user. Read more on how to use the CLI [here](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/cli-commands.md#cli-patchhound) and about the configuration [here](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/config.md).
 
 ---
 
@@ -177,7 +177,7 @@ If you are scanning a container image make sure to add a secret named `PAT_TOKEN
 2. Click **New repository secret**
 3. Name it: `PAT_TOKEN`
 4. Paste your PAT
-5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#scan)
+5. Make sure you pass the `PAT_TOKEN` secret in the [CLI](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/cli-commands.md#scan)
 
 ### Required Token Permissions
 
@@ -190,10 +190,11 @@ Public images only require `read:packages`.
 
 # Docs
 - [docs](https://github.com/BBlue530/PatchHound/tree/master/docs).
-- [quick-start](https://github.com/BBlue530/PatchHound/blob/master/docs/quick-start.md)
-- [backend](https://github.com/BBlue530/PatchHound/blob/main/docs/backend.md)
-- [cli-commands](https://github.com/BBlue530/PatchHound/blob/main/docs/cli-commands.md)
-- [config](https://github.com/BBlue530/PatchHound/blob/main/docs/config.md)
+- [quick start](https://github.com/BBlue530/PatchHound/blob/main/docs/quick-start.md)
+- [backend](https://github.com/BBlue530/PatchHound/blob/main/docs/backend/backend.md)
+- [backend config](https://github.com/BBlue530/PatchHound/blob/main/docs/backend/config.md)
+- [cli commands](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/cli-commands.md)
+- [cli config](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/config.md)
 
 ---
 

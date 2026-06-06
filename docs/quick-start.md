@@ -46,7 +46,7 @@ After PatchHound CLI is installed you will need to configure it:
 ```
 patchhound config --set BASE_URL http://localhost:8080 REPO_NAME test-repo AUTHOR_NAME Your-Name AUTHOR_EMAIL you@example.com
 ```
-Optionally set `SAST_SCAN`, `TRIVY_SCAN`, or `SCAN_IMAGE` depending on what you want to test. You can read more about configurations of the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#config)
+Optionally set `SAST_SCAN`, `TRIVY_SCAN`, or `SCAN_IMAGE` depending on what you want to test. You can read more about configurations of the CLI [here](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/cli-commands.md#config) and its configuration [here](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/config.md)
 
 ## Create a Token Key
 Create a new token for your organization to authenticate scans:
@@ -118,8 +118,8 @@ This will validate the image against the previously generated signature ensuring
 PatchHound makes it simple to scan for vulnerabilities, manage tokens, and generate reports all from the CLI. After completing this quick start, you should be able to run your first scan, retrieve results, and optionally sign or verify container images.
 
 For more in-depth information:
-- Learn more about the Backend [here](https://github.com/BBlue530/PatchHound/blob/master/docs/backend.md#backend-patchhound) or its configurations [here](https://github.com/BBlue530/PatchHound/blob/main/docs/config.md)
-- Learn more about the CLI [here](https://github.com/BBlue530/PatchHound/blob/master/docs/cli-commands.md#cli-patchhound)
+- Learn more about the Backend [here](https://github.com/BBlue530/PatchHound/blob/main/docs/backend/backend.md#backend-patchhound) or its configurations [here](https://github.com/BBlue530/PatchHound/blob/main/docs/backend/config.md)
+- Learn more about the CLI [here](https://github.com/BBlue530/PatchHound/blob/main/docs/cli/cli-commands.md#cli-patchhound)
 
 ---
 
