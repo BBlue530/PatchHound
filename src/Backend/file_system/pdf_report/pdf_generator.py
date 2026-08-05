@@ -13,7 +13,6 @@ from core.variables import *
 from file_system.pdf_report.pdf_table_builds import *
 from file_system.pdf_report.pdf_helpers import build_data_table, normalize_semgrep_ruleset
 from logs.event_handler import event
-from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def summary_to_pdf(organization_decoded, current_repo_decoded, timestamp_decoded):
     grype_exclusions_vulnerabilities_severity_rows = []

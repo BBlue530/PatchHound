@@ -14,7 +14,6 @@ from file_system.summary_handling.summary_generator import update_summary_rescan
 from file_system.repo_history_tracking import update_repo_history_rescan
 from file_system.cleanup.cleanup_scan_data import cleanup_scan_data
 from logs.event_handler import event
-from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def rescan_scan_data(audit_trail, repo_path, timestamp_folder, repo_name, organization):
     rescan_success = True

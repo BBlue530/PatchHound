@@ -7,7 +7,6 @@ from external_storage.external_storage_get import get_resources_external_storage
 from external_storage.external_storage_send import send_files_to_external_storage
 from vuln_scan.rescan.rescan_scan_data import rescan_scan_data
 from logs.event_handler import event
-from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 def rescan_latest_scan_data():
     env["PATH"] = local_bin + os.pathsep + env.get("PATH", "")
@@ -19,14 +18,12 @@ def rescan_latest_scan_data():
             temp_resources_root = get_resources_external_storage_internal_use_tmp(all_resources_folder)
 
             repo_scans_dir = os.path.join(temp_resources_root, all_repo_scans_folder)
-            image_sign_dir = os.path.join(temp_resources_root, all_image_signature_folder)
 
             if not os.path.isdir(repo_scans_dir):
                 print(f"[!] AWS s3 missing resource file: {temp_resources_root}")
                 return
         else:
             repo_scans_dir = os.path.join(all_resources_folder, all_repo_scans_folder)
-            image_sign_dir = os.path.join(all_resources_folder, all_image_signature_folder)
 
             if not os.path.isdir(repo_scans_dir):
                 print(f"[~] Creating missing scans folder: {repo_scans_dir}")

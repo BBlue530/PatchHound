@@ -6,8 +6,6 @@ kev_catalog = "kev_catalog.json"
 
 all_resources_folder = "resource_data"
 all_repo_scans_folder = "scan_data"
-all_image_signature_folder = "image_signature"
-all_base_image_signature_folder = "base_image_signature"
 
 service_log_path = os.path.join(all_resources_folder, "log_data", "service_logs.json")
 
@@ -26,7 +24,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.49"
+patchhound_version = "0.1.50"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"

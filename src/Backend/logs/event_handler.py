@@ -2,8 +2,6 @@ import os
 from datetime import datetime, timezone
 from logs.audit_trail import audit_trail_event
 from logs.export_logs import log_exporter
-from core.variables import log_type_info, log_type_debug, log_type_error
-
 from core.variables import *
 
 def event(audit_trail, new_event):

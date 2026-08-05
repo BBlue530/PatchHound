@@ -14,7 +14,6 @@ from external_storage.external_storage_send import send_files_to_external_storag
 from alerts.alert_on_severity import check_alert_on_severity
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from logs.event_handler import event
-from core.variables import log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
 
 def save_scan_files(audit_trail, current_repo, syft_sbom_file, semgrep_sast_report, trivy_report, grype_vulns_cyclonedx_json_data, prio_vuln_data, organization, alert_system_webhook, commit_sha, commit_author, tool_versions, scan_root, timestamp, semgrep_sast_ruleset, fail_on_severity):
