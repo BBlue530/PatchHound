@@ -1,4 +1,5 @@
 from flask import request, jsonify, Blueprint
+import hashlib
 from database.validate_token import validate_token
 from logs.event_handler import event
 from core.variables import patchhound_version, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
@@ -21,7 +22,7 @@ def health_check():
         })
         return jsonify({"error": "Token missing"}), 401
 
-    response, valid_token = validate_token(audit_trail, token_key)
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid token provided",

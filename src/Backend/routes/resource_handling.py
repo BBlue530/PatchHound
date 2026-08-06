@@ -1,4 +1,5 @@
 from flask import request, jsonify, Blueprint
+import hashlib
 from utils.jwt_path import decode_jwt_path_to_resources
 from file_system.resource_handling import get_resources, list_resources, get_latest_workflow_run
 from database.validate_token import validate_token
@@ -26,7 +27,7 @@ def get_resource():
     
     audit_trail = False
 
-    response, valid_token = validate_token(audit_trail, token_key)
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid authentication token",
@@ -123,7 +124,7 @@ def list_resource():
     
     audit_trail = False
 
-    response, valid_token = validate_token(audit_trail, token_key)
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid authentication token",

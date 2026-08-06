@@ -29,10 +29,6 @@ def rescan_latest_scan_data():
                 print(f"[~] Creating missing scans folder: {repo_scans_dir}")
                 os.makedirs(repo_scans_dir, exist_ok=True)
 
-            if not os.path.isdir(image_sign_dir):
-                print(f"[~] Creating missing scans folder: {image_sign_dir}")
-                os.makedirs(image_sign_dir, exist_ok=True)
-        
         # List all directories inside repo_scans_dir aka the token keys
 
         for organization in os.listdir(repo_scans_dir):

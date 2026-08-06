@@ -5,7 +5,7 @@ from datetime import datetime
 from logs.event_handler import event
 from core.variables import db_path, log_type_info, log_type_debug, log_type_error, log_message_key, log_level_key, log_module_key, log_details_key
 
-def validate_token(audit_trail, token_key):
+def validate_token(audit_trail, hashed_token_key):
     if os.environ.get("external_database_enabled", "False").lower() == "true":
         try:
             conn = psycopg2.connect(
@@ -21,7 +21,7 @@ def validate_token(audit_trail, token_key):
                 SELECT ExpirationDate, Enabled, Organization
                 FROM Key_Validation
                 WHERE TokenKey = %s
-            """, (token_key,))
+            """, (hashed_token_key,))
 
             result = cursor.fetchone()
             cursor.close()
@@ -99,7 +99,7 @@ def validate_token(audit_trail, token_key):
                 SELECT ExpirationDate, Enabled, Organization 
                 FROM Key_Validation 
                 WHERE TokenKey = ?
-            """, (token_key,))
+            """, (hashed_token_key,))
             
             result = cursor.fetchone()
             cursor.close()

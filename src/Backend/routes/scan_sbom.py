@@ -5,6 +5,7 @@ import os
 import json
 import threading
 import io
+import hashlib
 from datetime import datetime
 from file_system.file_handling import save_scan_files
 from utils.jwt_path import jwt_path_to_resources
@@ -36,8 +37,8 @@ def scan_sbom():
         return jsonify({"error": "Token missing"}), 401
     
     audit_trail = []
-    
-    response, valid_token = validate_token(audit_trail, token_key)
+
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid authentication token",

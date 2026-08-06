@@ -24,7 +24,7 @@ secret_storage = "secrets.json"
 length=32
 secret_types = ["api_key", "jwt_key", "cosign_key"]
 
-patchhound_version = "0.1.50"
+patchhound_version = "0.1.51"
 
 GRYPE_VERSION = "0.104.1"
 COSIGN_VERSION = "2.5.3"

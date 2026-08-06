@@ -3,10 +3,12 @@ import psycopg2
 import os
 from datetime import datetime, timedelta
 import uuid
+import hashlib
 from core.variables import db_path
 
 def create_key(organization, expiration_days):
     token_key = str(uuid.uuid4())
+    hashed_token_key = hashlib.sha256(token_key.encode("utf-8")).hexdigest()
     expiration_date = (datetime.now() + timedelta(days=expiration_days)).strftime("%Y-%m-%d")
     enabled = 1
 
@@ -24,7 +26,7 @@ def create_key(organization, expiration_days):
             cursor.execute("""
                 INSERT INTO Key_Validation (TokenKey, Organization, ExpirationDate, Enabled)
                 VALUES (%s, %s, %s, TRUE)
-            """, (token_key, organization, expiration_date))
+            """, (hashed_token_key, organization, expiration_date))
 
             conn.commit()
             cursor.close()
@@ -50,7 +52,7 @@ def create_key(organization, expiration_days):
             cursor.execute("""
                 INSERT INTO Key_Validation (TokenKey, Organization, ExpirationDate, Enabled)
                 VALUES (?, ?, ?, ?)
-            """, (token_key, organization, expiration_date, enabled))
+            """, (hashed_token_key, organization, expiration_date, enabled))
             conn.commit()
             cursor.close()
             conn.close()

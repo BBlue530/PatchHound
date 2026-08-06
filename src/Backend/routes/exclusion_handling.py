@@ -1,6 +1,7 @@
 from flask import request, jsonify, Blueprint
 import os
 import json
+import hashlib
 from database.validate_token import validate_token
 from external_storage.external_storage_get import get_resources_external_storage_internal_use
 from external_storage.external_storage_send import send_files_to_external_storage
@@ -29,7 +30,7 @@ def exclusion_get():
     
     audit_trail = False
 
-    response, valid_token = validate_token(audit_trail, token_key)
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid authentication token",
@@ -128,7 +129,7 @@ def exclusion_post():
     
     audit_trail = []
 
-    response, valid_token = validate_token(audit_trail, token_key)
+    response, valid_token = validate_token(audit_trail, hashlib.sha256(token_key.encode("utf-8")).hexdigest())
     if valid_token == False:
         event(audit_trail, {
             log_message_key: "invalid authentication token",
